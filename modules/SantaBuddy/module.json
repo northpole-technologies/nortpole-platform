@@ -1,0 +1,6 @@
+{
+    "name": "Santa Buddy",
+    "slug": "santa-buddy",
+    "version": "1.0.0",
+    "provider": "Modules\\SantaBuddy\\Providers\\SantaBuddyServiceProvider"
+}
