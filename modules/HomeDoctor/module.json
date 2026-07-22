@@ -2,6 +2,7 @@
     "name": "HomeDoctor",
     "slug": "home-doctor",
     "version": "0.1.0",
-    "description": "HomeDoctor module for the NorthPole Platform",
-    "enabled": true
+    "description": "Home Doctor module for the NorthPole Platform.",
+    "enabled": true,
+    "provider": "Modules\\HomeDoctor\\Providers\\HomeDoctorServiceProvider"
 }

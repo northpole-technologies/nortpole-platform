@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\SantaBuddy\Providers;
+namespace Modules\HomeDoctor\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class SantaBuddyServiceProvider extends ServiceProvider
+class HomeDoctorServiceProvider extends ServiceProvider
 {
     public function register(): void
     {

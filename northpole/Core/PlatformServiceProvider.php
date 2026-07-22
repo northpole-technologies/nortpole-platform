@@ -4,6 +4,7 @@ namespace Northpole\Core;
 
 use Illuminate\Support\ServiceProvider;
 use Northpole\Modules\ModuleManager;
+use Northpole\Modules\ModuleResourceLoader;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,6 @@ class PlatformServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        ModuleResourceLoader::load();
     }
 }
