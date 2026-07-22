@@ -1,6 +1,6 @@
 <?php
 
-namespace Northpole\Core;
+namespace Platform\Core;
 
 use Illuminate\Support\ServiceProvider;
 use Northpole\Modules\ModuleManager;
