@@ -48,22 +48,27 @@ class ModuleRegistryController extends Controller
             $validated['organisation_id']
         );
 
-        $installation = OrganisationModule::updateOrCreate(
-            [
+        $installation = OrganisationModule::withTrashed()
+            ->firstOrNew([
                 'organisation_id' => $organisation->id,
                 'marketplace_module_id' => $marketplaceModule->id,
-            ],
-            [
-                'is_enabled' => true,
-                'installed_at' => now(),
-                'deleted_at' => null,
-            ]
-        );
+            ]);
+
+        if ($installation->trashed()) {
+            $installation->restore();
+        }
+
+        $installation->fill([
+            'is_enabled' => true,
+            'installed_at' => now(),
+        ]);
+
+        $installation->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Module installed successfully.',
-            'data' => $installation,
+            'data' => $installation->fresh(),
         ], 201);
     }
 
@@ -118,6 +123,30 @@ class ModuleRegistryController extends Controller
             'success' => true,
             'message' => 'Module enabled successfully.',
             'data' => $installation->fresh(),
+        ]);
+    }
+
+    public function uninstall(
+        Request $request,
+        MarketplaceModule $marketplaceModule
+    ): JsonResponse {
+        $validated = $request->validate([
+            'organisation_id' => [
+                'required',
+                'exists:organisations,id',
+            ],
+        ]);
+
+        $installation = OrganisationModule::query()
+            ->where('organisation_id', $validated['organisation_id'])
+            ->where('marketplace_module_id', $marketplaceModule->id)
+            ->firstOrFail();
+
+        $installation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Module uninstalled successfully.',
         ]);
     }
 }

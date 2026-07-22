@@ -51,6 +51,11 @@ Route::prefix('v1')->group(function () {
         [ModuleRegistryController::class, 'enable']
     );
 
+    Route::delete(
+        '/modules/{marketplaceModule}/uninstall',
+        [ModuleRegistryController::class, 'uninstall']
+    );
+
     /*
     |--------------------------------------------------------------------------
     | Organisations
@@ -58,6 +63,7 @@ Route::prefix('v1')->group(function () {
     */
 
     Route::get('/organisations', [OrganisationController::class, 'index']);
+
     Route::post('/organisations', [OrganisationController::class, 'store']);
 
     Route::get(
