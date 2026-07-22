@@ -1,0 +1,11 @@
+{
+    "name": "northpole/santa-buddy",
+    "description": "Santa Buddy module for the Northpole Platform",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Modules\\SantaBuddy\\": "src/"
+        }
+    },
+    "require": {}
+}

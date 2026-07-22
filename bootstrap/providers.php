@@ -2,5 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    Platform\Core\PlatformServiceProvider::class,
+    Northpole\Core\PlatformServiceProvider::class,
 ];

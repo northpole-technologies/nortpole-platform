@@ -1,6 +1,6 @@
 <?php
 
-namespace Platform\Core;
+namespace Northpole\Core;
 
 class Platform
 {

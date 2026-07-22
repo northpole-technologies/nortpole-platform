@@ -1,6 +1,6 @@
 <?php
 
-namespace Platform\Contracts;
+namespace Northpole\Contracts;
 
 interface ModuleInterface
 {

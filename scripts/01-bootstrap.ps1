@@ -10,13 +10,13 @@ $folders = @(
 
     # Platform
     "platform",
-    "platform\Core",
-    "platform\Contracts",
-    "platform\Registry",
-    "platform\Loader",
-    "platform\Services",
-    "platform\Support",
-    "platform\Exceptions",
+    "Northpole\Core",
+    "Northpole\Contracts",
+    "Northpole\Registry",
+    "Northpole\Loader",
+    "Northpole\Services",
+    "Northpole\Support",
+    "Northpole\Exceptions",
 
     # Documentation
     "docs",
