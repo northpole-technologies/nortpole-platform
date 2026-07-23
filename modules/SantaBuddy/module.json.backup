@@ -1,0 +1,8 @@
+{
+    "name": "SantaBuddy",
+    "slug": "santa-buddy",
+    "version": "1.0.0",
+    "description": "SantaBuddy module for the Northpole Platform.",
+    "enabled": true,
+    "provider": "Modules\\SantaBuddy\\Providers\\SantaBuddyServiceProvider"
+}

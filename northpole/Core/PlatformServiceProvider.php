@@ -3,8 +3,8 @@
 namespace Northpole\Core;
 
 use Illuminate\Support\ServiceProvider;
+use Northpole\Core\Runtime\ModuleRuntime;
 use Northpole\Modules\ModuleManager;
-use Northpole\Modules\ModuleResourceLoader;
 
 class PlatformServiceProvider extends ServiceProvider
 {
@@ -13,20 +13,18 @@ class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleManager::class, function () {
             return new ModuleManager();
         });
-
-        $moduleManager = $this->app->make(ModuleManager::class);
-
-        $moduleManager->discover();
-
-        foreach ($moduleManager->providers() as $provider) {
-            if (class_exists($provider)) {
-                $this->app->register($provider);
-            }
-        }
     }
 
     public function boot(): void
     {
-        ModuleResourceLoader::load();
+        /** @var ModuleManager $moduleManager */
+        $moduleManager = $this->app->make(ModuleManager::class);
+
+        /** @var ModuleRuntime $runtime */
+        $runtime = $this->app->make(ModuleRuntime::class);
+
+        $modules = $moduleManager->discover();
+
+        $runtime->bootEnabledModules($modules);
     }
 }

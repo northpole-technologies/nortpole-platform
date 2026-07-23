@@ -4,5 +4,11 @@
     "version": "1.0.0",
     "description": "SantaBuddy module for the Northpole Platform.",
     "enabled": true,
-    "provider": "Modules\\SantaBuddy\\Providers\\SantaBuddyServiceProvider"
+    "provider": "Modules\\SantaBuddy\\Providers\\SantaBuddyServiceProvider",
+    "routes": {
+        "web": "routes/web.php",
+        "api": "routes/api.php"
+    },
+    "views": "resources/views",
+    "migrations": "database/migrations"
 }
