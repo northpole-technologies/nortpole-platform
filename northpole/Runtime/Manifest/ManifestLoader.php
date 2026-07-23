@@ -2,33 +2,56 @@
 
 namespace Northpole\Runtime\Manifest;
 
-use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
+use JsonException;
 
 final class ManifestLoader
 {
     public function load(string $modulePath): ModuleManifest
     {
-        $manifest = $modulePath.DIRECTORY_SEPARATOR.'module.json';
+        $manifestPath = $modulePath
+            .DIRECTORY_SEPARATOR
+            .'module.json';
 
-        if (! File::exists($manifest)) {
+        if (! is_file($manifestPath)) {
             throw new InvalidArgumentException(
-                "Module manifest not found: {$manifest}"
+                "Module manifest not found: {$manifestPath}"
             );
         }
 
-        $json = json_decode(File::get($manifest), true);
+        $contents = file_get_contents($manifestPath);
 
-        if (! is_array($json)) {
+        if ($contents === false) {
             throw new InvalidArgumentException(
-                "Invalid JSON in {$manifest}"
+                "Unable to read module manifest: {$manifestPath}"
+            );
+        }
+
+        try {
+            $data = json_decode(
+                $contents,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } catch (JsonException $exception) {
+            throw new InvalidArgumentException(
+                "Invalid JSON in module manifest [{$manifestPath}]: "
+                .$exception->getMessage(),
+                previous: $exception
+            );
+        }
+
+        if (! is_array($data)) {
+            throw new InvalidArgumentException(
+                "Module manifest must contain a JSON object: {$manifestPath}"
             );
         }
 
         return new ModuleManifest(
-            $json,
+            $data,
             $modulePath,
-            $manifest
+            $manifestPath
         );
     }
 }
