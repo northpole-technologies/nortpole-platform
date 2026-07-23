@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketplaceModule;
-use App\Models\Organisation;
 use App\Models\OrganisationModule;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ModuleRegistryController extends Controller
 {
@@ -34,23 +32,10 @@ class ModuleRegistryController extends Controller
     }
 
     public function install(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $organisation = Organisation::findOrFail(
-            $validated['organisation_id']
-        );
-
         $installation = OrganisationModule::withTrashed()
             ->firstOrNew([
-                'organisation_id' => $organisation->id,
                 'marketplace_module_id' => $marketplaceModule->id,
             ]);
 
@@ -73,20 +58,11 @@ class ModuleRegistryController extends Controller
     }
 
     public function disable(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
+        $installation = $this->findTenantInstallation(
+            $marketplaceModule
+        );
 
         $installation->update([
             'is_enabled' => false,
@@ -100,20 +76,11 @@ class ModuleRegistryController extends Controller
     }
 
     public function enable(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
+        $installation = $this->findTenantInstallation(
+            $marketplaceModule
+        );
 
         $installation->update([
             'is_enabled' => true,
@@ -127,20 +94,11 @@ class ModuleRegistryController extends Controller
     }
 
     public function uninstall(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
+        $installation = $this->findTenantInstallation(
+            $marketplaceModule
+        );
 
         $installation->delete();
 
@@ -148,5 +106,16 @@ class ModuleRegistryController extends Controller
             'success' => true,
             'message' => 'Module uninstalled successfully.',
         ]);
+    }
+
+    private function findTenantInstallation(
+        MarketplaceModule $marketplaceModule
+    ): OrganisationModule {
+        return OrganisationModule::query()
+            ->where(
+                'marketplace_module_id',
+                $marketplaceModule->id
+            )
+            ->firstOrFail();
     }
 }

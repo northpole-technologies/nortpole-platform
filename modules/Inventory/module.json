@@ -1,0 +1,7 @@
+{
+    "name": "Inventory",
+    "slug": "inventory",
+    "version": "1.0.0",
+    "description": "",
+    "provider": "Modules\\Inventory\\Providers\\InventoryServiceProvider"
+}

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ModuleRegistryController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PluginController;
 use App\Http\Controllers\AuthController;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,36 +26,61 @@ Route::prefix('v1')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Marketplace Modules
+    | Public Marketplace Routes
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/modules', [ModuleRegistryController::class, 'index']);
+    Route::get('/modules', [
+        ModuleRegistryController::class,
+        'index',
+    ]);
 
-    Route::get(
-        '/modules/{marketplaceModule}',
-        [ModuleRegistryController::class, 'show']
-    );
+    Route::get('/modules/{marketplaceModule}', [
+        ModuleRegistryController::class,
+        'show',
+    ]);
 
-    Route::post(
-        '/modules/{marketplaceModule}/install',
-        [ModuleRegistryController::class, 'install']
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | Tenant-Protected Routes
+    |--------------------------------------------------------------------------
+    */
 
-    Route::patch(
-        '/modules/{marketplaceModule}/disable',
-        [ModuleRegistryController::class, 'disable']
-    );
+    Route::middleware([
+        'auth:sanctum',
+        'tenant',
+    ])->group(function () {
+        Route::post('/modules/{marketplaceModule}/install', [
+            ModuleRegistryController::class,
+            'install',
+        ]);
 
-    Route::patch(
-        '/modules/{marketplaceModule}/enable',
-        [ModuleRegistryController::class, 'enable']
-    );
+        Route::patch('/modules/{marketplaceModule}/disable', [
+            ModuleRegistryController::class,
+            'disable',
+        ]);
 
-    Route::delete(
-        '/modules/{marketplaceModule}/uninstall',
-        [ModuleRegistryController::class, 'uninstall']
-    );
+        Route::patch('/modules/{marketplaceModule}/enable', [
+            ModuleRegistryController::class,
+            'enable',
+        ]);
+
+        Route::delete('/modules/{marketplaceModule}/uninstall', [
+            ModuleRegistryController::class,
+            'uninstall',
+        ]);
+
+        Route::get('/tenant/context', function (
+            TenantContext $tenantContext
+        ) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'organisation' => $tenantContext->organisation(),
+                ],
+            ]);
+        });
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -62,24 +88,30 @@ Route::prefix('v1')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/organisations', [OrganisationController::class, 'index']);
+    Route::get('/organisations', [
+        OrganisationController::class,
+        'index',
+    ]);
 
-    Route::post('/organisations', [OrganisationController::class, 'store']);
+    Route::post('/organisations', [
+        OrganisationController::class,
+        'store',
+    ]);
 
-    Route::get(
-        '/organisations/{organisation}',
-        [OrganisationController::class, 'show']
-    );
+    Route::get('/organisations/{organisation}', [
+        OrganisationController::class,
+        'show',
+    ]);
 
-    Route::patch(
-        '/organisations/{organisation}',
-        [OrganisationController::class, 'update']
-    );
+    Route::patch('/organisations/{organisation}', [
+        OrganisationController::class,
+        'update',
+    ]);
 
-    Route::delete(
-        '/organisations/{organisation}',
-        [OrganisationController::class, 'destroy']
-    );
+    Route::delete('/organisations/{organisation}', [
+        OrganisationController::class,
+        'destroy',
+    ]);
 });
 
 /*
@@ -89,8 +121,18 @@ Route::prefix('v1')->group(function () {
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [
+        AuthController::class,
+        'user',
+    ]);
 
-    Route::apiResource('plugins', PluginController::class);
+    Route::post('/logout', [
+        AuthController::class,
+        'logout',
+    ]);
+
+    Route::apiResource(
+        'plugins',
+        PluginController::class
+    );
 });

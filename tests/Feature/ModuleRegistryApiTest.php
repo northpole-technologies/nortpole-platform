@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\MarketplaceModule;
 use App\Models\Organisation;
 use App\Models\OrganisationModule;
+use App\Models\User;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class ModuleRegistryApiTest extends TestCase
@@ -14,27 +17,16 @@ class ModuleRegistryApiTest extends TestCase
 
     public function test_marketplace_modules_can_be_listed(): void
     {
-        MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
+        $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
 
-        MarketplaceModule::create([
-            'key' => 'organisation-manager',
-            'name' => 'Organisation Manager',
-            'description' => 'Core organisation management module.',
-            'version' => '1.0.0',
-            'category' => 'Core',
-            'icon' => 'building',
-            'is_core' => true,
-            'is_active' => true,
-        ]);
+        $this->createModule(
+            'organisation-manager',
+            'Organisation Manager',
+            true
+        );
 
         $response = $this->getJson('/api/v1/modules');
 
@@ -54,16 +46,10 @@ class ModuleRegistryApiTest extends TestCase
 
     public function test_a_marketplace_module_can_be_viewed(): void
     {
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
 
         $response = $this->getJson(
             "/api/v1/modules/{$module->id}"
@@ -78,33 +64,25 @@ class ModuleRegistryApiTest extends TestCase
             ->assertJsonPath('data.version', '1.0.0');
     }
 
-    public function test_a_marketplace_module_can_be_installed_for_an_organisation(): void
+    public function test_a_marketplace_module_can_be_installed_for_the_active_tenant(): void
     {
-        $organisation = Organisation::create([
-            'name' => 'Northpole Technologies',
-            'slug' => 'northpole-technologies',
-            'email' => 'info@northpole.ie',
-            'country' => 'IE',
-            'timezone' => 'Europe/Dublin',
-        ]);
+        [$user, $organisation] = $this->createTenant();
 
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
-
-        $response = $this->postJson(
-            "/api/v1/modules/{$module->id}/install",
-            [
-                'organisation_id' => $organisation->id,
-            ]
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
         );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->postJson(
+                "/api/v1/modules/{$module->id}/install"
+            );
 
         $response
             ->assertCreated()
@@ -130,40 +108,31 @@ class ModuleRegistryApiTest extends TestCase
         ]);
     }
 
-    public function test_an_installed_module_can_be_disabled(): void
+    public function test_an_installed_module_can_be_disabled_for_the_active_tenant(): void
     {
-        $organisation = Organisation::create([
-            'name' => 'Northpole Technologies',
-            'slug' => 'northpole-technologies',
-            'email' => 'info@northpole.ie',
-            'country' => 'IE',
-            'timezone' => 'Europe/Dublin',
-        ]);
+        [$user, $organisation] = $this->createTenant();
 
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
-
-        OrganisationModule::create([
-            'organisation_id' => $organisation->id,
-            'marketplace_module_id' => $module->id,
-            'is_enabled' => true,
-            'installed_at' => now(),
-        ]);
-
-        $response = $this->patchJson(
-            "/api/v1/modules/{$module->id}/disable",
-            [
-                'organisation_id' => $organisation->id,
-            ]
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
         );
+
+        $this->createInstallation(
+            $organisation,
+            $module,
+            true
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->patchJson(
+                "/api/v1/modules/{$module->id}/disable"
+            );
 
         $response
             ->assertOk()
@@ -181,40 +150,31 @@ class ModuleRegistryApiTest extends TestCase
         ]);
     }
 
-    public function test_a_disabled_module_can_be_enabled(): void
+    public function test_a_disabled_module_can_be_enabled_for_the_active_tenant(): void
     {
-        $organisation = Organisation::create([
-            'name' => 'Northpole Technologies',
-            'slug' => 'northpole-technologies',
-            'email' => 'info@northpole.ie',
-            'country' => 'IE',
-            'timezone' => 'Europe/Dublin',
-        ]);
+        [$user, $organisation] = $this->createTenant();
 
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
-
-        OrganisationModule::create([
-            'organisation_id' => $organisation->id,
-            'marketplace_module_id' => $module->id,
-            'is_enabled' => false,
-            'installed_at' => now(),
-        ]);
-
-        $response = $this->patchJson(
-            "/api/v1/modules/{$module->id}/enable",
-            [
-                'organisation_id' => $organisation->id,
-            ]
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
         );
+
+        $this->createInstallation(
+            $organisation,
+            $module,
+            false
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->patchJson(
+                "/api/v1/modules/{$module->id}/enable"
+            );
 
         $response
             ->assertOk()
@@ -232,40 +192,31 @@ class ModuleRegistryApiTest extends TestCase
         ]);
     }
 
-    public function test_an_installed_module_can_be_uninstalled(): void
+    public function test_an_installed_module_can_be_uninstalled_for_the_active_tenant(): void
     {
-        $organisation = Organisation::create([
-            'name' => 'Northpole Technologies',
-            'slug' => 'northpole-technologies',
-            'email' => 'info@northpole.ie',
-            'country' => 'IE',
-            'timezone' => 'Europe/Dublin',
-        ]);
+        [$user, $organisation] = $this->createTenant();
 
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
-
-        OrganisationModule::create([
-            'organisation_id' => $organisation->id,
-            'marketplace_module_id' => $module->id,
-            'is_enabled' => true,
-            'installed_at' => now(),
-        ]);
-
-        $response = $this->deleteJson(
-            "/api/v1/modules/{$module->id}/uninstall",
-            [
-                'organisation_id' => $organisation->id,
-            ]
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
         );
+
+        $this->createInstallation(
+            $organisation,
+            $module,
+            true
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->deleteJson(
+                "/api/v1/modules/{$module->id}/uninstall"
+            );
 
         $response
             ->assertOk()
@@ -281,42 +232,33 @@ class ModuleRegistryApiTest extends TestCase
         ]);
     }
 
-    public function test_an_uninstalled_module_can_be_reinstalled(): void
+    public function test_an_uninstalled_module_can_be_reinstalled_for_the_active_tenant(): void
     {
-        $organisation = Organisation::create([
-            'name' => 'Northpole Technologies',
-            'slug' => 'northpole-technologies',
-            'email' => 'info@northpole.ie',
-            'country' => 'IE',
-            'timezone' => 'Europe/Dublin',
-        ]);
+        [$user, $organisation] = $this->createTenant();
 
-        $module = MarketplaceModule::create([
-            'key' => 'santa-buddy',
-            'name' => 'SantaBuddy',
-            'description' => 'Christmas planning and family experience module.',
-            'version' => '1.0.0',
-            'category' => 'Lifestyle',
-            'icon' => 'gift',
-            'is_core' => false,
-            'is_active' => true,
-        ]);
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
 
-        $installation = OrganisationModule::create([
-            'organisation_id' => $organisation->id,
-            'marketplace_module_id' => $module->id,
-            'is_enabled' => true,
-            'installed_at' => now(),
-        ]);
+        $installation = $this->createInstallation(
+            $organisation,
+            $module,
+            true
+        );
 
         $installation->delete();
 
-        $response = $this->postJson(
-            "/api/v1/modules/{$module->id}/install",
-            [
-                'organisation_id' => $organisation->id,
-            ]
-        );
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->postJson(
+                "/api/v1/modules/{$module->id}/install"
+            );
 
         $response
             ->assertCreated()
@@ -338,10 +280,279 @@ class ModuleRegistryApiTest extends TestCase
 
         $this->assertSame(
             1,
-            OrganisationModule::withTrashed()
-                ->where('organisation_id', $organisation->id)
-                ->where('marketplace_module_id', $module->id)
-                ->count()
+            app(TenantContext::class)->withoutTenancy(
+                fn (): int => OrganisationModule::withTrashed()
+                    ->where(
+                        'organisation_id',
+                        $organisation->id
+                    )
+                    ->where(
+                        'marketplace_module_id',
+                        $module->id
+                    )
+                    ->count()
+            )
+        );
+    }
+
+    public function test_module_installation_requires_authentication(): void
+    {
+        $organisation = $this->createOrganisation(
+            'NorthPole Technologies',
+            'northpole-technologies'
+        );
+
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $organisation->id
+            )
+            ->postJson(
+                "/api/v1/modules/{$module->id}/install"
+            );
+
+        $response->assertUnauthorized();
+
+        $this->assertDatabaseMissing('organisation_modules', [
+            'organisation_id' => $organisation->id,
+            'marketplace_module_id' => $module->id,
+        ]);
+    }
+
+    public function test_module_installation_requires_a_tenant_header(): void
+    {
+        $user = User::factory()->create();
+
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson(
+            "/api/v1/modules/{$module->id}/install"
+        );
+
+        $response
+            ->assertUnprocessable()
+            ->assertJson([
+                'success' => false,
+                'message' => 'The X-Organisation-Id header is required.',
+            ]);
+
+        $this->assertDatabaseCount(
+            'organisation_modules',
+            0
+        );
+    }
+
+    public function test_a_user_cannot_install_a_module_for_another_organisation(): void
+    {
+        [$user, $allowedOrganisation] = $this->createTenant();
+
+        $otherOrganisation = $this->createOrganisation(
+            'Other Organisation',
+            'other-organisation'
+        );
+
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $otherOrganisation->id
+            )
+            ->postJson(
+                "/api/v1/modules/{$module->id}/install"
+            );
+
+        $response
+            ->assertNotFound()
+            ->assertJson([
+                'success' => false,
+                'message' => 'Organisation access was not found.',
+            ]);
+
+        $this->assertDatabaseMissing('organisation_modules', [
+            'organisation_id' => $otherOrganisation->id,
+            'marketplace_module_id' => $module->id,
+        ]);
+
+        $this->assertDatabaseMissing('organisation_modules', [
+            'organisation_id' => $allowedOrganisation->id,
+            'marketplace_module_id' => $module->id,
+        ]);
+    }
+
+    public function test_request_body_cannot_override_the_active_tenant(): void
+    {
+        [$user, $allowedOrganisation] = $this->createTenant();
+
+        $otherOrganisation = $this->createOrganisation(
+            'Other Organisation',
+            'other-organisation'
+        );
+
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $allowedOrganisation->id
+            )
+            ->postJson(
+                "/api/v1/modules/{$module->id}/install",
+                [
+                    'organisation_id' => $otherOrganisation->id,
+                ]
+            );
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath(
+                'data.organisation_id',
+                $allowedOrganisation->id
+            );
+
+        $this->assertDatabaseHas('organisation_modules', [
+            'organisation_id' => $allowedOrganisation->id,
+            'marketplace_module_id' => $module->id,
+        ]);
+
+        $this->assertDatabaseMissing('organisation_modules', [
+            'organisation_id' => $otherOrganisation->id,
+            'marketplace_module_id' => $module->id,
+        ]);
+    }
+
+    public function test_a_tenant_cannot_modify_another_tenants_installation(): void
+    {
+        [$user, $allowedOrganisation] = $this->createTenant();
+
+        $otherOrganisation = $this->createOrganisation(
+            'Other Organisation',
+            'other-organisation'
+        );
+
+        $module = $this->createModule(
+            'santa-buddy',
+            'SantaBuddy'
+        );
+
+        $otherInstallation = $this->createInstallation(
+            $otherOrganisation,
+            $module,
+            true
+        );
+
+        Sanctum::actingAs($user);
+
+        $response = $this
+            ->withHeader(
+                'X-Organisation-Id',
+                $allowedOrganisation->id
+            )
+            ->patchJson(
+                "/api/v1/modules/{$module->id}/disable"
+            );
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('organisation_modules', [
+            'id' => $otherInstallation->id,
+            'organisation_id' => $otherOrganisation->id,
+            'marketplace_module_id' => $module->id,
+            'is_enabled' => true,
+        ]);
+    }
+
+    private function createTenant(): array
+    {
+        $user = User::factory()->create();
+
+        $organisation = $this->createOrganisation(
+            'NorthPole Technologies',
+            'northpole-technologies'
+        );
+
+        $organisation->users()->attach(
+            $user->id,
+            [
+                'role' => 'owner',
+                'is_active' => true,
+                'joined_at' => now(),
+            ]
+        );
+
+        return [
+            $user,
+            $organisation,
+        ];
+    }
+
+    private function createOrganisation(
+        string $name,
+        string $slug
+    ): Organisation {
+        return Organisation::create([
+            'name' => $name,
+            'slug' => $slug,
+            'email' => "{$slug}@example.com",
+            'country' => 'IE',
+            'timezone' => 'Europe/Dublin',
+            'active' => true,
+        ]);
+    }
+
+    private function createModule(
+        string $key,
+        string $name,
+        bool $isCore = false
+    ): MarketplaceModule {
+        return MarketplaceModule::create([
+            'key' => $key,
+            'name' => $name,
+            'description' => "{$name} module.",
+            'version' => '1.0.0',
+            'category' => $isCore
+                ? 'Core'
+                : 'Lifestyle',
+            'icon' => $isCore
+                ? 'building'
+                : 'gift',
+            'is_core' => $isCore,
+            'is_active' => true,
+        ]);
+    }
+
+    private function createInstallation(
+        Organisation $organisation,
+        MarketplaceModule $module,
+        bool $isEnabled
+    ): OrganisationModule {
+        return app(TenantContext::class)->withoutTenancy(
+            fn (): OrganisationModule => OrganisationModule::create([
+                'organisation_id' => $organisation->id,
+                'marketplace_module_id' => $module->id,
+                'is_enabled' => $isEnabled,
+                'installed_at' => now(),
+            ])
         );
     }
 }

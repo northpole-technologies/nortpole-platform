@@ -8,38 +8,42 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('organisation_modules', function (Blueprint $table) {
+        Schema::create('organisation_user', function (Blueprint $table) {
             $table->id();
 
             $table->foreignUlid('organisation_id')
                 ->constrained('organisations')
                 ->cascadeOnDelete();
 
-            $table->foreignId('marketplace_module_id')
-                ->constrained('marketplace_modules')
+            $table->foreignId('user_id')
+                ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->boolean('is_enabled')->default(true);
-            $table->timestamp('installed_at')->nullable();
-            $table->json('settings')->nullable();
+            $table->string('role')->default('member');
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('joined_at')->nullable();
 
             $table->timestamps();
-            $table->softDeletes();
 
             $table->unique([
                 'organisation_id',
-                'marketplace_module_id',
+                'user_id',
+            ]);
+
+            $table->index([
+                'user_id',
+                'is_active',
             ]);
 
             $table->index([
                 'organisation_id',
-                'is_enabled',
+                'role',
             ]);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('organisation_modules');
+        Schema::dropIfExists('organisation_user');
     }
 };
