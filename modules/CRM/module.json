@@ -18,7 +18,16 @@
         "crm.customers.update",
         "crm.customers.delete"
     ],
-    "navigation": [],
+    "navigation": [
+        {
+            "label": "Customers",
+            "route": "crm.customers.index",
+            "icon": "users",
+            "permission": "crm.customers.view",
+            "group": "CRM",
+            "order": 10
+        }
+    ],
     "capabilities": [
         "customers",
         "contacts",

@@ -12,12 +12,14 @@ use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\ConfigStage;
 use Northpole\Runtime\Lifecycle\MigrationStage;
+use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\ProviderStage;
 use Northpole\Runtime\Lifecycle\RouteStage;
 use Northpole\Runtime\Lifecycle\ViewStage;
 use Northpole\Runtime\Manifest\ManifestLoader;
 use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
+use Northpole\Runtime\Navigation\NavigationRegistry;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
 
@@ -50,6 +52,13 @@ final class PlatformServiceProvider extends ServiceProvider
             ManifestLoader::class,
             function (): ManifestLoader {
                 return new ManifestLoader();
+            },
+        );
+
+        $this->app->singleton(
+            NavigationRegistry::class,
+            function (): NavigationRegistry {
+                return new NavigationRegistry();
             },
         );
 
@@ -88,6 +97,11 @@ final class PlatformServiceProvider extends ServiceProvider
                     new RouteStage($adapter),
                     new ViewStage($adapter),
                     new MigrationStage($adapter),
+                    new NavigationStage(
+                        $application->make(
+                            NavigationRegistry::class,
+                        )
+                    ),
                 ]);
             },
         );
