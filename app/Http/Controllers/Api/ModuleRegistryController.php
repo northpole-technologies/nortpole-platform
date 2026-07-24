@@ -1,14 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketplaceModule;
-use App\Models\OrganisationModule;
 use Illuminate\Http\JsonResponse;
+use Northpole\Lifecycle\ModuleLifecycleManager;
 
 class ModuleRegistryController extends Controller
 {
+    public function __construct(
+        private readonly ModuleLifecycleManager $lifecycleManager
+    ) {
+    }
+
     public function index(): JsonResponse
     {
         $modules = MarketplaceModule::query()
@@ -34,88 +41,55 @@ class ModuleRegistryController extends Controller
     public function install(
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $installation = OrganisationModule::withTrashed()
-            ->firstOrNew([
-                'marketplace_module_id' => $marketplaceModule->id,
-            ]);
-
-        if ($installation->trashed()) {
-            $installation->restore();
-        }
-
-        $installation->fill([
-            'is_enabled' => true,
-            'installed_at' => now(),
-        ]);
-
-        $installation->save();
+        $installation = $this->lifecycleManager->install(
+            $marketplaceModule
+        );
 
         return response()->json([
             'success' => true,
             'message' => 'Module installed successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ], 201);
     }
 
     public function disable(
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $installation = $this->findTenantInstallation(
+        $installation = $this->lifecycleManager->disable(
             $marketplaceModule
         );
-
-        $installation->update([
-            'is_enabled' => false,
-        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Module disabled successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ]);
     }
 
     public function enable(
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $installation = $this->findTenantInstallation(
+        $installation = $this->lifecycleManager->enable(
             $marketplaceModule
         );
-
-        $installation->update([
-            'is_enabled' => true,
-        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Module enabled successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ]);
     }
 
     public function uninstall(
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $installation = $this->findTenantInstallation(
+        $this->lifecycleManager->uninstall(
             $marketplaceModule
         );
-
-        $installation->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Module uninstalled successfully.',
         ]);
-    }
-
-    private function findTenantInstallation(
-        MarketplaceModule $marketplaceModule
-    ): OrganisationModule {
-        return OrganisationModule::query()
-            ->where(
-                'marketplace_module_id',
-                $marketplaceModule->id
-            )
-            ->firstOrFail();
     }
 }

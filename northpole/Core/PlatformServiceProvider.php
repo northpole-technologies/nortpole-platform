@@ -5,9 +5,18 @@ declare(strict_types=1);
 namespace Northpole\Core;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\ServiceProvider;
 use Northpole\Console\Support\ModuleScaffolder;
 use Northpole\Console\Support\StubWriter;
+use Northpole\Lifecycle\LifecyclePipeline;
+use Northpole\Lifecycle\LifecycleStageRegistry;
+use Northpole\Lifecycle\ModuleLifecycleManager;
+use Northpole\Lifecycle\Stages\DisableStage;
+use Northpole\Lifecycle\Stages\EnableStage;
+use Northpole\Lifecycle\Stages\InstallStage;
+use Northpole\Lifecycle\Stages\ResolveInstallationStage;
+use Northpole\Lifecycle\Stages\UninstallStage;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootPipeline;
@@ -151,6 +160,38 @@ final class PlatformServiceProvider extends ServiceProvider
                     $application->make(StageRegistry::class),
                 );
             },
+        );
+
+        $this->app->singleton(
+            LifecycleStageRegistry::class,
+            function (): LifecycleStageRegistry {
+                return (new LifecycleStageRegistry())
+                    ->registerMany([
+                        new ResolveInstallationStage(),
+                        new InstallStage(),
+                        new EnableStage(),
+                        new DisableStage(),
+                        new UninstallStage(),
+                    ]);
+            },
+        );
+
+        $this->app->singleton(
+            LifecyclePipeline::class,
+            function (Application $application): LifecyclePipeline {
+                return new LifecyclePipeline(
+                    $application->make(
+                        LifecycleStageRegistry::class
+                    ),
+                    $application->make(
+                        ConnectionInterface::class
+                    ),
+                );
+            },
+        );
+
+        $this->app->singleton(
+            ModuleLifecycleManager::class
         );
 
         $this->app->singleton(
