@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Runtime\Contracts;
 
 interface ModuleManifestContract
@@ -21,9 +23,20 @@ interface ModuleManifestContract
     public function manifestPath(): string;
 
     /**
+     * Returns dependency module slugs.
+     *
      * @return array<int, string>
      */
     public function dependencies(): array;
+
+    /**
+     * Returns dependency module slugs mapped to their version constraints.
+     *
+     * Legacy dependencies without an explicit constraint use [*].
+     *
+     * @return array<string, string>
+     */
+    public function dependencyConstraints(): array;
 
     /**
      * @return array<string, string>

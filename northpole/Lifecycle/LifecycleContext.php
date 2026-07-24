@@ -8,6 +8,7 @@ use App\Models\MarketplaceModule;
 use App\Models\Organisation;
 use App\Models\OrganisationModule;
 use Northpole\Lifecycle\Enums\LifecycleOperation;
+use Northpole\Runtime\Manifest\ModuleManifest;
 
 final class LifecycleContext
 {
@@ -17,6 +18,8 @@ final class LifecycleContext
     private array $attributes = [];
 
     private ?OrganisationModule $installation = null;
+
+    private ?ModuleManifest $manifest = null;
 
     public function __construct(
         private readonly LifecycleOperation $operation,
@@ -56,6 +59,24 @@ final class LifecycleContext
     public function hasInstallation(): bool
     {
         return $this->installation !== null;
+    }
+
+    public function manifest(): ?ModuleManifest
+    {
+        return $this->manifest;
+    }
+
+    public function setManifest(
+        ?ModuleManifest $manifest
+    ): self {
+        $this->manifest = $manifest;
+
+        return $this;
+    }
+
+    public function hasManifest(): bool
+    {
+        return $this->manifest !== null;
     }
 
     public function set(

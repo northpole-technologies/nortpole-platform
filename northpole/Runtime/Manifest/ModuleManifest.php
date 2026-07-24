@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Runtime\Manifest;
 
 use InvalidArgumentException;
@@ -34,13 +36,66 @@ final class ModuleManifest implements ModuleManifestContract
             );
         }
 
-        foreach ($this->data['dependencies'] ?? [] as $dependency) {
+        $dependencies = $this->data['dependencies'] ?? [];
+
+        if (array_is_list($dependencies)) {
+            $this->validateLegacyDependencies(
+                $dependencies
+            );
+
+            return;
+        }
+
+        $this->validateVersionedDependencies(
+            $dependencies
+        );
+    }
+
+    /**
+     * @param array<int, mixed> $dependencies
+     */
+    private function validateLegacyDependencies(
+        array $dependencies
+    ): void {
+        foreach ($dependencies as $dependency) {
             if (
                 ! is_string($dependency)
                 || trim($dependency) === ''
             ) {
                 throw new InvalidArgumentException(
                     'Module manifest dependencies must contain non-empty strings'
+                );
+            }
+        }
+    }
+
+    /**
+     * @param array<array-key, mixed> $dependencies
+     */
+    private function validateVersionedDependencies(
+        array $dependencies
+    ): void {
+        foreach (
+            $dependencies as $dependency => $constraint
+        ) {
+            if (
+                ! is_string($dependency)
+                || trim($dependency) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest dependency names must be non-empty strings'
+                );
+            }
+
+            if (
+                ! is_string($constraint)
+                || trim($constraint) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest dependency [%s] must have a non-empty version constraint',
+                        $dependency
+                    )
                 );
             }
         }
@@ -91,13 +146,42 @@ final class ModuleManifest implements ModuleManifestContract
      */
     public function dependencies(): array
     {
-        return array_values(
-            array_unique(
-                $this->data['dependencies'] ?? []
-            )
+        return array_keys(
+            $this->dependencyConstraints()
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function dependencyConstraints(): array
+    {
+        $dependencies = $this->data['dependencies'] ?? [];
+
+        if (array_is_list($dependencies)) {
+            $constraints = [];
+
+            foreach ($dependencies as $dependency) {
+                $constraints[trim($dependency)] = '*';
+            }
+
+            return $constraints;
+        }
+
+        $constraints = [];
+
+        foreach (
+            $dependencies as $dependency => $constraint
+        ) {
+            $constraints[trim($dependency)] = trim($constraint);
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public function routes(): array
     {
         return $this->data['routes'] ?? [];
@@ -113,26 +197,41 @@ final class ModuleManifest implements ModuleManifestContract
         return $this->data['migrations'] ?? null;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function configuration(): array
     {
         return $this->data['config'] ?? [];
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function permissions(): array
     {
         return $this->data['permissions'] ?? [];
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function navigation(): array
     {
         return $this->data['navigation'] ?? [];
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function capabilities(): array
     {
         return $this->data['capabilities'] ?? [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return $this->data;

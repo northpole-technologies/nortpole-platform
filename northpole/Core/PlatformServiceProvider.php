@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Northpole\Core;
 
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\ServiceProvider;
@@ -16,7 +17,9 @@ use Northpole\Lifecycle\Stages\DisableStage;
 use Northpole\Lifecycle\Stages\EnableStage;
 use Northpole\Lifecycle\Stages\InstallStage;
 use Northpole\Lifecycle\Stages\ResolveInstallationStage;
+use Northpole\Lifecycle\Stages\ResolveManifestStage;
 use Northpole\Lifecycle\Stages\UninstallStage;
+use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootPipeline;
@@ -164,10 +167,19 @@ final class PlatformServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             LifecycleStageRegistry::class,
-            function (): LifecycleStageRegistry {
+            function (
+                Application $application
+            ): LifecycleStageRegistry {
                 return (new LifecycleStageRegistry())
                     ->registerMany([
                         new ResolveInstallationStage(),
+                        new ResolveManifestStage(
+                            $application->make(Runtime::class)
+                        ),
+                        new ValidateDependenciesStage(
+                            $application->make(Runtime::class),
+                            $application->make(TenantContext::class),
+                        ),
                         new InstallStage(),
                         new EnableStage(),
                         new DisableStage(),
