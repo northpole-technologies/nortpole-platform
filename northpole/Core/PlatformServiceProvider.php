@@ -23,10 +23,12 @@ use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Events\ModuleEventBus;
+use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
+use Northpole\Runtime\Lifecycle\EventSubscriberStage;
 use Northpole\Runtime\Lifecycle\MigrationStage;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\PermissionStage;
@@ -111,6 +113,19 @@ final class PlatformServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            ModuleEventRegistrar::class,
+            function (
+                Application $application,
+            ): ModuleEventRegistrar {
+                return new ModuleEventRegistrar(
+                    $application->make(
+                        ModuleEventRegistry::class,
+                    ),
+                );
+            },
+        );
+
+        $this->app->singleton(
             ModuleEventBus::class,
             function (Application $application): ModuleEventBus {
                 return new ModuleEventBus(
@@ -118,7 +133,7 @@ final class PlatformServiceProvider extends ServiceProvider
                         ModuleEventRegistry::class,
                     ),
                     listenerResolver: static function (
-                        string $listener
+                        string $listener,
                     ) use ($application): object {
                         return $application->make($listener);
                     },
@@ -143,7 +158,9 @@ final class PlatformServiceProvider extends ServiceProvider
                 return new Runtime(
                     $application->make(ModuleDiscovery::class),
                     $application->make(ModuleRepository::class),
-                    $application->make(ModuleDependencyResolver::class),
+                    $application->make(
+                        ModuleDependencyResolver::class,
+                    ),
                     $application->basePath('modules'),
                 );
             },
@@ -177,6 +194,11 @@ final class PlatformServiceProvider extends ServiceProvider
                             NavigationRegistry::class,
                         ),
                     ),
+                    new EventSubscriberStage(
+                        $application->make(
+                            ModuleEventRegistrar::class,
+                        ),
+                    ),
                 ]);
             },
         );
@@ -193,7 +215,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(
             LifecycleStageRegistry::class,
             function (
-                Application $application
+                Application $application,
             ): LifecycleStageRegistry {
                 return (new LifecycleStageRegistry())
                     ->registerMany([
@@ -242,8 +264,12 @@ final class PlatformServiceProvider extends ServiceProvider
             ModuleScaffolder::class,
             function (Application $application): ModuleScaffolder {
                 return new ModuleScaffolder(
-                    stubWriter: $application->make(StubWriter::class),
-                    modulesPath: $application->basePath('modules'),
+                    stubWriter: $application->make(
+                        StubWriter::class,
+                    ),
+                    modulesPath: $application->basePath(
+                        'modules',
+                    ),
                     stubsPath: $application->basePath(
                         'northpole/Console/Stubs',
                     ),

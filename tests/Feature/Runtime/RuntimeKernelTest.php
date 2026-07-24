@@ -36,26 +36,27 @@ final class RuntimeKernelTest extends TestCase
     {
         $registry = $this->app->make(StageRegistry::class);
 
-        $this->assertSame(
-            [
-                'config',
-                'providers',
-                'routes',
-                'views',
-                'migrations',
-                'capabilities',
-                'permissions',
-                'navigation',
-            ],
+    $this->assertSame(
+    [
+        'config',
+        'providers',
+        'routes',
+        'views',
+        'migrations',
+        'capabilities',
+        'permissions',
+        'navigation',
+        'event-subscribers',
+    ],
             array_map(
                 static fn ($stage): string => $stage->name(),
                 $registry->sorted(),
             ),
         );
 
-        $this->assertSame(
-            8,
-            $registry->count(),
-        );
+      $this->assertSame(
+    9,
+    $registry->count(),
+);
     }
 }
