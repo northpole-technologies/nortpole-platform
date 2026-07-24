@@ -68,6 +68,20 @@ interface ModuleManifestContract
     public function capabilities(): array;
 
     /**
+     * Returns the event names this module may publish.
+     *
+     * @return array<int, string>
+     */
+    public function publishedEvents(): array;
+
+    /**
+     * Returns subscribed event names mapped to listener classes.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public function eventSubscribers(): array;
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array;

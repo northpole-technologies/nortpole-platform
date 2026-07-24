@@ -244,6 +244,317 @@ final class ModuleManifestTest extends TestCase
         ]);
     }
 
+    public function test_it_returns_published_events(): void
+    {
+        $manifest = $this->manifest([
+            'events' => [
+                'publishes' => [
+                    'customer.created',
+                    'customer.updated',
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'customer.created',
+                'customer.updated',
+            ],
+            $manifest->publishedEvents()
+        );
+    }
+
+    public function test_it_trims_and_removes_duplicate_published_events(): void
+    {
+        $manifest = $this->manifest([
+            'events' => [
+                'publishes' => [
+                    ' customer.created ',
+                    'customer.created',
+                    ' customer.updated ',
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'customer.created',
+                'customer.updated',
+            ],
+            $manifest->publishedEvents()
+        );
+    }
+
+    public function test_it_returns_empty_published_events_when_not_defined(): void
+    {
+        $manifest = $this->manifest();
+
+        self::assertSame(
+            [],
+            $manifest->publishedEvents()
+        );
+    }
+
+    public function test_it_returns_event_subscribers(): void
+    {
+        $manifest = $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    'invoice.paid' => [
+                        'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                    ],
+                    'customer.created' => [
+                        'Modules\\Reports\\Listeners\\CreateCustomerReport',
+                        'Modules\\Reports\\Listeners\\NotifyReportOwner',
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'invoice.paid' => [
+                    'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                ],
+                'customer.created' => [
+                    'Modules\\Reports\\Listeners\\CreateCustomerReport',
+                    'Modules\\Reports\\Listeners\\NotifyReportOwner',
+                ],
+            ],
+            $manifest->eventSubscribers()
+        );
+    }
+
+    public function test_it_trims_event_names_and_listener_classes(): void
+    {
+        $manifest = $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    ' invoice.paid ' => [
+                        ' Modules\\Reports\\Listeners\\UpdateRevenueReport ',
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'invoice.paid' => [
+                    'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                ],
+            ],
+            $manifest->eventSubscribers()
+        );
+    }
+
+    public function test_it_removes_duplicate_listener_classes(): void
+    {
+        $manifest = $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    'invoice.paid' => [
+                        'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                        'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'invoice.paid' => [
+                    'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                ],
+            ],
+            $manifest->eventSubscribers()
+        );
+    }
+
+    public function test_it_returns_empty_event_subscribers_when_not_defined(): void
+    {
+        $manifest = $this->manifest();
+
+        self::assertSame(
+            [],
+            $manifest->eventSubscribers()
+        );
+    }
+
+    public function test_it_rejects_a_non_array_events_field(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [events] must be an object'
+        );
+
+        $this->manifest([
+            'events' => 'customer.created',
+        ]);
+    }
+
+    public function test_it_rejects_a_non_list_published_events_field(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [events.publishes] must be a list'
+        );
+
+        $this->manifest([
+            'events' => [
+                'publishes' => [
+                    'customer.created' => true,
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_an_empty_published_event_name(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [events.publishes] must contain non-empty strings'
+        );
+
+        $this->manifest([
+            'events' => [
+                'publishes' => [
+                    'customer.created',
+                    '',
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_a_non_string_published_event_name(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [events.publishes] must contain non-empty strings'
+        );
+
+        $this->manifest([
+            'events' => [
+                'publishes' => [
+                    'customer.created',
+                    123,
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_a_non_array_subscribers_field(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [events.subscribes] must be an object'
+        );
+
+        $this->manifest([
+            'events' => [
+                'subscribes' => 'invoice.paid',
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_an_empty_subscribed_event_name(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest subscribed event names must be non-empty strings'
+        );
+
+        $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    '' => [
+                        'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_a_non_list_subscription(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest event subscription [invoice.paid] must contain a list of listener classes'
+        );
+
+        $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    'invoice.paid' => [
+                        'listener' => 'Modules\\Reports\\Listeners\\UpdateRevenueReport',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_an_empty_listener_class(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest event subscription [invoice.paid] must contain non-empty listener class names'
+        );
+
+        $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    'invoice.paid' => [
+                        '',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_a_non_string_listener_class(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest event subscription [invoice.paid] must contain non-empty listener class names'
+        );
+
+        $this->manifest([
+            'events' => [
+                'subscribes' => [
+                    'invoice.paid' => [
+                        123,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function test_it_preserves_the_original_manifest_data(): void
     {
         $data = [
@@ -253,6 +564,16 @@ final class ModuleManifestTest extends TestCase
             'enabled' => true,
             'dependencies' => [
                 'crm' => '^2.0',
+            ],
+            'events' => [
+                'publishes' => [
+                    'report.created',
+                ],
+                'subscribes' => [
+                    'customer.created' => [
+                        'Modules\\Reports\\Listeners\\CreateCustomerReport',
+                    ],
+                ],
             ],
         ];
 

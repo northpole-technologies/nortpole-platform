@@ -27,6 +27,12 @@ final class ModuleManifest implements ModuleManifestContract
             }
         }
 
+        $this->validateDependencies();
+        $this->validateEvents();
+    }
+
+    private function validateDependencies(): void
+    {
         if (
             isset($this->data['dependencies'])
             && ! is_array($this->data['dependencies'])
@@ -97,6 +103,100 @@ final class ModuleManifest implements ModuleManifestContract
                         $dependency
                     )
                 );
+            }
+        }
+    }
+
+    private function validateEvents(): void
+    {
+        if (! isset($this->data['events'])) {
+            return;
+        }
+
+        if (! is_array($this->data['events'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [events] must be an object'
+            );
+        }
+
+        $events = $this->data['events'];
+
+        $this->validatePublishedEvents(
+            $events['publishes'] ?? []
+        );
+
+        $this->validateEventSubscribers(
+            $events['subscribes'] ?? []
+        );
+    }
+
+    private function validatePublishedEvents(
+        mixed $publishedEvents
+    ): void {
+        if (
+            ! is_array($publishedEvents)
+            || ! array_is_list($publishedEvents)
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [events.publishes] must be a list'
+            );
+        }
+
+        foreach ($publishedEvents as $eventName) {
+            if (
+                ! is_string($eventName)
+                || trim($eventName) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest field [events.publishes] must contain non-empty strings'
+                );
+            }
+        }
+    }
+
+    private function validateEventSubscribers(
+        mixed $subscribers
+    ): void {
+        if (! is_array($subscribers)) {
+            throw new InvalidArgumentException(
+                'Module manifest field [events.subscribes] must be an object'
+            );
+        }
+
+        foreach ($subscribers as $eventName => $listeners) {
+            if (
+                ! is_string($eventName)
+                || trim($eventName) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest subscribed event names must be non-empty strings'
+                );
+            }
+
+            if (
+                ! is_array($listeners)
+                || ! array_is_list($listeners)
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest event subscription [%s] must contain a list of listener classes',
+                        $eventName
+                    )
+                );
+            }
+
+            foreach ($listeners as $listenerClass) {
+                if (
+                    ! is_string($listenerClass)
+                    || trim($listenerClass) === ''
+                ) {
+                    throw new InvalidArgumentException(
+                        sprintf(
+                            'Module manifest event subscription [%s] must contain non-empty listener class names',
+                            $eventName
+                        )
+                    );
+                }
             }
         }
     }
@@ -227,6 +327,47 @@ final class ModuleManifest implements ModuleManifestContract
     public function capabilities(): array
     {
         return $this->data['capabilities'] ?? [];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function publishedEvents(): array
+    {
+        $publishedEvents = $this->data['events']['publishes'] ?? [];
+
+        $normalisedEvents = [];
+
+        foreach ($publishedEvents as $eventName) {
+            $normalisedEvents[trim($eventName)] = true;
+        }
+
+        return array_keys($normalisedEvents);
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function eventSubscribers(): array
+    {
+        $subscribers = $this->data['events']['subscribes'] ?? [];
+
+        $normalisedSubscribers = [];
+
+        foreach ($subscribers as $eventName => $listeners) {
+            $normalisedEventName = trim($eventName);
+            $normalisedListeners = [];
+
+            foreach ($listeners as $listenerClass) {
+                $normalisedListeners[trim($listenerClass)] = true;
+            }
+
+            $normalisedSubscribers[$normalisedEventName] = array_keys(
+                $normalisedListeners
+            );
+        }
+
+        return $normalisedSubscribers;
     }
 
     /**
