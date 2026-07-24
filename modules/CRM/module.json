@@ -1,0 +1,29 @@
+{
+    "name": "CRM",
+    "slug": "crm",
+    "version": "1.0.0",
+    "description": "Customer relationship management for organisations, contacts, notes, tasks and activities.",
+    "enabled": true,
+    "provider": "Modules\\CRM\\Providers\\CRMServiceProvider",
+    "routes": {
+        "api": "routes/api.php",
+        "web": "routes/web.php"
+    },
+    "migrations": "database/migrations",
+    "views": "resources/views",
+    "config": {},
+    "permissions": [
+        "crm.customers.view",
+        "crm.customers.create",
+        "crm.customers.update",
+        "crm.customers.delete"
+    ],
+    "navigation": [],
+    "capabilities": [
+        "customers",
+        "contacts",
+        "notes",
+        "tasks",
+        "activities"
+    ]
+}

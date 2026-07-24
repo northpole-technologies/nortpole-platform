@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Core;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Northpole\Console\Support\ModuleScaffolder;
+use Northpole\Console\Support\StubWriter;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\ConfigStage;
@@ -25,28 +29,28 @@ final class PlatformServiceProvider extends ServiceProvider
             ApplicationAdapter::class,
             function (Application $application): ApplicationAdapter {
                 return new ApplicationAdapter($application);
-            }
+            },
         );
 
         $this->app->singleton(
             ModuleRepository::class,
             function (): ModuleRepository {
                 return new ModuleRepository();
-            }
+            },
         );
 
         $this->app->singleton(
             ModuleFinder::class,
             function (): ModuleFinder {
                 return new ModuleFinder();
-            }
+            },
         );
 
         $this->app->singleton(
             ManifestLoader::class,
             function (): ManifestLoader {
                 return new ManifestLoader();
-            }
+            },
         );
 
         $this->app->singleton(
@@ -55,9 +59,9 @@ final class PlatformServiceProvider extends ServiceProvider
                 return new ModuleDiscovery(
                     $application->make(ModuleFinder::class),
                     $application->make(ManifestLoader::class),
-                    $application->make(ModuleRepository::class)
+                    $application->make(ModuleRepository::class),
                 );
-            }
+            },
         );
 
         $this->app->singleton(
@@ -66,16 +70,16 @@ final class PlatformServiceProvider extends ServiceProvider
                 return new Runtime(
                     $application->make(ModuleDiscovery::class),
                     $application->make(ModuleRepository::class),
-                    $application->basePath('modules')
+                    $application->basePath('modules'),
                 );
-            }
+            },
         );
 
         $this->app->singleton(
             BootPipeline::class,
             function (Application $application): BootPipeline {
                 $adapter = $application->make(
-                    ApplicationAdapter::class
+                    ApplicationAdapter::class,
                 );
 
                 return (new BootPipeline())->addMany([
@@ -85,7 +89,27 @@ final class PlatformServiceProvider extends ServiceProvider
                     new ViewStage($adapter),
                     new MigrationStage($adapter),
                 ]);
-            }
+            },
+        );
+
+        $this->app->singleton(
+            StubWriter::class,
+            function (): StubWriter {
+                return new StubWriter();
+            },
+        );
+
+        $this->app->singleton(
+            ModuleScaffolder::class,
+            function (Application $application): ModuleScaffolder {
+                return new ModuleScaffolder(
+                    stubWriter: $application->make(StubWriter::class),
+                    modulesPath: $application->basePath('modules'),
+                    stubsPath: $application->basePath(
+                        'northpole/Console/Stubs',
+                    ),
+                );
+            },
         );
     }
 

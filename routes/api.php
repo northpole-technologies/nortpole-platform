@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\ModuleRegistryController;
+use App\Http\Controllers\Api\Organisation\PermissionController;
+use App\Http\Controllers\Api\Organisation\RoleController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PluginController;
 use App\Http\Controllers\AuthController;
@@ -13,8 +15,15 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [
+    AuthController::class,
+    'register',
+]);
+
+Route::post('/login', [
+    AuthController::class,
+    'login',
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +59,13 @@ Route::prefix('v1')->group(function () {
         'auth:sanctum',
         'tenant',
     ])->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Modules
+        |--------------------------------------------------------------------------
+        */
+
         Route::post('/modules/{marketplaceModule}/install', [
             ModuleRegistryController::class,
             'install',
@@ -69,6 +85,59 @@ Route::prefix('v1')->group(function () {
             ModuleRegistryController::class,
             'uninstall',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Roles
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/roles', [
+            RoleController::class,
+            'index',
+        ])->middleware('permission:roles.view');
+
+        Route::post('/roles', [
+            RoleController::class,
+            'store',
+        ])->middleware('permission:roles.create');
+
+        Route::get('/roles/{role}', [
+            RoleController::class,
+            'show',
+        ])->middleware('permission:roles.view');
+
+        Route::patch('/roles/{role}', [
+            RoleController::class,
+            'update',
+        ])->middleware('permission:roles.update');
+
+        Route::post('/roles/{role}/permissions', [
+            RoleController::class,
+            'syncPermissions',
+        ])->middleware('permission:roles.permissions.sync');
+
+        Route::delete('/roles/{role}', [
+            RoleController::class,
+            'destroy',
+        ])->middleware('permission:roles.delete');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Permissions
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/permissions', [
+            PermissionController::class,
+            'index',
+        ])->middleware('permission:permissions.view');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tenant Context
+        |--------------------------------------------------------------------------
+        */
 
         Route::get('/tenant/context', function (
             TenantContext $tenantContext
