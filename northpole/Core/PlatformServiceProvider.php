@@ -22,6 +22,8 @@ use Northpole\Lifecycle\Stages\UninstallStage;
 use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
+use Northpole\Runtime\Events\ModuleEventBus;
+use Northpole\Runtime\Events\ModuleEventRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
@@ -102,6 +104,29 @@ final class PlatformServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            ModuleEventRegistry::class,
+            function (): ModuleEventRegistry {
+                return new ModuleEventRegistry();
+            },
+        );
+
+        $this->app->singleton(
+            ModuleEventBus::class,
+            function (Application $application): ModuleEventBus {
+                return new ModuleEventBus(
+                    registry: $application->make(
+                        ModuleEventRegistry::class,
+                    ),
+                    listenerResolver: static function (
+                        string $listener
+                    ) use ($application): object {
+                        return $application->make($listener);
+                    },
+                );
+            },
+        );
+
+        $this->app->singleton(
             ModuleDiscovery::class,
             function (Application $application): ModuleDiscovery {
                 return new ModuleDiscovery(
@@ -174,7 +199,7 @@ final class PlatformServiceProvider extends ServiceProvider
                     ->registerMany([
                         new ResolveInstallationStage(),
                         new ResolveManifestStage(
-                            $application->make(Runtime::class)
+                            $application->make(Runtime::class),
                         ),
                         new ValidateDependenciesStage(
                             $application->make(Runtime::class),
@@ -193,17 +218,17 @@ final class PlatformServiceProvider extends ServiceProvider
             function (Application $application): LifecyclePipeline {
                 return new LifecyclePipeline(
                     $application->make(
-                        LifecycleStageRegistry::class
+                        LifecycleStageRegistry::class,
                     ),
                     $application->make(
-                        ConnectionInterface::class
+                        ConnectionInterface::class,
                     ),
                 );
             },
         );
 
         $this->app->singleton(
-            ModuleLifecycleManager::class
+            ModuleLifecycleManager::class,
         );
 
         $this->app->singleton(
