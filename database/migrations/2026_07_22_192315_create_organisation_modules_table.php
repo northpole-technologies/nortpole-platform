@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('organisation_modules', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('organisation_id')
-                ->constrained()
+            $table->foreignUlid('organisation_id')
+                ->constrained('organisations')
                 ->cascadeOnDelete();
 
             $table->foreignId('marketplace_module_id')
@@ -29,6 +29,11 @@ return new class extends Migration
             $table->unique([
                 'organisation_id',
                 'marketplace_module_id',
+            ]);
+
+            $table->index([
+                'organisation_id',
+                'is_enabled',
             ]);
         });
     }

@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ModuleNamespace}}\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+final class {{Module}}ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        //
+    }
+}

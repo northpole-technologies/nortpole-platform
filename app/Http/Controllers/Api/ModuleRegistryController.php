@@ -1,16 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketplaceModule;
-use App\Models\Organisation;
-use App\Models\OrganisationModule;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Northpole\Lifecycle\ModuleLifecycleManager;
 
 class ModuleRegistryController extends Controller
 {
+    public function __construct(
+        private readonly ModuleLifecycleManager $lifecycleManager
+    ) {
+    }
+
     public function index(): JsonResponse
     {
         $modules = MarketplaceModule::query()
@@ -34,115 +39,53 @@ class ModuleRegistryController extends Controller
     }
 
     public function install(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $organisation = Organisation::findOrFail(
-            $validated['organisation_id']
+        $installation = $this->lifecycleManager->install(
+            $marketplaceModule
         );
-
-        $installation = OrganisationModule::withTrashed()
-            ->firstOrNew([
-                'organisation_id' => $organisation->id,
-                'marketplace_module_id' => $marketplaceModule->id,
-            ]);
-
-        if ($installation->trashed()) {
-            $installation->restore();
-        }
-
-        $installation->fill([
-            'is_enabled' => true,
-            'installed_at' => now(),
-        ]);
-
-        $installation->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Module installed successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ], 201);
     }
 
     public function disable(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
-
-        $installation->update([
-            'is_enabled' => false,
-        ]);
+        $installation = $this->lifecycleManager->disable(
+            $marketplaceModule
+        );
 
         return response()->json([
             'success' => true,
             'message' => 'Module disabled successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ]);
     }
 
     public function enable(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
-
-        $installation->update([
-            'is_enabled' => true,
-        ]);
+        $installation = $this->lifecycleManager->enable(
+            $marketplaceModule
+        );
 
         return response()->json([
             'success' => true,
             'message' => 'Module enabled successfully.',
-            'data' => $installation->fresh(),
+            'data' => $installation,
         ]);
     }
 
     public function uninstall(
-        Request $request,
         MarketplaceModule $marketplaceModule
     ): JsonResponse {
-        $validated = $request->validate([
-            'organisation_id' => [
-                'required',
-                'exists:organisations,id',
-            ],
-        ]);
-
-        $installation = OrganisationModule::query()
-            ->where('organisation_id', $validated['organisation_id'])
-            ->where('marketplace_module_id', $marketplaceModule->id)
-            ->firstOrFail();
-
-        $installation->delete();
+        $this->lifecycleManager->uninstall(
+            $marketplaceModule
+        );
 
         return response()->json([
             'success' => true,
