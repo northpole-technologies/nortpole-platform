@@ -10,6 +10,7 @@ use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootContext;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Manifest\ManifestLoader;
+use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
 use Northpole\Runtime\Navigation\NavigationRegistry;
@@ -172,6 +173,7 @@ final class NavigationStageTest extends TestCase
                 $repository
             ),
             $repository,
+            new ModuleDependencyResolver(),
             base_path('modules')
         );
     }

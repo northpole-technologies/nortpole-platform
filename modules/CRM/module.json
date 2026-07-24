@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "description": "Customer relationship management for organisations, contacts, notes, tasks and activities.",
     "enabled": true,
+    "dependencies": [],
     "provider": "Modules\\CRM\\Providers\\CRMServiceProvider",
     "routes": {
         "api": "routes/api.php",

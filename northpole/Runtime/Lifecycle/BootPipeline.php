@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Runtime\Lifecycle;
 
 use Northpole\Runtime\Contracts\BootStageContract;
@@ -7,14 +9,14 @@ use Northpole\Runtime\Runtime;
 
 final class BootPipeline
 {
-    /**
-     * @var array<int, BootStageContract>
-     */
-    private array $stages = [];
+    public function __construct(
+        private readonly StageRegistry $registry = new StageRegistry(),
+    ) {
+    }
 
     public function add(BootStageContract $stage): self
     {
-        $this->stages[] = $stage;
+        $this->registry->register($stage);
 
         return $this;
     }
@@ -24,24 +26,21 @@ final class BootPipeline
      */
     public function addMany(iterable $stages): self
     {
-        foreach ($stages as $stage) {
-            $this->add($stage);
-        }
+        $this->registry->registerMany($stages);
 
         return $this;
     }
 
     public function boot(Runtime $runtime): void
     {
-        $stages = $this->sortedStages();
         $modules = $runtime->enabledModules();
 
-        foreach ($stages as $stage) {
+        foreach ($this->registry->sorted() as $stage) {
             foreach ($modules as $module) {
                 $stage->boot(
                     new BootContext(
                         $runtime,
-                        $module
+                        $module,
                     )
                 );
             }
@@ -53,29 +52,16 @@ final class BootPipeline
      */
     public function stages(): array
     {
-        return $this->sortedStages();
+        return $this->registry->sorted();
     }
 
     public function count(): int
     {
-        return count($this->stages);
+        return $this->registry->count();
     }
 
-    /**
-     * @return array<int, BootStageContract>
-     */
-    private function sortedStages(): array
+    public function registry(): StageRegistry
     {
-        $stages = $this->stages;
-
-        usort(
-            $stages,
-            static fn (
-                BootStageContract $first,
-                BootStageContract $second
-            ): int => $first->priority() <=> $second->priority()
-        );
-
-        return $stages;
+        return $this->registry;
     }
 }

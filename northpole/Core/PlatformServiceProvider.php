@@ -8,16 +8,20 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Northpole\Console\Support\ModuleScaffolder;
 use Northpole\Console\Support\StubWriter;
+use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootPipeline;
+use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
 use Northpole\Runtime\Lifecycle\MigrationStage;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\PermissionStage;
 use Northpole\Runtime\Lifecycle\ProviderStage;
 use Northpole\Runtime\Lifecycle\RouteStage;
+use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Lifecycle\ViewStage;
 use Northpole\Runtime\Manifest\ManifestLoader;
+use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
 use Northpole\Runtime\Navigation\NavigationRegistry;
@@ -58,6 +62,20 @@ final class PlatformServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            ModuleDependencyResolver::class,
+            function (): ModuleDependencyResolver {
+                return new ModuleDependencyResolver();
+            },
+        );
+
+        $this->app->singleton(
+            CapabilityRegistry::class,
+            function (): CapabilityRegistry {
+                return new CapabilityRegistry();
+            },
+        );
+
+        $this->app->singleton(
             PermissionRegistry::class,
             function (): PermissionRegistry {
                 return new PermissionRegistry();
@@ -88,35 +106,50 @@ final class PlatformServiceProvider extends ServiceProvider
                 return new Runtime(
                     $application->make(ModuleDiscovery::class),
                     $application->make(ModuleRepository::class),
+                    $application->make(ModuleDependencyResolver::class),
                     $application->basePath('modules'),
                 );
             },
         );
 
         $this->app->singleton(
-            BootPipeline::class,
-            function (Application $application): BootPipeline {
+            StageRegistry::class,
+            function (Application $application): StageRegistry {
                 $adapter = $application->make(
                     ApplicationAdapter::class,
                 );
 
-                return (new BootPipeline())->addMany([
+                return (new StageRegistry())->registerMany([
                     new ConfigStage($adapter),
                     new ProviderStage($adapter),
                     new RouteStage($adapter),
                     new ViewStage($adapter),
                     new MigrationStage($adapter),
+                    new CapabilityStage(
+                        $application->make(
+                            CapabilityRegistry::class,
+                        ),
+                    ),
                     new PermissionStage(
                         $application->make(
                             PermissionRegistry::class,
-                        )
+                        ),
                     ),
                     new NavigationStage(
                         $application->make(
                             NavigationRegistry::class,
-                        )
+                        ),
                     ),
                 ]);
+            },
+        );
+
+        $this->app->singleton(
+            BootPipeline::class,
+            function (Application $application): BootPipeline {
+                return new BootPipeline(
+                    $application->make(StageRegistry::class),
+                );
             },
         );
 

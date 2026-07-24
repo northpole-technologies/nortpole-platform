@@ -5,60 +5,66 @@ declare(strict_types=1);
 namespace Tests\Feature\Runtime;
 
 use InvalidArgumentException;
+use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Contracts\ModuleManifestContract;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootContext;
-use Northpole\Runtime\Lifecycle\PermissionStage;
+use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Manifest\ManifestLoader;
 use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
-use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Runtime;
 use Tests\TestCase;
 
-final class PermissionStageTest extends TestCase
+final class CapabilityStageTest extends TestCase
 {
-    public function test_it_registers_module_permissions(): void
+    public function test_it_registers_module_capabilities(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new CapabilityRegistry();
 
-        $stage = new PermissionStage($registry);
+        $stage = new CapabilityStage($registry);
 
         $stage->boot(
             new BootContext(
                 $this->createRuntime(),
                 $this->createManifestMock([
-                    'crm.customers.view',
-                    'crm.customers.create',
+                    'customers',
+                    'contacts',
+                    'notes',
                 ])
             )
         );
 
-        $this->assertSame(2, $registry->count());
+        $this->assertSame(3, $registry->count());
+
         $this->assertTrue(
-            $registry->has('crm.customers.view')
-        );
-        $this->assertTrue(
-            $registry->has('crm.customers.create')
+            $registry->has(
+                'crm',
+                'customers'
+            )
         );
 
-        $permission = $registry->get(
-            'crm.customers.view'
+        $this->assertTrue(
+            $registry->has(
+                'crm',
+                'contacts'
+            )
         );
 
-        $this->assertNotNull($permission);
-        $this->assertSame(
-            'crm',
-            $permission->moduleSlug()
+        $this->assertTrue(
+            $registry->has(
+                'crm',
+                'notes'
+            )
         );
     }
 
-    public function test_it_skips_modules_without_permissions(): void
+    public function test_it_skips_modules_without_capabilities(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new CapabilityRegistry();
 
-        $stage = new PermissionStage($registry);
+        $stage = new CapabilityStage($registry);
 
         $stage->boot(
             new BootContext(
@@ -71,42 +77,42 @@ final class PermissionStageTest extends TestCase
         $this->assertSame([], $registry->all());
     }
 
-    public function test_it_rejects_non_string_permissions(): void
+    public function test_it_rejects_non_string_capabilities(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new CapabilityRegistry();
 
-        $stage = new PermissionStage($registry);
+        $stage = new CapabilityStage($registry);
 
         $this->expectException(
             InvalidArgumentException::class
         );
 
         $this->expectExceptionMessage(
-            'Permissions for module [crm] must be non-empty strings.'
+            'Capabilities for module [crm] must be non-empty strings.'
         );
 
         $stage->boot(
             new BootContext(
                 $this->createRuntime(),
                 $this->createManifestMock([
-                    ['name' => 'crm.customers.view'],
+                    ['name' => 'customers'],
                 ])
             )
         );
     }
 
-    public function test_it_rejects_empty_permission_names(): void
+    public function test_it_rejects_empty_capability_names(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new CapabilityRegistry();
 
-        $stage = new PermissionStage($registry);
+        $stage = new CapabilityStage($registry);
 
         $this->expectException(
             InvalidArgumentException::class
         );
 
         $this->expectExceptionMessage(
-            'Permissions for module [crm] must be non-empty strings.'
+            'Capabilities for module [crm] must be non-empty strings.'
         );
 
         $stage->boot(
@@ -120,10 +126,10 @@ final class PermissionStageTest extends TestCase
     }
 
     /**
-     * @param array<int, mixed> $permissions
+     * @param array<int, mixed> $capabilities
      */
     private function createManifestMock(
-        array $permissions
+        array $capabilities
     ): ModuleManifestContract {
         $manifest = $this->createMock(
             ModuleManifestContract::class
@@ -135,8 +141,8 @@ final class PermissionStageTest extends TestCase
 
         $manifest
             ->expects($this->once())
-            ->method('permissions')
-            ->willReturn($permissions);
+            ->method('capabilities')
+            ->willReturn($capabilities);
 
         return $manifest;
     }

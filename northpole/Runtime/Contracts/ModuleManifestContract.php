@@ -21,6 +21,11 @@ interface ModuleManifestContract
     public function manifestPath(): string;
 
     /**
+     * @return array<int, string>
+     */
+    public function dependencies(): array;
+
+    /**
      * @return array<string, string>
      */
     public function routes(): array;

@@ -24,6 +24,26 @@ final class ModuleManifest implements ModuleManifestContract
                 );
             }
         }
+
+        if (
+            isset($this->data['dependencies'])
+            && ! is_array($this->data['dependencies'])
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [dependencies] must be an array'
+            );
+        }
+
+        foreach ($this->data['dependencies'] ?? [] as $dependency) {
+            if (
+                ! is_string($dependency)
+                || trim($dependency) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest dependencies must contain non-empty strings'
+                );
+            }
+        }
     }
 
     public function name(): string
@@ -64,6 +84,18 @@ final class ModuleManifest implements ModuleManifestContract
     public function manifestPath(): string
     {
         return $this->manifestPath;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function dependencies(): array
+    {
+        return array_values(
+            array_unique(
+                $this->data['dependencies'] ?? []
+            )
+        );
     }
 
     public function routes(): array

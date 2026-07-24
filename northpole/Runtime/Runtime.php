@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Runtime;
 
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Manifest\ModuleManifest;
+use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleRepository;
 
 final class Runtime
@@ -11,13 +14,16 @@ final class Runtime
     public function __construct(
         private readonly ModuleDiscovery $discovery,
         private readonly ModuleRepository $repository,
+        private readonly ModuleDependencyResolver $dependencyResolver,
         private readonly string $modulesPath,
     ) {
     }
 
     public function discover(): self
     {
-        $this->discovery->discover($this->modulesPath);
+        $this->discovery->discover(
+            $this->modulesPath,
+        );
 
         return $this;
     }
@@ -31,11 +37,15 @@ final class Runtime
     }
 
     /**
+     * Returns enabled modules in dependency-safe boot order.
+     *
      * @return array<string, ModuleManifest>
      */
     public function enabledModules(): array
     {
-        return $this->repository->enabled();
+        return $this->dependencyResolver->resolve(
+            $this->repository->all(),
+        );
     }
 
     public function module(string $slug): ?ModuleManifest

@@ -22,6 +22,7 @@ class ModuleFoundationTest extends TestCase
         );
 
         File::deleteDirectory($this->temporaryModulesPath);
+
         File::makeDirectory(
             $this->temporaryModulesPath,
             0755,
@@ -58,6 +59,9 @@ class ModuleFoundationTest extends TestCase
                     'description' => 'NorthPole Santa assistant module.',
                     'provider' => 'Modules\\SantaBuddy\\SantaBuddyServiceProvider',
                     'enabled' => true,
+                    'dependencies' => [
+                        'notifications',
+                    ],
                     'routes' => [
                         'web' => 'routes/web.php',
                         'api' => 'routes/api.php',
@@ -113,7 +117,14 @@ class ModuleFoundationTest extends TestCase
         $this->assertSame('santa-buddy', $module->slug());
         $this->assertSame('1.0.0', $module->version());
         $this->assertTrue($module->enabled());
+
+        $this->assertSame(
+            ['notifications'],
+            $module->dependencies()
+        );
+
         $this->assertSame($modulePath, $module->path());
+
         $this->assertSame(
             $modulePath.DIRECTORY_SEPARATOR.'module.json',
             $module->manifestPath()

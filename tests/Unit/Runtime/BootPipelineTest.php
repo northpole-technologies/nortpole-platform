@@ -1,96 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Runtime;
 
 use Northpole\Runtime\Contracts\BootStageContract;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Lifecycle\BootContext;
 use Northpole\Runtime\Lifecycle\BootPipeline;
+use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Manifest\ManifestLoader;
+use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
 use Northpole\Runtime\Runtime;
 use Tests\TestCase;
 
-class BootPipelineTest extends TestCase
+final class BootPipelineTest extends TestCase
 {
     public function test_pipeline_executes_stages_by_priority_for_enabled_modules(): void
     {
-        $repository = new ModuleRepository();
-
-        $runtime = new Runtime(
-            new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
-                $repository
-            ),
-            $repository,
-            base_path('modules')
-        );
+        $runtime = $this->createRuntime();
 
         $runtime->discover();
 
         $executionLog = [];
 
-        $laterStage = new class($executionLog) implements BootStageContract
-        {
-            /**
-             * @param array<int, string> $executionLog
-             */
-            public function __construct(
-                private array &$executionLog
-            ) {
-            }
+        $laterStage = $this->createStage(
+            name: 'later',
+            priority: 200,
+            executionLog: $executionLog,
+        );
 
-            public function name(): string
-            {
-                return 'later';
-            }
-
-            public function priority(): int
-            {
-                return 200;
-            }
-
-            public function boot(BootContext $context): void
-            {
-                $this->executionLog[] = sprintf(
-                    '%s:%s',
-                    $this->name(),
-                    $context->module()->slug()
-                );
-            }
-        };
-
-        $earlierStage = new class($executionLog) implements BootStageContract
-        {
-            /**
-             * @param array<int, string> $executionLog
-             */
-            public function __construct(
-                private array &$executionLog
-            ) {
-            }
-
-            public function name(): string
-            {
-                return 'earlier';
-            }
-
-            public function priority(): int
-            {
-                return 100;
-            }
-
-            public function boot(BootContext $context): void
-            {
-                $this->executionLog[] = sprintf(
-                    '%s:%s',
-                    $this->name(),
-                    $context->module()->slug()
-                );
-            }
-        };
+        $earlierStage = $this->createStage(
+            name: 'earlier',
+            priority: 100,
+            executionLog: $executionLog,
+        );
 
         $pipeline = new BootPipeline();
 
@@ -100,7 +46,7 @@ class BootPipelineTest extends TestCase
             ->boot($runtime);
 
         $enabledSlugs = array_keys(
-            $runtime->enabledModules()
+            $runtime->enabledModules(),
         );
 
         $expected = [];
@@ -113,15 +59,139 @@ class BootPipelineTest extends TestCase
             $expected[] = "later:{$slug}";
         }
 
-        $this->assertSame(2, $pipeline->count());
+        $this->assertSame(
+            2,
+            $pipeline->count(),
+        );
+
         $this->assertSame(
             ['earlier', 'later'],
             array_map(
                 static fn (BootStageContract $stage): string =>
                     $stage->name(),
-                $pipeline->stages()
+                $pipeline->stages(),
+            ),
+        );
+
+        $this->assertSame(
+            $expected,
+            $executionLog,
+        );
+    }
+
+    public function test_pipeline_uses_the_supplied_stage_registry(): void
+    {
+        $registry = new StageRegistry();
+
+        $pipeline = new BootPipeline($registry);
+
+        $stage = $this->createStage(
+            name: 'config',
+            priority: 50,
+        );
+
+        $pipeline->add($stage);
+
+        $this->assertSame(
+            $registry,
+            $pipeline->registry(),
+        );
+
+        $this->assertTrue(
+            $registry->has('config'),
+        );
+
+        $this->assertSame(
+            $stage,
+            $registry->get('config'),
+        );
+    }
+
+    public function test_pipeline_rejects_duplicate_stage_names(): void
+    {
+        $pipeline = new BootPipeline();
+
+        $pipeline->add(
+            $this->createStage(
+                name: 'config',
+                priority: 50,
             )
         );
-        $this->assertSame($expected, $executionLog);
+
+        $this->expectException(
+            \InvalidArgumentException::class,
+        );
+
+        $this->expectExceptionMessage(
+            'Runtime boot stage [config] is already registered.',
+        );
+
+        $pipeline->add(
+            $this->createStage(
+                name: 'config',
+                priority: 100,
+            )
+        );
+    }
+
+    private function createRuntime(): Runtime
+    {
+        $repository = new ModuleRepository();
+
+        return new Runtime(
+            new ModuleDiscovery(
+                new ModuleFinder(),
+                new ManifestLoader(),
+                $repository,
+            ),
+            $repository,
+            new ModuleDependencyResolver(),
+            base_path('modules'),
+        );
+    }
+
+    /**
+     * @param array<int, string> $executionLog
+     */
+    private function createStage(
+        string $name,
+        int $priority,
+        array &$executionLog = [],
+    ): BootStageContract {
+        return new class(
+            $name,
+            $priority,
+            $executionLog,
+        ) implements BootStageContract
+        {
+            /**
+             * @param array<int, string> $executionLog
+             */
+            public function __construct(
+                private readonly string $stageName,
+                private readonly int $stagePriority,
+                private array &$executionLog,
+            ) {
+            }
+
+            public function name(): string
+            {
+                return $this->stageName;
+            }
+
+            public function priority(): int
+            {
+                return $this->stagePriority;
+            }
+
+            public function boot(BootContext $context): void
+            {
+                $this->executionLog[] = sprintf(
+                    '%s:%s',
+                    $this->name(),
+                    $context->module()->slug(),
+                );
+            }
+        };
     }
 }
