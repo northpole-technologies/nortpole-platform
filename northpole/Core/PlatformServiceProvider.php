@@ -21,12 +21,16 @@ use Northpole\Lifecycle\Stages\ResolveManifestStage;
 use Northpole\Lifecycle\Stages\UninstallStage;
 use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
+use Northpole\Runtime\Commands\ModuleCommandBus;
+use Northpole\Runtime\Commands\ModuleCommandRegistrar;
+use Northpole\Runtime\Commands\ModuleCommandRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Events\ModuleEventBus;
 use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
+use Northpole\Runtime\Lifecycle\CommandHandlerStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
 use Northpole\Runtime\Lifecycle\EventSubscriberStage;
 use Northpole\Runtime\Lifecycle\MigrationStage;
@@ -142,6 +146,42 @@ final class PlatformServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            ModuleCommandRegistry::class,
+            function (): ModuleCommandRegistry {
+                return new ModuleCommandRegistry();
+            },
+        );
+
+        $this->app->singleton(
+            ModuleCommandRegistrar::class,
+            function (
+                Application $application,
+            ): ModuleCommandRegistrar {
+                return new ModuleCommandRegistrar(
+                    $application->make(
+                        ModuleCommandRegistry::class,
+                    ),
+                );
+            },
+        );
+
+        $this->app->singleton(
+            ModuleCommandBus::class,
+            function (Application $application): ModuleCommandBus {
+                return new ModuleCommandBus(
+                    registry: $application->make(
+                        ModuleCommandRegistry::class,
+                    ),
+                    handlerResolver: static function (
+                        string $handler,
+                    ) use ($application): object {
+                        return $application->make($handler);
+                    },
+                );
+            },
+        );
+
+        $this->app->singleton(
             ModuleDiscovery::class,
             function (Application $application): ModuleDiscovery {
                 return new ModuleDiscovery(
@@ -197,6 +237,11 @@ final class PlatformServiceProvider extends ServiceProvider
                     new EventSubscriberStage(
                         $application->make(
                             ModuleEventRegistrar::class,
+                        ),
+                    ),
+                    new CommandHandlerStage(
+                        $application->make(
+                            ModuleCommandRegistrar::class,
                         ),
                     ),
                 ]);

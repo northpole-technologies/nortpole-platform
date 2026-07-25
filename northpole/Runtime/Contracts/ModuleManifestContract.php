@@ -82,6 +82,13 @@ interface ModuleManifestContract
     public function eventSubscribers(): array;
 
     /**
+     * Returns command names mapped to the handler classes owned by this module.
+     *
+     * @return array<string, string>
+     */
+    public function handledCommands(): array;
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array;

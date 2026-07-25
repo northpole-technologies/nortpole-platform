@@ -29,6 +29,7 @@ final class ModuleManifest implements ModuleManifestContract
 
         $this->validateDependencies();
         $this->validateEvents();
+        $this->validateCommands();
     }
 
     private function validateDependencies(): void
@@ -201,6 +202,57 @@ final class ModuleManifest implements ModuleManifestContract
         }
     }
 
+    private function validateCommands(): void
+    {
+        if (! isset($this->data['commands'])) {
+            return;
+        }
+
+        if (! is_array($this->data['commands'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [commands] must be an object'
+            );
+        }
+
+        $this->validateHandledCommands(
+            $this->data['commands']['handles'] ?? []
+        );
+    }
+
+    private function validateHandledCommands(
+        mixed $handledCommands
+    ): void {
+        if (! is_array($handledCommands)) {
+            throw new InvalidArgumentException(
+                'Module manifest field [commands.handles] must be an object'
+            );
+        }
+
+        foreach (
+            $handledCommands as $commandName => $handlerClass
+        ) {
+            if (
+                ! is_string($commandName)
+                || trim($commandName) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest handled command names must be non-empty strings'
+                );
+            }
+
+            if (
+                ! is_string($handlerClass)
+                || trim($handlerClass) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest command [%s] must have a non-empty handler class',
+                        $commandName
+                    )
+                );
+            }
+        }
+    }
     public function name(): string
     {
         return (string) $this->data['name'];
@@ -370,6 +422,25 @@ final class ModuleManifest implements ModuleManifestContract
         return $normalisedSubscribers;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function handledCommands(): array
+    {
+        $handledCommands = $this->data['commands']['handles'] ?? [];
+
+        $normalisedCommands = [];
+
+        foreach (
+            $handledCommands as $commandName => $handlerClass
+        ) {
+            $normalisedCommands[trim($commandName)] = trim(
+                $handlerClass
+            );
+        }
+
+        return $normalisedCommands;
+    }
     /**
      * @return array<string, mixed>
      */
