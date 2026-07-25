@@ -205,3 +205,38 @@ Route::middleware('auth:sanctum')->group(function () {
         PluginController::class
     );
 });
+
+// NorthPole Runtime Metadata API
+Route::prefix('runtime')->group(function (): void {
+    Route::get(
+        '/',
+        [
+            \App\Http\Controllers\Api\RuntimeMetadataController::class,
+            'summary',
+        ],
+    );
+
+    Route::get(
+        '/modules',
+        [
+            \App\Http\Controllers\Api\RuntimeMetadataController::class,
+            'modules',
+        ],
+    );
+
+    Route::get(
+        '/modules/{module}',
+        [
+            \App\Http\Controllers\Api\RuntimeMetadataController::class,
+            'module',
+        ],
+    );
+
+    Route::get(
+        '/graph',
+        [
+            \App\Http\Controllers\Api\RuntimeMetadataController::class,
+            'graph',
+        ],
+    );
+});
