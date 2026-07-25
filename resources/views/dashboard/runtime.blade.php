@@ -300,6 +300,12 @@
             gap: 14px;
         }
 
+        .module-card-link {
+            display: block;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+
         .module-card {
             position: relative;
             overflow: hidden;
@@ -312,6 +318,17 @@
                     rgba(14, 35, 57, 0.96),
                     rgba(9, 25, 43, 0.92)
                 );
+            transition:
+                border-color 160ms ease,
+                transform 160ms ease,
+                box-shadow 160ms ease;
+        }
+
+        .module-card-link:hover .module-card {
+            border-color: rgba(119, 219, 255, 0.35);
+            box-shadow:
+                0 24px 55px rgba(0, 0, 0, 0.26);
+            transform: translateY(-3px);
         }
 
         .module-card::before {
@@ -563,55 +580,65 @@
             @else
                 <div class="modules">
                     @foreach ($modules as $module)
-                        <article
-                            class="module-card
-                                {{ $module['enabled'] ? '' : 'disabled' }}"
+                        <a
+                            class="module-card-link"
+                            href="{{ route(
+                                'control-centre.modules.show',
+                                ['slug' => $module['slug']],
+                            ) }}"
                         >
-                            <div class="module-top">
-                                <div>
-                                    <h3>{{ $module['name'] }}</h3>
+                            <article
+                                class="module-card
+                                    {{ $module['enabled']
+                                        ? ''
+                                        : 'disabled' }}"
+                            >
+                                <div class="module-top">
+                                    <div>
+                                        <h3>{{ $module['name'] }}</h3>
 
-                                    <p class="module-slug">
-                                        {{ $module['slug'] }}
-                                        ·
-                                        v{{ $module['version'] }}
-                                    </p>
+                                        <p class="module-slug">
+                                            {{ $module['slug'] }}
+                                            ·
+                                            v{{ $module['version'] }}
+                                        </p>
+                                    </div>
+
+                                    <span class="badge">
+                                        {{ $module['enabled']
+                                            ? 'Enabled'
+                                            : 'Disabled' }}
+                                    </span>
                                 </div>
 
-                                <span class="badge">
-                                    {{ $module['enabled']
-                                        ? 'Enabled'
-                                        : 'Disabled' }}
-                                </span>
-                            </div>
+                                <p class="module-description">
+                                    {{ $module['description']
+                                        ?? 'No module description provided.' }}
+                                </p>
 
-                            <p class="module-description">
-                                {{ $module['description']
-                                    ?? 'No module description provided.' }}
-                            </p>
+                                <div class="module-meta">
+                                    <span>
+                                        {{ $module['dependencies'] }}
+                                        dependencies
+                                    </span>
 
-                            <div class="module-meta">
-                                <span>
-                                    {{ $module['dependencies'] }}
-                                    dependencies
-                                </span>
+                                    <span>
+                                        {{ $module['commands'] }}
+                                        commands
+                                    </span>
 
-                                <span>
-                                    {{ $module['commands'] }}
-                                    commands
-                                </span>
+                                    <span>
+                                        {{ $module['queries'] }}
+                                        queries
+                                    </span>
 
-                                <span>
-                                    {{ $module['queries'] }}
-                                    queries
-                                </span>
-
-                                <span>
-                                    {{ $module['permissions'] }}
-                                    permissions
-                                </span>
-                            </div>
-                        </article>
+                                    <span>
+                                        {{ $module['permissions'] }}
+                                        permissions
+                                    </span>
+                                </div>
+                            </article>
+                        </a>
                     @endforeach
                 </div>
             @endif
