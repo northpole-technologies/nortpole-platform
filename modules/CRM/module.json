@@ -35,5 +35,15 @@
         "notes",
         "tasks",
         "activities"
-    ]
+    ],
+    "events": {
+        "publishes": [
+            "crm.customer.created"
+        ]
+    },
+    "commands": {
+        "handles": {
+            "crm.customer.create": "Modules\\CRM\\Commands\\CreateCustomerHandler"
+        }
+    }
 }
