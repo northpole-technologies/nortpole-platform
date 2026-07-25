@@ -6,10 +6,13 @@ namespace Tests\Feature\Console;
 
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
+use Northpole\Runtime\Configuration\ModuleConfigurationRegistry;
 use Northpole\Runtime\Events\ModuleEventRegistry;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Manifest\ModuleManifest;
 use Northpole\Runtime\Navigation\NavigationRegistry;
+use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
 use Northpole\Runtime\Runtime;
@@ -17,73 +20,83 @@ use Tests\TestCase;
 
 final class NorthpoleAboutCommandTest extends TestCase
 {
-    public function test_it_displays_northpole_runtime_information(): void
+    public function test_it_displays_northpole_runtime_health(): void
     {
-        $runtime = $this->app->make(
-            Runtime::class,
-        );
-
-        $enabledModuleCount = count(
-            array_filter(
-                $runtime->modules(),
-                static fn (ModuleManifest $module): bool => $module->enabled(),
-            ),
-        );
-
-        $this->artisan('northpole:about')
+        $this->artisan('northpole:doctor')
             ->expectsOutputToContain(
-                'NorthPole Platform',
+                'NorthPole Platform Doctor',
             )
             ->expectsOutputToContain(
-                'Runtime',
+                'Runtime Health',
             )
             ->expectsOutputToContain(
-                'Status: Healthy',
+                'Status: HEALTHY',
             )
             ->expectsOutputToContain(
-                'Modules discovered: '.$runtime->count(),
+                'Platform',
             )
             ->expectsOutputToContain(
-                'Modules enabled: '.$enabledModuleCount,
+                'Environment',
             )
             ->expectsOutputToContain(
-                'Boot stages: '.$this->app
-                    ->make(StageRegistry::class)
-                    ->count(),
+                'Laravel',
             )
             ->expectsOutputToContain(
-                'Capabilities: '.$this->app
-                    ->make(CapabilityRegistry::class)
-                    ->count(),
+                'PHP',
             )
             ->expectsOutputToContain(
-                'Commands: '.$this->app
-                    ->make(ModuleCommandRegistry::class)
-                    ->count(),
+                'Peak memory',
             )
             ->expectsOutputToContain(
-                'Queries: '.$this->app
-                    ->make(ModuleQueryRegistry::class)
-                    ->count(),
+                'Modules',
             )
             ->expectsOutputToContain(
-                'Event listeners: '.$this->app
-                    ->make(ModuleEventRegistry::class)
-                    ->count(),
+                'Discovered',
             )
             ->expectsOutputToContain(
-                'Navigation items: '.$this->app
-                    ->make(NavigationRegistry::class)
-                    ->count(),
+                'Enabled',
             )
             ->expectsOutputToContain(
-                'Permissions: '.$this->app
-                    ->make(PermissionRegistry::class)
-                    ->count(),
+                'Disabled',
+            )
+            ->expectsOutputToContain(
+                'Runtime Registries',
+            )
+            ->expectsOutputToContain(
+                'Boot stages',
+            )
+            ->expectsOutputToContain(
+                'Capabilities',
+            )
+            ->expectsOutputToContain(
+                'Commands',
+            )
+            ->expectsOutputToContain(
+                'Queries',
+            )
+            ->expectsOutputToContain(
+                'Event listeners',
+            )
+            ->expectsOutputToContain(
+                'Navigation items',
+            )
+            ->expectsOutputToContain(
+                'Permissions',
+            )
+            ->expectsOutputToContain(
+                'Configuration',
+            )
+            ->expectsOutputToContain(
+                'Notifications',
+            )
+            ->expectsOutputToContain(
+                'Scheduled jobs',
+            )
+            ->expectsOutputToContain(
+                'Overall status: HEALTHY',
             )
             ->assertSuccessful();
     }
-
     public function test_it_displays_discovered_modules(): void
     {
         $runtime = $this->app->make(
@@ -91,27 +104,31 @@ final class NorthpoleAboutCommandTest extends TestCase
         );
 
         $command = $this->artisan(
-            'northpole:about',
+            'northpole:doctor',
         );
 
         $command->expectsOutputToContain(
-            'Modules',
+            'Discovered Modules',
         );
 
         foreach ($runtime->modules() as $module) {
             $command->expectsOutputToContain(
-                sprintf(
-                    '%s | Slug: %s | Version: %s | Status: %s',
-                    $module->name(),
-                    $module->slug(),
-                    $module->version(),
-                    $module->enabled()
-                        ? 'Enabled'
-                        : 'Disabled',
-                ),
+                $module->name(),
             );
         }
 
         $command->assertSuccessful();
+    }
+
+    public function test_about_remains_an_alias_for_doctor(): void
+    {
+        $this->artisan('northpole:about')
+            ->expectsOutputToContain(
+                'NorthPole Platform Doctor',
+            )
+            ->expectsOutputToContain(
+                'Overall status: HEALTHY',
+            )
+            ->assertSuccessful();
     }
 }
