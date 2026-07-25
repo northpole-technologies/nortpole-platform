@@ -99,6 +99,27 @@
             font-size: 13px;
         }
 
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .graph-link {
+            padding: 8px 14px;
+            border: 1px solid rgba(119,219,255,.25);
+            border-radius: 999px;
+            background: rgba(13,28,46,.72);
+            color: #b8cde2;
+            text-decoration: none;
+            font-size: 12px;
+            transition: .15s ease;
+        }
+
+        .graph-link:hover {
+            border-color: rgba(119,219,255,.55);
+        }
+
         .environment {
             padding: 8px 12px;
             border: 1px solid rgba(160, 181, 207, 0.18);
@@ -478,8 +499,17 @@
                 </div>
             </div>
 
-            <div class="environment">
-                {{ $environment }}
+            <div class="topbar-actions">
+                <a
+                    class="graph-link"
+                    href="{{ route('control-centre.runtime.graph') }}"
+                >
+                    Dependency Graph
+                </a>
+
+                <div class="environment">
+                    {{ $environment }}
+                </div>
             </div>
         </header>
 
