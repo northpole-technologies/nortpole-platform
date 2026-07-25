@@ -9,11 +9,14 @@ use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Commands\ModuleCommandBus;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
+use Northpole\Runtime\Configuration\ModuleConfigurationRegistrar;
+use Northpole\Runtime\Configuration\ModuleConfigurationRegistry;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Events\ModuleEventBus;
 use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
+use Northpole\Runtime\Lifecycle\ConfigurationStage;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\CommandHandlerStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
@@ -71,6 +74,10 @@ final class RuntimeServiceRegistrar
         );
 
         $this->registerQueries(
+            $application
+        );
+
+        $this->registerConfiguration(
             $application
         );
 
@@ -327,6 +334,29 @@ final class RuntimeServiceRegistrar
         );
     }
 
+    private function registerConfiguration(
+        Application $application
+    ): void {
+        $application->singleton(
+            ModuleConfigurationRegistry::class,
+            function (): ModuleConfigurationRegistry {
+                return new ModuleConfigurationRegistry;
+            },
+        );
+
+        $application->singleton(
+            ModuleConfigurationRegistrar::class,
+            function (
+                Application $application
+            ): ModuleConfigurationRegistrar {
+                return new ModuleConfigurationRegistrar(
+                    $application->make(
+                        ModuleConfigurationRegistry::class
+                    ),
+                );
+            },
+        );
+    }
     private function registerNotifications(
         Application $application
     ): void {
@@ -462,6 +492,11 @@ final class RuntimeServiceRegistrar
                         new EventSubscriberStage(
                             $application->make(
                                 ModuleEventRegistrar::class
+                            ),
+                        ),
+                        new ConfigurationStage(
+                            $application->make(
+                                ModuleConfigurationRegistrar::class
                             ),
                         ),
                         new NotificationStage(

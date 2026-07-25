@@ -7,6 +7,8 @@ namespace Tests\Feature\Runtime;
 use Northpole\Runtime\Commands\ModuleCommandBus;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
+use Northpole\Runtime\Configuration\ModuleConfigurationRegistrar;
+use Northpole\Runtime\Configuration\ModuleConfigurationRegistry;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
@@ -66,6 +68,7 @@ final class RuntimeKernelTest extends TestCase
                 'permissions',
                 'navigation',
                 'event-subscribers',
+                'configuration-schema',
                 'notifications',
                 'scheduled-jobs',
                 'command-handlers',
@@ -78,7 +81,7 @@ final class RuntimeKernelTest extends TestCase
         );
 
         $this->assertSame(
-            13,
+            14,
             $registry->count(),
         );
     }
@@ -187,6 +190,38 @@ final class RuntimeKernelTest extends TestCase
 
         $registrar = $this->app->make(
             ModuleScheduledJobRegistrar::class,
+        );
+
+        $this->assertSame(
+            $registry,
+            $registrar->registry(),
+        );
+    }
+
+    public function test_configuration_registry_is_a_singleton(): void
+    {
+        $first = $this->app->make(
+            ModuleConfigurationRegistry::class,
+        );
+
+        $second = $this->app->make(
+            ModuleConfigurationRegistry::class,
+        );
+
+        $this->assertSame(
+            $first,
+            $second,
+        );
+    }
+
+    public function test_configuration_registrar_uses_the_application_registry(): void
+    {
+        $registry = $this->app->make(
+            ModuleConfigurationRegistry::class,
+        );
+
+        $registrar = $this->app->make(
+            ModuleConfigurationRegistrar::class,
         );
 
         $this->assertSame(

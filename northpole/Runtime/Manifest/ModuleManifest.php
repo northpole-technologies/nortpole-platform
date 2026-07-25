@@ -31,6 +31,7 @@ final class ModuleManifest implements ModuleManifestContract
         $this->validateDependencies();
         $this->validateEvents();
         $this->validateNotifications();
+        $this->validateSettings();
         $this->validateCommands();
         $this->validateQueries();
         $this->validateJobs();
@@ -400,6 +401,273 @@ final class ModuleManifest implements ModuleManifestContract
         }
     }
 
+    private function validateSettings(): void
+    {
+        if (! isset($this->data['settings'])) {
+            return;
+        }
+
+        if (
+            ! is_array($this->data['settings'])
+            || ! array_is_list($this->data['settings'])
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [settings] must be a list'
+            );
+        }
+
+        foreach ($this->data['settings'] as $index => $setting) {
+            if (! is_array($setting)) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest setting [%d] must be an object',
+                        $index
+                    )
+                );
+            }
+
+            $this->validateSettingStringField(
+                $setting,
+                $index,
+                'key'
+            );
+
+            $this->validateSettingStringField(
+                $setting,
+                $index,
+                'type'
+            );
+
+            $this->validateSettingType(
+                $setting,
+                $index
+            );
+
+            $this->validateOptionalSettingStringField(
+                $setting,
+                $index,
+                'label'
+            );
+
+            $this->validateOptionalSettingStringField(
+                $setting,
+                $index,
+                'description'
+            );
+
+            $this->validateSettingOptions(
+                $setting,
+                $index
+            );
+
+            $this->validateSettingDefault(
+                $setting,
+                $index
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $setting
+     */
+    private function validateSettingStringField(
+        array $setting,
+        int $index,
+        string $field
+    ): void {
+        $value = $setting[$field] ?? null;
+
+        if (
+            ! is_string($value)
+            || trim($value) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] must define a non-empty %s',
+                    $index,
+                    $field
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $setting
+     */
+    private function validateOptionalSettingStringField(
+        array $setting,
+        int $index,
+        string $field
+    ): void {
+        if (! array_key_exists($field, $setting)) {
+            return;
+        }
+
+        if (
+            ! is_string($setting[$field])
+            || trim($setting[$field]) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] field [%s] must be a non-empty string',
+                    $index,
+                    $field
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $setting
+     */
+    private function validateSettingType(
+        array $setting,
+        int $index
+    ): void {
+        $type = strtolower(
+            trim((string) ($setting['type'] ?? ''))
+        );
+
+        $supportedTypes = [
+            'boolean',
+            'date',
+            'float',
+            'integer',
+            'json',
+            'password',
+            'select',
+            'string',
+            'textarea',
+        ];
+
+        if (! in_array($type, $supportedTypes, true)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] has unsupported type [%s]',
+                    $index,
+                    $type
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $setting
+     */
+    private function validateSettingOptions(
+        array $setting,
+        int $index
+    ): void {
+        $type = strtolower(
+            trim((string) ($setting['type'] ?? ''))
+        );
+
+        if (! array_key_exists('options', $setting)) {
+            if ($type === 'select') {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest setting [%d] of type [select] must define options',
+                        $index
+                    )
+                );
+            }
+
+            return;
+        }
+
+        $options = $setting['options'];
+
+        if (
+            ! is_array($options)
+            || ! array_is_list($options)
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] field [options] must be a list',
+                    $index
+                )
+            );
+        }
+
+        if ($type === 'select' && $options === []) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] of type [select] must define at least one option',
+                    $index
+                )
+            );
+        }
+
+        foreach ($options as $option) {
+            if (
+                ! is_string($option)
+                || trim($option) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest setting [%d] field [options] must contain non-empty strings',
+                        $index
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $setting
+     */
+    private function validateSettingDefault(
+        array $setting,
+        int $index
+    ): void {
+        if (! array_key_exists('default', $setting)) {
+            return;
+        }
+
+        $default = $setting['default'];
+        $type = strtolower(
+            trim((string) ($setting['type'] ?? ''))
+        );
+
+        $valid = match ($type) {
+            'boolean' => is_bool($default),
+            'integer' => is_int($default),
+            'float' => is_float($default) || is_int($default),
+            'json' => is_array($default),
+            'select' => is_string($default),
+            'date',
+            'password',
+            'string',
+            'textarea' => is_string($default),
+            default => false,
+        };
+
+        if (! $valid) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] default value does not match type [%s]',
+                    $index,
+                    $type
+                )
+            );
+        }
+
+        if (
+            $type === 'select'
+            && ! in_array(
+                $default,
+                $setting['options'] ?? [],
+                true
+            )
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest setting [%d] default value must exist in its options',
+                    $index
+                )
+            );
+        }
+    }
     private function validateCommands(): void
     {
         if (! isset($this->data['commands'])) {
@@ -863,6 +1131,60 @@ final class ModuleManifest implements ModuleManifestContract
     /**
      * @return array<int, string>
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function settings(): array
+    {
+        $settings = $this->data['settings'] ?? [];
+        $normalisedSettings = [];
+
+        foreach ($settings as $setting) {
+            $normalisedSetting = [
+                'key' => trim($setting['key']),
+                'type' => strtolower(
+                    trim($setting['type'])
+                ),
+            ];
+
+            if (array_key_exists('label', $setting)) {
+                $normalisedSetting['label'] = trim(
+                    $setting['label']
+                );
+            }
+
+            if (array_key_exists('description', $setting)) {
+                $normalisedSetting['description'] = trim(
+                    $setting['description']
+                );
+            }
+
+            if (array_key_exists('default', $setting)) {
+                $normalisedSetting['default'] =
+                    $setting['default'];
+            }
+
+            if (array_key_exists('options', $setting)) {
+                $normalisedOptions = [];
+
+                foreach ($setting['options'] as $option) {
+                    $normalisedOption = trim($option);
+
+                    $normalisedOptions[
+                        $normalisedOption
+                    ] = $normalisedOption;
+                }
+
+                $normalisedSetting['options'] = array_values(
+                    $normalisedOptions
+                );
+            }
+
+            $normalisedSettings[] = $normalisedSetting;
+        }
+
+        return $normalisedSettings;
+    }
     public function permissions(): array
     {
         return $this->data['permissions'] ?? [];

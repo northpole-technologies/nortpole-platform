@@ -67,6 +67,11 @@ interface ModuleManifestContract
     /**
      * @return array<int, string>
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function settings(): array;
+
     public function permissions(): array;
 
     /**
