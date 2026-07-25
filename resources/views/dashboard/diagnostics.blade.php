@@ -474,6 +474,143 @@
             overflow-wrap: anywhere;
         }
 
+        .repair-overview {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .repair-stat {
+            min-height: 112px;
+            padding: 18px;
+            border: 1px solid rgba(154, 184, 218, 0.12);
+            border-radius: 18px;
+            background: rgba(11, 31, 51, 0.66);
+        }
+
+        .repair-stat span {
+            display: block;
+            color: #849ab2;
+            font-size: 12px;
+        }
+
+        .repair-stat strong {
+            display: block;
+            margin-top: 16px;
+            font-size: 28px;
+            letter-spacing: -0.05em;
+        }
+
+        .repair-stat.status-clear {
+            border-color: rgba(49, 215, 162, 0.26);
+            background: rgba(49, 215, 162, 0.07);
+        }
+
+        .repair-stat.status-clear strong {
+            color: #67e3bd;
+        }
+
+        .repair-stat.status-recommended {
+            border-color: rgba(255, 183, 96, 0.28);
+            background: rgba(255, 183, 96, 0.07);
+        }
+
+        .repair-stat.status-recommended strong {
+            color: #ffc980;
+        }
+
+        .repair-recommendations {
+            display: grid;
+            gap: 14px;
+        }
+
+        .repair-recommendation {
+            padding: 20px;
+            border: 1px solid rgba(119, 219, 255, 0.2);
+            border-radius: 18px;
+            background: rgba(119, 219, 255, 0.05);
+        }
+
+        .repair-recommendation.severity-error {
+            border-color: rgba(239, 106, 117, 0.28);
+            background: rgba(239, 106, 117, 0.07);
+        }
+
+        .repair-recommendation.severity-warning {
+            border-color: rgba(255, 183, 96, 0.28);
+            background: rgba(255, 183, 96, 0.07);
+        }
+
+        .repair-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .repair-header strong {
+            color: #dce8f5;
+            font-size: 15px;
+        }
+
+        .repair-header span {
+            flex: 0 0 auto;
+            color: #8197af;
+            font-size: 11px;
+        }
+
+        .repair-recommendation > p {
+            margin: 12px 0 0;
+            color: #a9b9ca;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .repair-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .repair-action {
+            padding: 14px;
+            border: 1px solid rgba(151, 177, 206, 0.12);
+            border-radius: 14px;
+            background: rgba(7, 17, 31, 0.42);
+        }
+
+        .repair-action strong {
+            display: block;
+            color: #9fdff4;
+            font-size: 12px;
+        }
+
+        .repair-action span {
+            display: block;
+            margin-top: 4px;
+            color: #7189a2;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .repair-action pre {
+            margin: 10px 0 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            color: #b9c9d9;
+            font-family:
+                "SFMono-Regular",
+                Consolas,
+                "Liberation Mono",
+                monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
         .footer {
             display: flex;
             justify-content: space-between;
@@ -493,6 +630,11 @@
             }
 
             .validation-overview {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+            }
+
+            .repair-overview {
                 grid-template-columns:
                     repeat(3, minmax(0, 1fr));
             }
@@ -517,7 +659,8 @@
 
             .summary,
             .registries,
-            .validation-overview {
+            .validation-overview,
+            .repair-overview {
                 grid-template-columns: 1fr;
             }
 
@@ -764,6 +907,112 @@
                                         </div>
                                     @endforeach
                                 </dl>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+
+        <section class="panel section">
+            <div class="section-header">
+                <h2>Automatic repair recommendations</h2>
+
+                <p>
+                    Suggested actions generated from current runtime
+                    validation issues.
+                </p>
+            </div>
+
+            <div class="repair-overview">
+                <article
+                    class="repair-stat status-{{ $repairSummary['status'] }}"
+                >
+                    <span>Repair status</span>
+
+                    <strong>
+                        {{ strtoupper($repairSummary['status']) }}
+                    </strong>
+                </article>
+
+                <article class="repair-stat">
+                    <span>Recommendations</span>
+
+                    <strong>
+                        {{ $repairSummary['recommendations'] }}
+                    </strong>
+                </article>
+
+                <article class="repair-stat">
+                    <span>Repair providers</span>
+
+                    <strong>
+                        {{ $repairSummary['providers'] }}
+                    </strong>
+                </article>
+            </div>
+
+            @if ($repairRecommendations === [])
+                <div class="clear">
+                    <strong>No repairs currently required</strong>
+
+                    <p>
+                        The repair engine found no supported validation
+                        issues requiring corrective action.
+                    </p>
+                </div>
+            @else
+                <div class="repair-recommendations">
+                    @foreach (
+                        $repairRecommendations
+                        as $recommendation
+                    )
+                        <article
+                            class="repair-recommendation severity-{{ $recommendation['severity'] }}"
+                        >
+                            <div class="repair-header">
+                                <strong>
+                                    {{ $recommendation['title'] }}
+                                </strong>
+
+                                <span>
+                                    {{ $recommendation['code'] }}
+
+                                    @if (
+                                        $recommendation['module']
+                                        !== null
+                                    )
+                                        · {{ $recommendation['module'] }}
+                                    @endif
+                                </span>
+                            </div>
+
+                            <p>
+                                {{ $recommendation['description'] }}
+                            </p>
+
+                            @if (
+                                $recommendation['actions']
+                                !== []
+                            )
+                                <div class="repair-actions">
+                                    @foreach (
+                                        $recommendation['actions']
+                                        as $action
+                                    )
+                                        <article class="repair-action">
+                                            <strong>
+                                                {{ $action['label'] }}
+                                            </strong>
+
+                                            <span>
+                                                {{ $action['type'] }}
+                                            </span>
+
+                                            <pre>{{ $action['content'] }}</pre>
+                                        </article>
+                                    @endforeach
+                                </div>
                             @endif
                         </article>
                     @endforeach

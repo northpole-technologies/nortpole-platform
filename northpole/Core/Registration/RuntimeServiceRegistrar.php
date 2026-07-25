@@ -49,6 +49,9 @@ use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryBus;
 use Northpole\Runtime\Queries\ModuleQueryRegistrar;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
+use Northpole\Runtime\Repair\Providers\CommandRepairProvider;
+use Northpole\Runtime\Repair\Providers\QueryRepairProvider;
+use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Roles\RoleDefinitionRegistry;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
@@ -103,6 +106,10 @@ final class RuntimeServiceRegistrar
         );
 
         $this->registerRuntimeValidation(
+            $application
+        );
+
+        $this->registerRuntimeRepair(
             $application
         );
 
@@ -516,6 +523,21 @@ final class RuntimeServiceRegistrar
                                 ModuleQueryRegistry::class
                             ),
                         ),
+                    ]);
+            },
+        );
+    }
+
+    private function registerRuntimeRepair(
+        Application $application
+    ): void {
+        $application->singleton(
+            RuntimeRepairEngine::class,
+            function (): RuntimeRepairEngine {
+                return (new RuntimeRepairEngine)
+                    ->registerProviders([
+                        new CommandRepairProvider,
+                        new QueryRepairProvider,
                     ]);
             },
         );

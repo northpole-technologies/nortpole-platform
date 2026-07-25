@@ -18,6 +18,7 @@ use Northpole\Runtime\Navigation\NavigationRegistry;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
+use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Validation\RuntimeValidationEngine;
 
 final class RuntimeDiagnosticsController extends Controller
@@ -25,6 +26,7 @@ final class RuntimeDiagnosticsController extends Controller
     public function __construct(
         private readonly RuntimeHealthService $runtimeHealthService,
         private readonly RuntimeValidationEngine $validationEngine,
+        private readonly RuntimeRepairEngine $repairEngine,
         private readonly StageRegistry $stageRegistry,
         private readonly CapabilityRegistry $capabilityRegistry,
         private readonly ModuleCommandRegistry $commandRegistry,
@@ -41,6 +43,9 @@ final class RuntimeDiagnosticsController extends Controller
     {
         $runtimeHealth = $this->runtimeHealthService->report();
         $validationResult = $this->validationEngine->validate();
+        $repairResult = $this->repairEngine->recommend(
+            $validationResult,
+        );
 
         $moduleIssues = [];
 
@@ -120,6 +125,15 @@ final class RuntimeDiagnosticsController extends Controller
                 'runtimeHealth' => $runtimeHealth,
                 'validationResult' => $validationResult,
                 'validationIssues' => $validationResult->toArray(),
+                'repairResult' => $repairResult,
+                'repairRecommendations' => $repairResult->toArray(),
+                'repairSummary' => [
+                    'status' => $repairResult->isEmpty()
+                        ? 'clear'
+                        : 'recommended',
+                    'recommendations' => $repairResult->count(),
+                    'providers' => $this->repairEngine->providerCount(),
+                ],
                 'validationSummary' => [
                     'status' => $validationResult->passes()
                         ? 'passed'

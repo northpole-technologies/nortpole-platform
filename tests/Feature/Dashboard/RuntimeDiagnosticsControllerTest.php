@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Dashboard;
 
+use Northpole\Runtime\Repair\RepairResult;
 use Northpole\Runtime\Validation\ValidationResult;
 use Tests\TestCase;
 
@@ -20,6 +21,9 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertViewHas('validationResult')
             ->assertViewHas('validationSummary')
             ->assertViewHas('validationIssues')
+            ->assertViewHas('repairResult')
+            ->assertViewHas('repairSummary')
+            ->assertViewHas('repairRecommendations')
             ->assertViewHas('summary')
             ->assertViewHas('registryCounts')
             ->assertViewHas('moduleIssues')
@@ -27,6 +31,9 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertSee('Runtime validation')
             ->assertSee('Validation status')
             ->assertSee('Rules executed')
+            ->assertSee('Automatic repair recommendations')
+            ->assertSee('Repair status')
+            ->assertSee('Repair providers')
             ->assertSee('Registry statistics')
             ->assertSee('Module diagnostic issues');
     }
@@ -82,6 +89,44 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertViewHas(
                 'validationIssues',
                 static fn (mixed $issues): bool => is_array($issues),
+            );
+    }
+
+    public function test_runtime_diagnostics_receives_repair_data(): void
+    {
+        $this->get(
+            route('control-centre.runtime.diagnostics'),
+        )
+            ->assertOk()
+            ->assertViewHas(
+                'repairResult',
+                static fn (mixed $result): bool =>
+                    $result instanceof RepairResult,
+            )
+            ->assertViewHas(
+                'repairSummary',
+                static fn (mixed $summary): bool =>
+                    is_array($summary)
+                    && array_key_exists('status', $summary)
+                    && array_key_exists(
+                        'recommendations',
+                        $summary,
+                    )
+                    && array_key_exists('providers', $summary)
+                    && in_array(
+                        $summary['status'],
+                        [
+                            'clear',
+                            'recommended',
+                        ],
+                        true,
+                    )
+                    && $summary['providers'] === 2,
+            )
+            ->assertViewHas(
+                'repairRecommendations',
+                static fn (mixed $recommendations): bool =>
+                    is_array($recommendations),
             );
     }
 
