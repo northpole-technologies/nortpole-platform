@@ -125,4 +125,3 @@ final class RuntimeKernelTest extends TestCase
         );
     }
 }
-

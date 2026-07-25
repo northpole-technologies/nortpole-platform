@@ -15,7 +15,7 @@ final class ModuleEventRegistry
     private array $listeners = [];
 
     /**
-     * @param class-string<ModuleEventListenerContract> $listener
+     * @param  class-string<ModuleEventListenerContract>  $listener
      */
     public function listen(
         string $eventName,
@@ -136,7 +136,7 @@ final class ModuleEventRegistry
         string $listener,
     ): string {
         return strtolower(
-            $module . ':' . $listener,
+            $module.':'.$listener,
         );
     }
 }

@@ -21,7 +21,7 @@ final class NavigationStageTest extends TestCase
 {
     public function test_it_registers_module_navigation(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $stage = new NavigationStage($registry);
 
@@ -62,7 +62,7 @@ final class NavigationStageTest extends TestCase
 
     public function test_it_registers_multiple_navigation_items(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $stage = new NavigationStage($registry);
 
@@ -92,8 +92,7 @@ final class NavigationStageTest extends TestCase
                 'Customers',
             ],
             array_map(
-                static fn ($item): string =>
-                    $item->label(),
+                static fn ($item): string => $item->label(),
                 $registry->all()
             )
         );
@@ -101,7 +100,7 @@ final class NavigationStageTest extends TestCase
 
     public function test_it_skips_modules_without_navigation(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $stage = new NavigationStage($registry);
 
@@ -118,7 +117,7 @@ final class NavigationStageTest extends TestCase
 
     public function test_it_rejects_non_object_navigation_entries(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $stage = new NavigationStage($registry);
 
@@ -141,7 +140,7 @@ final class NavigationStageTest extends TestCase
     }
 
     /**
-     * @param array<int, mixed> $navigation
+     * @param  array<int, mixed>  $navigation
      */
     private function createManifestMock(
         array $navigation
@@ -164,16 +163,16 @@ final class NavigationStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules')
         );
     }

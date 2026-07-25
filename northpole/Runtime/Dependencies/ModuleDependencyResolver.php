@@ -10,8 +10,7 @@ final class ModuleDependencyResolver
 {
     public function __construct(
         private readonly ModuleRepository $repository
-    ) {
-    }
+    ) {}
 
     /**
      * Resolve all enabled modules into dependency-safe boot order.
@@ -42,10 +41,10 @@ final class ModuleDependencyResolver
     }
 
     /**
-     * @param array<string, ModuleManifest> $resolved
-     * @param array<string, bool> $visiting
-     * @param array<string, bool> $visited
-     * @param array<int, string> $path
+     * @param  array<string, ModuleManifest>  $resolved
+     * @param  array<string, bool>  $visiting
+     * @param  array<string, bool>  $visited
+     * @param  array<int, string>  $path
      */
     private function visit(
         ModuleManifest $module,

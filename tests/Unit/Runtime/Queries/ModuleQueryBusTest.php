@@ -20,7 +20,7 @@ final class ModuleQueryBusTest extends TestCase
     {
         RecordingModuleQueryHandler::reset();
 
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'crm.customer.find',
@@ -30,7 +30,7 @@ final class ModuleQueryBusTest extends TestCase
 
         $bus = new ModuleQueryBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         $query = new ModuleQuery(
@@ -70,7 +70,7 @@ final class ModuleQueryBusTest extends TestCase
 
     public function test_it_returns_the_handler_result(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'inventory.stock.available',
@@ -80,7 +80,7 @@ final class ModuleQueryBusTest extends TestCase
 
         $bus = new ModuleQueryBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         $result = $bus->execute(
@@ -105,8 +105,8 @@ final class ModuleQueryBusTest extends TestCase
     public function test_it_rejects_a_query_without_a_registered_handler(): void
     {
         $bus = new ModuleQueryBus(
-            new ModuleQueryRegistry(),
-            static fn (string $handler): object => new $handler(),
+            new ModuleQueryRegistry,
+            static fn (string $handler): object => new $handler,
         );
 
         $this->expectException(
@@ -127,7 +127,7 @@ final class ModuleQueryBusTest extends TestCase
 
     public function test_it_rejects_a_resolved_handler_with_the_wrong_contract(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'crm.customer.find',
@@ -137,7 +137,7 @@ final class ModuleQueryBusTest extends TestCase
 
         $bus = new ModuleQueryBus(
             $registry,
-            static fn (): object => new \stdClass(),
+            static fn (): object => new \stdClass,
         );
 
         $this->expectException(
@@ -263,11 +263,11 @@ final class ModuleQueryBusTest extends TestCase
 
     public function test_it_exposes_the_query_registry(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $bus = new ModuleQueryBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         self::assertSame(

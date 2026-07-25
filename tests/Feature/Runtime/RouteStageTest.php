@@ -186,16 +186,16 @@ final class RouteStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules')
         );
     }

@@ -11,8 +11,7 @@ final class QueryHandlerStage implements BootStageContract
 {
     public function __construct(
         private readonly ModuleQueryRegistrar $registrar,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

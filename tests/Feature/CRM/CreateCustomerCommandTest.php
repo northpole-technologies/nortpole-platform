@@ -21,6 +21,7 @@ use Tests\TestCase;
 final class CreateCustomerCommandTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_the_runtime_creates_a_tenant_customer_and_publishes_an_event(): void
     {
         RecordingCustomerCreatedListener::reset();
@@ -248,8 +249,7 @@ final class CreateCustomerCommandTest extends TestCase
     }
 }
 
-final class RecordingCustomerCreatedListener implements
-    ModuleEventListenerContract
+final class RecordingCustomerCreatedListener implements ModuleEventListenerContract
 {
     /**
      * @var array<int, ModuleEventContract>

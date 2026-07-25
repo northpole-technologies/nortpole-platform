@@ -12,8 +12,7 @@ final class LifecyclePipeline
     public function __construct(
         private readonly LifecycleStageRegistry $registry,
         private readonly ConnectionInterface $database,
-    ) {
-    }
+    ) {}
 
     public function add(
         LifecycleStageContract $stage
@@ -24,7 +23,7 @@ final class LifecyclePipeline
     }
 
     /**
-     * @param iterable<int, LifecycleStageContract> $stages
+     * @param  iterable<int, LifecycleStageContract>  $stages
      */
     public function addMany(
         iterable $stages
@@ -42,8 +41,7 @@ final class LifecyclePipeline
                 $context
             ): LifecycleContext {
                 foreach (
-                    $this->registry->sorted()
-                    as $stage
+                    $this->registry->sorted() as $stage
                 ) {
                     if (! $stage->supports($context)) {
                         continue;

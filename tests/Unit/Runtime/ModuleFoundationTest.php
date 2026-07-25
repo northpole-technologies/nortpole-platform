@@ -90,9 +90,9 @@ class ModuleFoundationTest extends TestCase
             )
         );
 
-        $finder = new ModuleFinder();
-        $loader = new ManifestLoader();
-        $repository = new ModuleRepository();
+        $finder = new ModuleFinder;
+        $loader = new ManifestLoader;
+        $repository = new ModuleRepository;
 
         $moduleDirectories = $finder->find(
             $this->temporaryModulesPath

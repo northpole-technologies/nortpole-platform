@@ -9,8 +9,7 @@ final class MigrationStage implements BootStageContract
 {
     public function __construct(
         private readonly ApplicationAdapter $application,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

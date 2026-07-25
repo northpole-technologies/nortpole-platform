@@ -20,7 +20,7 @@ final class ModuleCommandRegistry
     private array $owners = [];
 
     /**
-     * @param class-string<ModuleCommandHandlerContract> $handler
+     * @param  class-string<ModuleCommandHandlerContract>  $handler
      */
     public function register(
         string $commandName,

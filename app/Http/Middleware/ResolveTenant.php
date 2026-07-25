@@ -13,8 +13,7 @@ class ResolveTenant
 {
     public function __construct(
         private readonly TenantContext $tenantContext
-    ) {
-    }
+    ) {}
 
     public function handle(
         Request $request,

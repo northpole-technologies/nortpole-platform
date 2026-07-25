@@ -186,7 +186,7 @@ final class ModuleManifestCommandsTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $overrides
+     * @param  array<string, mixed>  $overrides
      */
     private function manifest(
         array $overrides = [],

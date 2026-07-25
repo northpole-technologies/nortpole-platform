@@ -13,7 +13,7 @@ final class PermissionRegistryTest extends TestCase
 {
     public function test_it_stores_permissions(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $permission = new Permission(
             moduleSlug: 'crm',
@@ -34,7 +34,7 @@ final class PermissionRegistryTest extends TestCase
 
     public function test_it_orders_permissions_by_name(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $registry->addMany([
             new Permission(
@@ -58,8 +58,7 @@ final class PermissionRegistryTest extends TestCase
                 'crm.customers.view',
             ],
             array_map(
-                static fn (Permission $permission): string =>
-                    $permission->name(),
+                static fn (Permission $permission): string => $permission->name(),
                 $registry->all()
             )
         );
@@ -67,7 +66,7 @@ final class PermissionRegistryTest extends TestCase
 
     public function test_it_filters_permissions_by_module(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $registry->addMany([
             new Permission(
@@ -91,7 +90,7 @@ final class PermissionRegistryTest extends TestCase
 
     public function test_adding_the_same_permission_replaces_it(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $first = new Permission(
             moduleSlug: 'crm',
@@ -120,7 +119,7 @@ final class PermissionRegistryTest extends TestCase
 
     public function test_it_can_be_cleared(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $registry->add(
             new Permission(

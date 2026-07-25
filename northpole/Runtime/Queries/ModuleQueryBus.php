@@ -12,13 +12,12 @@ use Northpole\Runtime\Queries\Contracts\ModuleQueryHandlerContract;
 final class ModuleQueryBus
 {
     /**
-     * @param Closure(class-string): object $handlerResolver
+     * @param  Closure(class-string): object  $handlerResolver
      */
     public function __construct(
         private readonly ModuleQueryRegistry $registry,
         private readonly Closure $handlerResolver,
-    ) {
-    }
+    ) {}
 
     public function execute(
         ModuleQueryContract $query,

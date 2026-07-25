@@ -13,8 +13,8 @@ final class ModuleEvent implements ModuleEventContract
     private readonly DateTimeImmutable $occurredAt;
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $metadata
      */
     public function __construct(
         private readonly string $name,
@@ -24,7 +24,7 @@ final class ModuleEvent implements ModuleEventContract
         ?DateTimeImmutable $occurredAt = null,
     ) {
         $this->occurredAt = $occurredAt
-            ?? new DateTimeImmutable();
+            ?? new DateTimeImmutable;
 
         $this->validate();
     }

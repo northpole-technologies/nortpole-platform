@@ -13,8 +13,7 @@ final class PermissionStage implements BootStageContract
 {
     public function __construct(
         private readonly PermissionRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

@@ -22,7 +22,7 @@ final class QueryHandlerStageTest extends TestCase
 {
     public function test_it_registers_module_query_handlers(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -67,7 +67,7 @@ final class QueryHandlerStageTest extends TestCase
 
     public function test_it_skips_modules_without_query_handlers(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -93,7 +93,7 @@ final class QueryHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_module_slugs(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -125,7 +125,7 @@ final class QueryHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_query_names(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -151,7 +151,7 @@ final class QueryHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_handler_class_names(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -177,7 +177,7 @@ final class QueryHandlerStageTest extends TestCase
 
     public function test_it_rejects_duplicate_query_handler_registrations(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar($registry),
@@ -203,7 +203,7 @@ final class QueryHandlerStageTest extends TestCase
     {
         $stage = new QueryHandlerStage(
             new ModuleQueryRegistrar(
-                new ModuleQueryRegistry(),
+                new ModuleQueryRegistry,
             ),
         );
 
@@ -219,7 +219,7 @@ final class QueryHandlerStageTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $handledQueries
+     * @param  array<string, string>  $handledQueries
      */
     private function createManifestMock(
         array $handledQueries,
@@ -241,25 +241,21 @@ final class QueryHandlerStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository,
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules'),
         );
     }
 }
 
-final class FindCustomerHandler
-{
-}
+final class FindCustomerHandler {}
 
-final class ListCustomersHandler
-{
-}
+final class ListCustomersHandler {}

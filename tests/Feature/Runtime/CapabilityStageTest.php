@@ -21,7 +21,7 @@ final class CapabilityStageTest extends TestCase
 {
     public function test_it_registers_module_capabilities(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $stage = new CapabilityStage($registry);
 
@@ -62,7 +62,7 @@ final class CapabilityStageTest extends TestCase
 
     public function test_it_skips_modules_without_capabilities(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $stage = new CapabilityStage($registry);
 
@@ -79,7 +79,7 @@ final class CapabilityStageTest extends TestCase
 
     public function test_it_rejects_non_string_capabilities(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $stage = new CapabilityStage($registry);
 
@@ -103,7 +103,7 @@ final class CapabilityStageTest extends TestCase
 
     public function test_it_rejects_empty_capability_names(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $stage = new CapabilityStage($registry);
 
@@ -126,7 +126,7 @@ final class CapabilityStageTest extends TestCase
     }
 
     /**
-     * @param array<int, mixed> $capabilities
+     * @param  array<int, mixed>  $capabilities
      */
     private function createManifestMock(
         array $capabilities
@@ -149,16 +149,16 @@ final class CapabilityStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules')
         );
     }

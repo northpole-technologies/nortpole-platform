@@ -13,8 +13,7 @@ final class NavigationStage implements BootStageContract
 {
     public function __construct(
         private readonly NavigationRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

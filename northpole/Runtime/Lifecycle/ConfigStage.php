@@ -9,8 +9,7 @@ final class ConfigStage implements BootStageContract
 {
     public function __construct(
         private readonly ApplicationAdapter $application,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

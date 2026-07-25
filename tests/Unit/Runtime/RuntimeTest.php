@@ -16,16 +16,16 @@ final class RuntimeTest extends TestCase
 {
     public function test_runtime_discovers_and_exposes_modules(): void
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         $runtime = new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository,
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules'),
         );
 

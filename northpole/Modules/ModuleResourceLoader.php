@@ -16,7 +16,7 @@ class ModuleResourceLoader
         }
 
         foreach (File::directories($modulesPath) as $modulePath) {
-            $viewsPath = $modulePath . DIRECTORY_SEPARATOR . 'Resources' . DIRECTORY_SEPARATOR . 'Views';
+            $viewsPath = $modulePath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'Views';
 
             if (! File::exists($viewsPath)) {
                 continue;

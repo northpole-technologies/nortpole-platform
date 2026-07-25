@@ -20,7 +20,7 @@ final class LifecyclePipelineTest extends TestCase
     {
         $executionOrder = [];
 
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $registry->registerMany([
             $this->stage(
@@ -62,7 +62,7 @@ final class LifecyclePipelineTest extends TestCase
     {
         $executionOrder = [];
 
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $registry->registerMany([
             $this->stage(
@@ -98,10 +98,11 @@ final class LifecyclePipelineTest extends TestCase
 
     public function test_stages_can_share_context_attributes(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $registry->registerMany([
-            new class implements LifecycleStageContract {
+            new class implements LifecycleStageContract
+            {
                 public function name(): string
                 {
                     return 'write';
@@ -127,7 +128,8 @@ final class LifecyclePipelineTest extends TestCase
                     );
                 }
             },
-            new class implements LifecycleStageContract {
+            new class implements LifecycleStageContract
+            {
                 public function name(): string
                 {
                     return 'read';
@@ -175,7 +177,7 @@ final class LifecyclePipelineTest extends TestCase
     {
         $executionOrder = [];
 
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $stage = $this->stage(
             'install',
@@ -232,7 +234,7 @@ final class LifecyclePipelineTest extends TestCase
             );
 
         $pipeline = new LifecyclePipeline(
-            new LifecycleStageRegistry(),
+            new LifecycleStageRegistry,
             $database
         );
 
@@ -266,7 +268,7 @@ final class LifecyclePipelineTest extends TestCase
     }
 
     /**
-     * @param array<int, string> $executionOrder
+     * @param  array<int, string>  $executionOrder
      */
     private function stage(
         string $name,
@@ -274,22 +276,17 @@ final class LifecyclePipelineTest extends TestCase
         array &$executionOrder,
         bool $supported = true
     ): LifecycleStageContract {
-        return new class(
-            $name,
-            $priority,
-            $executionOrder,
-            $supported
-        ) implements LifecycleStageContract {
+        return new class($name, $priority, $executionOrder, $supported) implements LifecycleStageContract
+        {
             /**
-             * @param array<int, string> $executionOrder
+             * @param  array<int, string>  $executionOrder
              */
             public function __construct(
                 private readonly string $stageName,
                 private readonly int $stagePriority,
                 private array &$executionOrder,
                 private readonly bool $supported,
-            ) {
-            }
+            ) {}
 
             public function name(): string
             {

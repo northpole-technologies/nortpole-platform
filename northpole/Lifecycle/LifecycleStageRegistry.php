@@ -40,7 +40,7 @@ final class LifecycleStageRegistry
     }
 
     /**
-     * @param iterable<int, LifecycleStageContract> $stages
+     * @param  iterable<int, LifecycleStageContract>  $stages
      */
     public function registerMany(
         iterable $stages

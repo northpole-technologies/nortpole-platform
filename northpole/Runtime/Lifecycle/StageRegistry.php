@@ -39,7 +39,7 @@ final class StageRegistry
     }
 
     /**
-     * @param iterable<int, BootStageContract> $stages
+     * @param  iterable<int, BootStageContract>  $stages
      */
     public function registerMany(iterable $stages): self
     {

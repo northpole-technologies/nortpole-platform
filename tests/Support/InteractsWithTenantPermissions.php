@@ -45,8 +45,8 @@ trait InteractsWithTenantPermissions
     }
 
     /**
-     * @param array<int, string> $permissions
-     * @param array<string, mixed> $attributes
+     * @param  array<int, string>  $permissions
+     * @param  array<string, mixed>  $attributes
      */
     protected function createTenantRole(
         Organisation $organisation,
@@ -82,8 +82,8 @@ trait InteractsWithTenantPermissions
     }
 
     /**
-     * @param array<int, string> $permissions
-     * @param array<string, mixed> $roleAttributes
+     * @param  array<int, string>  $permissions
+     * @param  array<string, mixed>  $roleAttributes
      */
     protected function actingAsTenantUser(
         Organisation $organisation,
@@ -117,7 +117,7 @@ trait InteractsWithTenantPermissions
      * Authenticate a tenant user with every active permission currently
      * registered in the database.
      *
-     * @param array<string, mixed> $roleAttributes
+     * @param  array<string, mixed>  $roleAttributes
      */
     protected function actingAsTenantAdmin(
         Organisation $organisation,

@@ -12,13 +12,12 @@ use Northpole\Runtime\Commands\Contracts\ModuleCommandHandlerContract;
 final class ModuleCommandBus
 {
     /**
-     * @param Closure(class-string): object $handlerResolver
+     * @param  Closure(class-string): object  $handlerResolver
      */
     public function __construct(
         private readonly ModuleCommandRegistry $registry,
         private readonly Closure $handlerResolver,
-    ) {
-    }
+    ) {}
 
     public function execute(
         ModuleCommandContract $command,

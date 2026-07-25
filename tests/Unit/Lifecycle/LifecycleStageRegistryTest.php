@@ -14,7 +14,7 @@ final class LifecycleStageRegistryTest extends TestCase
 {
     public function test_it_registers_lifecycle_stages(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $stage = $this->stage(
             'validate',
@@ -40,7 +40,7 @@ final class LifecycleStageRegistryTest extends TestCase
 
     public function test_it_orders_stages_by_priority(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $late = $this->stage(
             'late',
@@ -75,7 +75,7 @@ final class LifecycleStageRegistryTest extends TestCase
 
     public function test_it_rejects_empty_stage_names(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $this->expectException(
             InvalidArgumentException::class
@@ -95,7 +95,7 @@ final class LifecycleStageRegistryTest extends TestCase
 
     public function test_it_rejects_duplicate_stage_names(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $registry->register(
             $this->stage(
@@ -122,7 +122,7 @@ final class LifecycleStageRegistryTest extends TestCase
 
     public function test_it_reports_when_empty(): void
     {
-        $registry = new LifecycleStageRegistry();
+        $registry = new LifecycleStageRegistry;
 
         $this->assertTrue(
             $registry->isEmpty()
@@ -144,15 +144,12 @@ final class LifecycleStageRegistryTest extends TestCase
         string $name,
         int $priority
     ): LifecycleStageContract {
-        return new class(
-            $name,
-            $priority
-        ) implements LifecycleStageContract {
+        return new class($name, $priority) implements LifecycleStageContract
+        {
             public function __construct(
                 private readonly string $stageName,
                 private readonly int $stagePriority,
-            ) {
-            }
+            ) {}
 
             public function name(): string
             {
@@ -172,8 +169,7 @@ final class LifecycleStageRegistryTest extends TestCase
 
             public function handle(
                 LifecycleContext $context
-            ): void {
-            }
+            ): void {}
         };
     }
 }

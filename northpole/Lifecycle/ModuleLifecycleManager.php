@@ -16,8 +16,7 @@ final class ModuleLifecycleManager
     public function __construct(
         private readonly LifecyclePipeline $pipeline,
         private readonly TenantContext $tenantContext,
-    ) {
-    }
+    ) {}
 
     public function install(
         MarketplaceModule $module

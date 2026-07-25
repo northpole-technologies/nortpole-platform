@@ -20,7 +20,7 @@ final class ModuleCommandBusTest extends TestCase
     {
         RecordingModuleCommandHandler::reset();
 
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'crm.customer.create',
@@ -30,7 +30,7 @@ final class ModuleCommandBusTest extends TestCase
 
         $bus = new ModuleCommandBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         $command = new ModuleCommand(
@@ -67,7 +67,7 @@ final class ModuleCommandBusTest extends TestCase
 
     public function test_it_returns_the_handler_result(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'inventory.stock.reserve',
@@ -77,7 +77,7 @@ final class ModuleCommandBusTest extends TestCase
 
         $bus = new ModuleCommandBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         $result = $bus->execute(
@@ -104,8 +104,8 @@ final class ModuleCommandBusTest extends TestCase
     public function test_it_rejects_a_command_without_a_registered_handler(): void
     {
         $bus = new ModuleCommandBus(
-            new ModuleCommandRegistry(),
-            static fn (string $handler): object => new $handler(),
+            new ModuleCommandRegistry,
+            static fn (string $handler): object => new $handler,
         );
 
         $this->expectException(
@@ -126,7 +126,7 @@ final class ModuleCommandBusTest extends TestCase
 
     public function test_it_rejects_a_resolved_handler_with_the_wrong_contract(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'crm.customer.create',
@@ -136,7 +136,7 @@ final class ModuleCommandBusTest extends TestCase
 
         $bus = new ModuleCommandBus(
             $registry,
-            static fn (): object => new \stdClass(),
+            static fn (): object => new \stdClass,
         );
 
         $this->expectException(
@@ -262,11 +262,11 @@ final class ModuleCommandBusTest extends TestCase
 
     public function test_it_exposes_the_command_registry(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $bus = new ModuleCommandBus(
             $registry,
-            static fn (string $handler): object => new $handler(),
+            static fn (string $handler): object => new $handler,
         );
 
         self::assertSame(

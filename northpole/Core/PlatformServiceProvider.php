@@ -67,56 +67,56 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(
             ModuleRepository::class,
             function (): ModuleRepository {
-                return new ModuleRepository();
+                return new ModuleRepository;
             },
         );
 
         $this->app->singleton(
             ModuleFinder::class,
             function (): ModuleFinder {
-                return new ModuleFinder();
+                return new ModuleFinder;
             },
         );
 
         $this->app->singleton(
             ManifestLoader::class,
             function (): ManifestLoader {
-                return new ManifestLoader();
+                return new ManifestLoader;
             },
         );
 
         $this->app->singleton(
             ModuleDependencyResolver::class,
             function (): ModuleDependencyResolver {
-                return new ModuleDependencyResolver();
+                return new ModuleDependencyResolver;
             },
         );
 
         $this->app->singleton(
             CapabilityRegistry::class,
             function (): CapabilityRegistry {
-                return new CapabilityRegistry();
+                return new CapabilityRegistry;
             },
         );
 
         $this->app->singleton(
             PermissionRegistry::class,
             function (): PermissionRegistry {
-                return new PermissionRegistry();
+                return new PermissionRegistry;
             },
         );
 
         $this->app->singleton(
             NavigationRegistry::class,
             function (): NavigationRegistry {
-                return new NavigationRegistry();
+                return new NavigationRegistry;
             },
         );
 
         $this->app->singleton(
             ModuleEventRegistry::class,
             function (): ModuleEventRegistry {
-                return new ModuleEventRegistry();
+                return new ModuleEventRegistry;
             },
         );
 
@@ -152,7 +152,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(
             ModuleCommandRegistry::class,
             function (): ModuleCommandRegistry {
-                return new ModuleCommandRegistry();
+                return new ModuleCommandRegistry;
             },
         );
 
@@ -188,7 +188,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(
             ModuleQueryRegistry::class,
             function (): ModuleQueryRegistry {
-                return new ModuleQueryRegistry();
+                return new ModuleQueryRegistry;
             },
         );
 
@@ -253,7 +253,7 @@ final class PlatformServiceProvider extends ServiceProvider
                     ApplicationAdapter::class,
                 );
 
-                return (new StageRegistry())->registerMany([
+                return (new StageRegistry)->registerMany([
                     new ConfigStage($adapter),
                     new ProviderStage($adapter),
                     new RouteStage($adapter),
@@ -307,9 +307,9 @@ final class PlatformServiceProvider extends ServiceProvider
             function (
                 Application $application,
             ): LifecycleStageRegistry {
-                return (new LifecycleStageRegistry())
+                return (new LifecycleStageRegistry)
                     ->registerMany([
-                        new ResolveInstallationStage(),
+                        new ResolveInstallationStage,
                         new ResolveManifestStage(
                             $application->make(Runtime::class),
                         ),
@@ -317,10 +317,10 @@ final class PlatformServiceProvider extends ServiceProvider
                             $application->make(Runtime::class),
                             $application->make(TenantContext::class),
                         ),
-                        new InstallStage(),
-                        new EnableStage(),
-                        new DisableStage(),
-                        new UninstallStage(),
+                        new InstallStage,
+                        new EnableStage,
+                        new DisableStage,
+                        new UninstallStage,
                     ]);
             },
         );
@@ -346,7 +346,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->singleton(
             StubWriter::class,
             function (): StubWriter {
-                return new StubWriter();
+                return new StubWriter;
             },
         );
 

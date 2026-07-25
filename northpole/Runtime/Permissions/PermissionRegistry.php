@@ -19,7 +19,7 @@ final class PermissionRegistry
     }
 
     /**
-     * @param iterable<int, Permission> $permissions
+     * @param  iterable<int, Permission>  $permissions
      */
     public function addMany(iterable $permissions): self
     {
@@ -60,8 +60,7 @@ final class PermissionRegistry
     {
         $permissions = array_filter(
             $this->permissions,
-            static fn (Permission $permission): bool =>
-                $permission->moduleSlug() === $moduleSlug
+            static fn (Permission $permission): bool => $permission->moduleSlug() === $moduleSlug
         );
 
         $permissions = array_values($permissions);

@@ -13,8 +13,8 @@ final class ModuleQuery implements ModuleQueryContract
     private readonly DateTimeImmutable $requestedAt;
 
     /**
-     * @param array<string, mixed> $parameters
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $parameters
+     * @param  array<string, mixed>  $metadata
      */
     public function __construct(
         private readonly string $name,
@@ -24,7 +24,7 @@ final class ModuleQuery implements ModuleQueryContract
         ?DateTimeImmutable $requestedAt = null,
     ) {
         $this->requestedAt = $requestedAt
-            ?? new DateTimeImmutable();
+            ?? new DateTimeImmutable;
 
         $this->validate();
     }

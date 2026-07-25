@@ -25,8 +25,7 @@ final class LifecycleContext
         private readonly LifecycleOperation $operation,
         private readonly MarketplaceModule $module,
         private readonly Organisation $organisation,
-    ) {
-    }
+    ) {}
 
     public function operation(): LifecycleOperation
     {

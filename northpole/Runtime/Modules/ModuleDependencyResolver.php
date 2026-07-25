@@ -10,7 +10,7 @@ use Northpole\Runtime\Manifest\ModuleManifest;
 final class ModuleDependencyResolver
 {
     /**
-     * @param array<string, ModuleManifest> $modules
+     * @param  array<string, ModuleManifest>  $modules
      * @return array<string, ModuleManifest>
      */
     public function resolve(array $modules): array
@@ -44,8 +44,8 @@ final class ModuleDependencyResolver
     }
 
     /**
-     * @param array<string, ModuleManifest> $allModules
-     * @param array<string, ModuleManifest> $enabledModules
+     * @param  array<string, ModuleManifest>  $allModules
+     * @param  array<string, ModuleManifest>  $enabledModules
      */
     private function validateDependencies(
         array $allModules,
@@ -71,11 +71,11 @@ final class ModuleDependencyResolver
     }
 
     /**
-     * @param array<string, ModuleManifest> $modules
-     * @param array<string, ModuleManifest> $resolved
-     * @param array<string, bool> $visited
-     * @param array<string, bool> $visiting
-     * @param array<int, string> $path
+     * @param  array<string, ModuleManifest>  $modules
+     * @param  array<string, ModuleManifest>  $resolved
+     * @param  array<string, bool>  $visited
+     * @param  array<string, bool>  $visiting
+     * @param  array<int, string>  $path
      */
     private function visit(
         string $slug,

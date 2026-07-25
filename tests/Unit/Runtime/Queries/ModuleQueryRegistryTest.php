@@ -14,7 +14,7 @@ final class ModuleQueryRegistryTest extends TestCase
 {
     public function test_it_registers_a_query_handler(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $result = $registry->register(
             'crm.customer.find',
@@ -55,7 +55,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_uses_platform_as_the_default_owner(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'platform.health.status',
@@ -72,7 +72,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_normalises_registered_values(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             '  crm.customer.find  ',
@@ -97,7 +97,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_returns_null_for_unknown_queries(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         self::assertNull(
             $registry->handler(
@@ -120,7 +120,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_returns_null_for_empty_lookup_names(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         self::assertNull(
             $registry->handler('   '),
@@ -137,7 +137,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_returns_handlers_sorted_by_query_name(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'sales.order.find',
@@ -162,7 +162,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_returns_owners_sorted_by_query_name(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'sales.order.find',
@@ -187,7 +187,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_rejects_duplicate_query_handlers(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'crm.customer.find',
@@ -215,7 +215,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_query_name(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -234,7 +234,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_handler_class(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -253,7 +253,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_owner(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -272,7 +272,7 @@ final class ModuleQueryRegistryTest extends TestCase
 
     public function test_it_can_clear_all_query_handlers(): void
     {
-        $registry = new ModuleQueryRegistry();
+        $registry = new ModuleQueryRegistry;
 
         $registry->register(
             'crm.customer.find',

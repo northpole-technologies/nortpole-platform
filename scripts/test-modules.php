@@ -1,9 +1,11 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+use Northpole\Loader\ModuleLoader;
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+require __DIR__.'/../vendor/autoload.php';
 
-$loader = new Northpole\Loader\ModuleLoader();
+$app = require __DIR__.'/../bootstrap/app.php';
+
+$loader = new ModuleLoader;
 
 print_r($loader->discover());

@@ -31,8 +31,7 @@ final class ModuleResources
 
     public function __construct(
         private readonly ModuleManifestContract $module,
-    ) {
-    }
+    ) {}
 
     public function module(): ModuleManifestContract
     {

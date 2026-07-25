@@ -9,8 +9,7 @@ final class ProviderStage implements BootStageContract
 {
     public function __construct(
         private readonly ApplicationAdapter $application,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

@@ -11,8 +11,7 @@ final class EventSubscriberStage implements BootStageContract
 {
     public function __construct(
         private readonly ModuleEventRegistrar $registrar,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

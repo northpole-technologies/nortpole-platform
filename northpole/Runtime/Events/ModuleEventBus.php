@@ -12,17 +12,16 @@ use Northpole\Runtime\Events\Contracts\ModuleEventListenerContract;
 final class ModuleEventBus
 {
     /**
-     * @param Closure(class-string): object $listenerResolver
+     * @param  Closure(class-string): object  $listenerResolver
      */
     public function __construct(
         private readonly ModuleEventRegistry $registry,
         private readonly Closure $listenerResolver,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $metadata
      */
     public function publish(
         string $eventName,
@@ -44,8 +43,7 @@ final class ModuleEventBus
         ModuleEventContract $event,
     ): ModuleEventContract {
         foreach (
-            $this->registry->listeners($event->name())
-            as $listenerClass
+            $this->registry->listeners($event->name()) as $listenerClass
         ) {
             $listener = ($this->listenerResolver)(
                 $listenerClass,

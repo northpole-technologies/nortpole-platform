@@ -11,8 +11,7 @@ final class ModuleCommandRegistrar
 {
     public function __construct(
         private readonly ModuleCommandRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function register(
         ModuleManifestContract $module,
@@ -26,8 +25,7 @@ final class ModuleCommandRegistrar
         }
 
         foreach (
-            $module->handledCommands()
-            as $commandName => $handlerClass
+            $module->handledCommands() as $commandName => $handlerClass
         ) {
             $this->registerCommandHandler(
                 moduleSlug: $moduleSlug,

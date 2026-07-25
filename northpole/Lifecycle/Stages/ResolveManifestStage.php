@@ -13,8 +13,7 @@ final class ResolveManifestStage implements LifecycleStageContract
 {
     public function __construct(
         private readonly Runtime $runtime
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

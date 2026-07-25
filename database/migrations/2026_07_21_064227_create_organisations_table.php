@@ -9,29 +9,29 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::create('organisations', function (Blueprint $table) {
+    public function up(): void
+    {
+        Schema::create('organisations', function (Blueprint $table) {
 
-        $table->ulid('id')->primary();
+            $table->ulid('id')->primary();
 
-        $table->string('name');
-        $table->string('slug')->unique();
+            $table->string('name');
+            $table->string('slug')->unique();
 
-        $table->string('email')->nullable();
-        $table->string('phone')->nullable();
-        $table->string('website')->nullable();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('website')->nullable();
 
-        $table->string('country', 2)->nullable();
-        $table->string('timezone')->default('Europe/Dublin');
+            $table->string('country', 2)->nullable();
+            $table->string('timezone')->default('Europe/Dublin');
 
-        $table->boolean('active')->default(true);
+            $table->boolean('active')->default(true);
 
-        $table->timestamps();
-        $table->softDeletes();
+            $table->timestamps();
+            $table->softDeletes();
 
-    });
-}
+        });
+    }
 
     /**
      * Reverse the migrations.

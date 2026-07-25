@@ -12,8 +12,7 @@ final class ModuleDiscovery
         private readonly ModuleFinder $finder,
         private readonly ManifestLoader $loader,
         private readonly ModuleRepository $repository,
-    ) {
-    }
+    ) {}
 
     public function discover(string $modulesPath): ModuleRepository
     {

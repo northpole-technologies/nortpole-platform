@@ -11,8 +11,7 @@ final class ModuleQueryRegistrar
 {
     public function __construct(
         private readonly ModuleQueryRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function register(
         ModuleManifestContract $module,
@@ -26,8 +25,7 @@ final class ModuleQueryRegistrar
         }
 
         foreach (
-            $module->handledQueries()
-            as $queryName => $handlerClass
+            $module->handledQueries() as $queryName => $handlerClass
         ) {
             $this->registerQueryHandler(
                 moduleSlug: $moduleSlug,

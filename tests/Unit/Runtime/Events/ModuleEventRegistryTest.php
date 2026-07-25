@@ -14,7 +14,7 @@ final class ModuleEventRegistryTest extends TestCase
 {
     public function test_it_registers_a_listener(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'customer.created',
@@ -39,7 +39,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_registers_multiple_listeners(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry
             ->listen(
@@ -69,7 +69,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_keeps_events_separate(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry
             ->listen(
@@ -96,7 +96,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_rejects_duplicate_listener_registration(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'customer.created',
@@ -117,7 +117,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_the_same_listener_can_be_owned_by_different_modules(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry
             ->listen(
@@ -142,7 +142,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_event_name(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -157,7 +157,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_module_owner(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -172,7 +172,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_listener_class(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -187,7 +187,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_returns_all_registered_listeners_sorted_by_event_name(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry
             ->listen(
@@ -216,7 +216,7 @@ final class ModuleEventRegistryTest extends TestCase
 
     public function test_it_can_be_cleared(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'customer.created',
@@ -246,14 +246,12 @@ final class RegistryRecordingListener implements ModuleEventListenerContract
 {
     public function handle(
         ModuleEventContract $event,
-    ): void {
-    }
+    ): void {}
 }
 
 final class RegistrySecondaryListener implements ModuleEventListenerContract
 {
     public function handle(
         ModuleEventContract $event,
-    ): void {
-    }
+    ): void {}
 }

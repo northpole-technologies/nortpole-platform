@@ -13,7 +13,7 @@ final class ModuleDependencyResolverTest extends TestCase
 {
     public function test_it_returns_enabled_modules_without_dependencies(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $resolved = $resolver->resolve([
             'crm' => $this->module('crm'),
@@ -28,7 +28,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_excludes_disabled_modules(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $resolved = $resolver->resolve([
             'crm' => $this->module('crm'),
@@ -46,7 +46,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_places_dependencies_before_dependants(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $resolved = $resolver->resolve([
             'accounting' => $this->module(
@@ -68,7 +68,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_resolves_shared_dependencies_once(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $resolved = $resolver->resolve([
             'sales' => $this->module(
@@ -92,7 +92,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_rejects_a_missing_dependency(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $this->expectException(
             ModuleDependencyException::class,
@@ -112,7 +112,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_rejects_a_disabled_dependency(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $this->expectException(
             ModuleDependencyException::class,
@@ -136,7 +136,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_rejects_a_direct_circular_dependency(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $this->expectException(
             ModuleDependencyException::class,
@@ -156,7 +156,7 @@ final class ModuleDependencyResolverTest extends TestCase
 
     public function test_it_rejects_an_indirect_circular_dependency(): void
     {
-        $resolver = new ModuleDependencyResolver();
+        $resolver = new ModuleDependencyResolver;
 
         $this->expectException(
             ModuleDependencyException::class,
@@ -183,7 +183,7 @@ final class ModuleDependencyResolverTest extends TestCase
     }
 
     /**
-     * @param array<int, string> $dependencies
+     * @param  array<int, string>  $dependencies
      */
     private function module(
         string $slug,

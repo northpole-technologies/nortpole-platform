@@ -20,7 +20,7 @@ final class ModuleQueryRegistry
     private array $owners = [];
 
     /**
-     * @param class-string<ModuleQueryHandlerContract> $handler
+     * @param  class-string<ModuleQueryHandlerContract>  $handler
      */
     public function register(
         string $queryName,

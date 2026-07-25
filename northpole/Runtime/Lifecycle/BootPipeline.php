@@ -10,9 +10,8 @@ use Northpole\Runtime\Runtime;
 final class BootPipeline
 {
     public function __construct(
-        private readonly StageRegistry $registry = new StageRegistry(),
-    ) {
-    }
+        private readonly StageRegistry $registry = new StageRegistry,
+    ) {}
 
     public function add(BootStageContract $stage): self
     {
@@ -22,7 +21,7 @@ final class BootPipeline
     }
 
     /**
-     * @param iterable<int, BootStageContract> $stages
+     * @param  iterable<int, BootStageContract>  $stages
      */
     public function addMany(iterable $stages): self
     {

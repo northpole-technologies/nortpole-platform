@@ -11,8 +11,7 @@ final class CommandHandlerStage implements BootStageContract
 {
     public function __construct(
         private readonly ModuleCommandRegistrar $registrar,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

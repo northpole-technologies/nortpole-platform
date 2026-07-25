@@ -13,8 +13,8 @@ final class ModuleCommand implements ModuleCommandContract
     private readonly DateTimeImmutable $issuedAt;
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $metadata
      */
     public function __construct(
         private readonly string $name,
@@ -24,7 +24,7 @@ final class ModuleCommand implements ModuleCommandContract
         ?DateTimeImmutable $issuedAt = null,
     ) {
         $this->issuedAt = $issuedAt
-            ?? new DateTimeImmutable();
+            ?? new DateTimeImmutable;
 
         $this->validate();
     }

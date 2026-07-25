@@ -11,7 +11,7 @@ final class StubWriter
     /**
      * Write a stub file to a destination after replacing its placeholders.
      *
-     * @param array<string, string> $replacements
+     * @param  array<string, string>  $replacements
      */
     public function write(
         string $stubPath,
@@ -110,7 +110,7 @@ final class StubWriter
     }
 
     /**
-     * @param array<string, string> $replacements
+     * @param  array<string, string>  $replacements
      */
     private function replacePlaceholders(
         string $contents,

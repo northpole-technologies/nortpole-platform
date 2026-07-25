@@ -14,8 +14,7 @@ final class CreateCustomerHandler implements ModuleCommandHandlerContract
 {
     public function __construct(
         private readonly ModuleEventBus $eventBus,
-    ) {
-    }
+    ) {}
 
     public function handle(
         ModuleCommandContract $command,
@@ -118,7 +117,7 @@ final class CreateCustomerHandler implements ModuleCommandHandlerContract
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function optionalString(
         array $payload,
@@ -139,7 +138,7 @@ final class CreateCustomerHandler implements ModuleCommandHandlerContract
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function nullableString(
         array $payload,

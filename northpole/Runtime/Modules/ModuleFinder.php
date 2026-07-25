@@ -24,12 +24,11 @@ final class ModuleFinder
 
         $modules = array_filter(
             $directories,
-            static fn (string $directory): bool =>
-                is_file(
-                    $directory
-                    .DIRECTORY_SEPARATOR
-                    .'module.json'
-                )
+            static fn (string $directory): bool => is_file(
+                $directory
+                .DIRECTORY_SEPARATOR
+                .'module.json'
+            )
         );
 
         sort($modules);

@@ -21,7 +21,7 @@ final class PermissionStageTest extends TestCase
 {
     public function test_it_registers_module_permissions(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $stage = new PermissionStage($registry);
 
@@ -56,7 +56,7 @@ final class PermissionStageTest extends TestCase
 
     public function test_it_skips_modules_without_permissions(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $stage = new PermissionStage($registry);
 
@@ -73,7 +73,7 @@ final class PermissionStageTest extends TestCase
 
     public function test_it_rejects_non_string_permissions(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $stage = new PermissionStage($registry);
 
@@ -97,7 +97,7 @@ final class PermissionStageTest extends TestCase
 
     public function test_it_rejects_empty_permission_names(): void
     {
-        $registry = new PermissionRegistry();
+        $registry = new PermissionRegistry;
 
         $stage = new PermissionStage($registry);
 
@@ -120,7 +120,7 @@ final class PermissionStageTest extends TestCase
     }
 
     /**
-     * @param array<int, mixed> $permissions
+     * @param  array<int, mixed>  $permissions
      */
     private function createManifestMock(
         array $permissions
@@ -143,16 +143,16 @@ final class PermissionStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules')
         );
     }

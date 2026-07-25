@@ -22,8 +22,7 @@ final class ValidateDependenciesStage implements LifecycleStageContract
     public function __construct(
         private readonly Runtime $runtime,
         private readonly TenantContext $tenantContext,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

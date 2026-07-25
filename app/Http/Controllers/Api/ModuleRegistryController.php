@@ -13,8 +13,7 @@ class ModuleRegistryController extends Controller
 {
     public function __construct(
         private readonly ModuleLifecycleManager $lifecycleManager
-    ) {
-    }
+    ) {}
 
     public function index(): JsonResponse
     {

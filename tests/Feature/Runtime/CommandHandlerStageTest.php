@@ -22,7 +22,7 @@ final class CommandHandlerStageTest extends TestCase
 {
     public function test_it_registers_module_command_handlers(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -67,7 +67,7 @@ final class CommandHandlerStageTest extends TestCase
 
     public function test_it_skips_modules_without_command_handlers(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -93,7 +93,7 @@ final class CommandHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_module_slugs(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -125,7 +125,7 @@ final class CommandHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_command_names(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -151,7 +151,7 @@ final class CommandHandlerStageTest extends TestCase
 
     public function test_it_rejects_empty_handler_class_names(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -177,7 +177,7 @@ final class CommandHandlerStageTest extends TestCase
 
     public function test_it_rejects_duplicate_command_handler_registrations(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar($registry),
@@ -203,7 +203,7 @@ final class CommandHandlerStageTest extends TestCase
     {
         $stage = new CommandHandlerStage(
             new ModuleCommandRegistrar(
-                new ModuleCommandRegistry(),
+                new ModuleCommandRegistry,
             ),
         );
 
@@ -219,7 +219,7 @@ final class CommandHandlerStageTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $handledCommands
+     * @param  array<string, string>  $handledCommands
      */
     private function createManifestMock(
         array $handledCommands,
@@ -241,25 +241,21 @@ final class CommandHandlerStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository,
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules'),
         );
     }
 }
 
-final class CreateCustomerHandler
-{
-}
+final class CreateCustomerHandler {}
 
-final class UpdateCustomerHandler
-{
-}
+final class UpdateCustomerHandler {}

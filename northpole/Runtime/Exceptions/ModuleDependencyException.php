@@ -35,7 +35,7 @@ final class ModuleDependencyException extends RuntimeException
     }
 
     /**
-     * @param array<int, string> $cycle
+     * @param  array<int, string>  $cycle
      */
     public static function circular(array $cycle): self
     {

@@ -46,7 +46,7 @@ final class StubWriterTest extends TestCase
             '<?php class {{Module}}ServiceProvider {}',
         );
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $writer->write(
             stubPath: $stubPath,
@@ -76,7 +76,7 @@ final class StubWriterTest extends TestCase
             'Generated module: {{Module}}',
         );
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $writer->write(
             stubPath: $stubPath,
@@ -104,7 +104,7 @@ final class StubWriterTest extends TestCase
             '{{Module}} uses the {{Namespace}} namespace.',
         );
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $writer->write(
             stubPath: $stubPath,
@@ -129,7 +129,7 @@ final class StubWriterTest extends TestCase
         file_put_contents($stubPath, 'New content');
         file_put_contents($destinationPath, 'Existing content');
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $this->expectException(RuntimeException::class);
 
@@ -154,7 +154,7 @@ final class StubWriterTest extends TestCase
         file_put_contents($stubPath, 'Replacement content');
         file_put_contents($destinationPath, 'Existing content');
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $writer->write(
             stubPath: $stubPath,
@@ -173,7 +173,7 @@ final class StubWriterTest extends TestCase
         $stubPath = $this->testDirectory.'/missing.stub';
         $destinationPath = $this->testDirectory.'/generated.php';
 
-        $writer = new StubWriter();
+        $writer = new StubWriter;
 
         $this->expectException(RuntimeException::class);
 

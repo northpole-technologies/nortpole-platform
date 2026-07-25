@@ -11,8 +11,7 @@ final class ModuleEventRegistrar
 {
     public function __construct(
         private readonly ModuleEventRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function register(
         ModuleManifestContract $module,
@@ -26,8 +25,7 @@ final class ModuleEventRegistrar
         }
 
         foreach (
-            $module->eventSubscribers()
-            as $eventName => $listenerClasses
+            $module->eventSubscribers() as $eventName => $listenerClasses
         ) {
             $this->registerEventSubscribers(
                 moduleSlug: $moduleSlug,
@@ -38,7 +36,7 @@ final class ModuleEventRegistrar
     }
 
     /**
-     * @param array<int, string> $listenerClasses
+     * @param  array<int, string>  $listenerClasses
      */
     private function registerEventSubscribers(
         string $moduleSlug,

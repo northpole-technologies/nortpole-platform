@@ -28,7 +28,7 @@ class PermissionMiddlewareTest extends TestCase
         Route::middleware([
             'auth:sanctum',
             'tenant',
-            EnsureUserHasPermission::class . ':roles.view',
+            EnsureUserHasPermission::class.':roles.view',
         ])->get(
             '/testing/permission-protected-route',
             fn () => response()->json([
@@ -407,7 +407,7 @@ class PermissionMiddlewareTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     private function createRole(
         Organisation $organisation,

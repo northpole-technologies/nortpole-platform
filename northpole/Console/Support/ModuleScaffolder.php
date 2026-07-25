@@ -39,8 +39,7 @@ final class ModuleScaffolder
         private readonly StubWriter $stubWriter,
         private readonly string $modulesPath,
         private readonly string $stubsPath,
-    ) {
-    }
+    ) {}
 
     public function scaffold(
         string $requestedName,
@@ -140,8 +139,7 @@ final class ModuleScaffolder
         $directories = array_merge(
             [$modulePath],
             array_map(
-                static fn (string $directory): string =>
-                    $modulePath.DIRECTORY_SEPARATOR.$directory,
+                static fn (string $directory): string => $modulePath.DIRECTORY_SEPARATOR.$directory,
                 self::DIRECTORIES,
             ),
         );
@@ -182,7 +180,7 @@ final class ModuleScaffolder
     }
 
     /**
-     * @param array<string, string> $replacements
+     * @param  array<string, string>  $replacements
      */
     private function renderPath(
         string $path,

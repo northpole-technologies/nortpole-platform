@@ -15,8 +15,7 @@ final class ApplicationAdapter
 {
     public function __construct(
         private readonly Application $application,
-    ) {
-    }
+    ) {}
 
     public function application(): Application
     {

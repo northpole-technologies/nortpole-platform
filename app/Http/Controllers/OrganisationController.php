@@ -11,8 +11,7 @@ class OrganisationController extends Controller
 {
     public function __construct(
         private readonly OrganisationService $organisationService
-    ) {
-    }
+    ) {}
 
     public function store(
         CreateOrganisationRequest $request

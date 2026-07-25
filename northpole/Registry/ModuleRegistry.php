@@ -10,7 +10,7 @@ class ModuleRegistry
 
     public function __construct()
     {
-        $this->modules = (new ModuleLoader())->discover();
+        $this->modules = (new ModuleLoader)->discover();
     }
 
     public function all(): array

@@ -22,7 +22,7 @@ final class EventSubscriberStageTest extends TestCase
 {
     public function test_it_registers_module_event_subscribers(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -67,7 +67,7 @@ final class EventSubscriberStageTest extends TestCase
 
     public function test_it_skips_modules_without_event_subscribers(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -86,7 +86,7 @@ final class EventSubscriberStageTest extends TestCase
 
     public function test_it_rejects_empty_module_slugs(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -118,7 +118,7 @@ final class EventSubscriberStageTest extends TestCase
 
     public function test_it_rejects_empty_event_names(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -146,7 +146,7 @@ final class EventSubscriberStageTest extends TestCase
 
     public function test_it_rejects_empty_listener_class_names(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -174,7 +174,7 @@ final class EventSubscriberStageTest extends TestCase
 
     public function test_it_rejects_duplicate_module_listener_registrations(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $stage = new EventSubscriberStage(
             new ModuleEventRegistrar($registry),
@@ -206,7 +206,7 @@ final class EventSubscriberStageTest extends TestCase
     }
 
     /**
-     * @param array<string, array<int, string>> $subscribers
+     * @param  array<string, array<int, string>>  $subscribers
      */
     private function createManifestMock(
         array $subscribers,
@@ -228,29 +228,23 @@ final class EventSubscriberStageTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository,
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules'),
         );
     }
 }
 
-final class CustomerCreatedAuditListener
-{
-}
+final class CustomerCreatedAuditListener {}
 
-final class CustomerCreatedNotificationListener
-{
-}
+final class CustomerCreatedNotificationListener {}
 
-final class CustomerUpdatedAuditListener
-{
-}
+final class CustomerUpdatedAuditListener {}

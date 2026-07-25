@@ -253,7 +253,7 @@ final class ModuleScaffolderTest extends TestCase
     private function scaffolder(): ModuleScaffolder
     {
         return new ModuleScaffolder(
-            stubWriter: new StubWriter(),
+            stubWriter: new StubWriter,
             modulesPath: $this->modulesPath,
             stubsPath: $this->stubsPath,
         );

@@ -20,8 +20,7 @@ final class NavigationRuntimeTest extends TestCase
         $this->assertNotEmpty($crmItems);
 
         $customers = collect($crmItems)->first(
-            static fn ($item): bool =>
-                $item->route() === 'crm.customers.index'
+            static fn ($item): bool => $item->route() === 'crm.customers.index'
         );
 
         $this->assertNotNull($customers);

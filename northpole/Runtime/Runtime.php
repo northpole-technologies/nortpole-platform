@@ -16,8 +16,7 @@ final class Runtime
         private readonly ModuleRepository $repository,
         private readonly ModuleDependencyResolver $dependencyResolver,
         private readonly string $modulesPath,
-    ) {
-    }
+    ) {}
 
     public function discover(): self
     {

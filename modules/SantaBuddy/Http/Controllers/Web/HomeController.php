@@ -8,6 +8,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-       return view('santa-buddy::welcome');
+        return view('santa-buddy::welcome');
     }
 }

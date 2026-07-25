@@ -19,7 +19,7 @@ final class NavigationRegistry
     }
 
     /**
-     * @param iterable<int, NavigationItem> $items
+     * @param  iterable<int, NavigationItem>  $items
      */
     public function addMany(iterable $items): self
     {
@@ -47,8 +47,7 @@ final class NavigationRegistry
     {
         $items = array_filter(
             $this->items,
-            static fn (NavigationItem $item): bool =>
-                $item->moduleSlug() === $moduleSlug
+            static fn (NavigationItem $item): bool => $item->moduleSlug() === $moduleSlug
         );
 
         return $this->sort(
@@ -63,8 +62,7 @@ final class NavigationRegistry
     {
         $items = array_filter(
             $this->items,
-            static fn (NavigationItem $item): bool =>
-                $item->group() === $group
+            static fn (NavigationItem $item): bool => $item->group() === $group
         );
 
         return $this->sort(
@@ -88,8 +86,7 @@ final class NavigationRegistry
     }
 
     /**
-     * @param array<int, NavigationItem> $items
-     *
+     * @param  array<int, NavigationItem>  $items
      * @return array<int, NavigationItem>
      */
     private function sort(array $items): array

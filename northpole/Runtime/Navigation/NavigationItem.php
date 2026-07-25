@@ -9,7 +9,7 @@ use InvalidArgumentException;
 final readonly class NavigationItem
 {
     /**
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $metadata
      */
     public function __construct(
         private string $moduleSlug,
@@ -41,7 +41,7 @@ final readonly class NavigationItem
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromArray(
         string $moduleSlug,
@@ -151,7 +151,7 @@ final readonly class NavigationItem
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private static function requiredString(
         array $data,
@@ -172,7 +172,7 @@ final readonly class NavigationItem
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private static function optionalString(
         array $data,
@@ -198,7 +198,7 @@ final readonly class NavigationItem
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private static function integer(
         array $data,
@@ -217,8 +217,7 @@ final readonly class NavigationItem
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private static function extractMetadata(array $data): array

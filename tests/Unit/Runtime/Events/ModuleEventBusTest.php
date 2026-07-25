@@ -19,7 +19,7 @@ final class ModuleEventBusTest extends TestCase
     {
         RecordingModuleEventListener::reset();
 
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'customer.created',
@@ -29,7 +29,7 @@ final class ModuleEventBusTest extends TestCase
 
         $bus = new ModuleEventBus(
             $registry,
-            static fn (string $listener): object => new $listener(),
+            static fn (string $listener): object => new $listener,
         );
 
         $event = new ModuleEvent(
@@ -63,7 +63,7 @@ final class ModuleEventBusTest extends TestCase
     {
         OrderedModuleEventListener::reset();
 
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry
             ->listen(
@@ -79,7 +79,7 @@ final class ModuleEventBusTest extends TestCase
 
         $bus = new ModuleEventBus(
             $registry,
-            static fn (string $listener): object => new $listener(),
+            static fn (string $listener): object => new $listener,
         );
 
         $bus->publish(
@@ -97,7 +97,7 @@ final class ModuleEventBusTest extends TestCase
     {
         RecordingModuleEventListener::reset();
 
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'inventory.low',
@@ -107,7 +107,7 @@ final class ModuleEventBusTest extends TestCase
 
         $bus = new ModuleEventBus(
             $registry,
-            static fn (string $listener): object => new $listener(),
+            static fn (string $listener): object => new $listener,
         );
 
         $event = $bus->publish(
@@ -188,8 +188,8 @@ final class ModuleEventBusTest extends TestCase
     public function test_it_allows_events_without_listeners(): void
     {
         $bus = new ModuleEventBus(
-            new ModuleEventRegistry(),
-            static fn (string $listener): object => new $listener(),
+            new ModuleEventRegistry,
+            static fn (string $listener): object => new $listener,
         );
 
         $event = $bus->publish(
@@ -205,7 +205,7 @@ final class ModuleEventBusTest extends TestCase
 
     public function test_it_rejects_a_resolved_listener_with_the_wrong_contract(): void
     {
-        $registry = new ModuleEventRegistry();
+        $registry = new ModuleEventRegistry;
 
         $registry->listen(
             'customer.created',
@@ -215,7 +215,7 @@ final class ModuleEventBusTest extends TestCase
 
         $bus = new ModuleEventBus(
             $registry,
-            static fn (): object => new \stdClass(),
+            static fn (): object => new \stdClass,
         );
 
         $this->expectException(
@@ -287,6 +287,5 @@ final class InvalidModuleEventListener implements ModuleEventListenerContract
 {
     public function handle(
         ModuleEventContract $event,
-    ): void {
-    }
+    ): void {}
 }

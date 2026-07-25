@@ -19,7 +19,7 @@ final class StageRegistryTest extends TestCase
             priority: 50,
         );
 
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $registry->register($stage);
 
@@ -59,7 +59,7 @@ final class StageRegistryTest extends TestCase
             priority: 100,
         );
 
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $registry->registerMany([
             $configStage,
@@ -92,7 +92,7 @@ final class StageRegistryTest extends TestCase
             priority: 100,
         );
 
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $registry->registerMany([
             $laterStage,
@@ -115,7 +115,7 @@ final class StageRegistryTest extends TestCase
             priority: 100,
         );
 
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $this->expectException(
             InvalidArgumentException::class
@@ -140,7 +140,7 @@ final class StageRegistryTest extends TestCase
             priority: 100,
         );
 
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $registry->register($firstStage);
 
@@ -157,7 +157,7 @@ final class StageRegistryTest extends TestCase
 
     public function test_it_rejects_an_unknown_stage_name(): void
     {
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $this->expectException(
             InvalidArgumentException::class
@@ -172,7 +172,7 @@ final class StageRegistryTest extends TestCase
 
     public function test_a_new_registry_is_empty(): void
     {
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $this->assertTrue(
             $registry->isEmpty()
@@ -203,8 +203,7 @@ final class StageRegistryTest extends TestCase
             public function __construct(
                 private readonly string $stageName,
                 private readonly int $stagePriority,
-            ) {
-            }
+            ) {}
 
             public function name(): string
             {
@@ -216,9 +215,7 @@ final class StageRegistryTest extends TestCase
                 return $this->stagePriority;
             }
 
-            public function boot(BootContext $context): void
-            {
-            }
+            public function boot(BootContext $context): void {}
         };
     }
 }

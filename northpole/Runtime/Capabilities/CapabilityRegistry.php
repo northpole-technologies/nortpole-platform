@@ -19,7 +19,7 @@ final class CapabilityRegistry
     }
 
     /**
-     * @param iterable<int, Capability> $capabilities
+     * @param  iterable<int, Capability>  $capabilities
      */
     public function addMany(iterable $capabilities): self
     {
@@ -47,8 +47,7 @@ final class CapabilityRegistry
     {
         $capabilities = array_filter(
             $this->capabilities,
-            static fn (Capability $capability): bool =>
-                $capability->moduleSlug() === $moduleSlug
+            static fn (Capability $capability): bool => $capability->moduleSlug() === $moduleSlug
         );
 
         return $this->sort(
@@ -63,8 +62,7 @@ final class CapabilityRegistry
     {
         $capabilities = array_filter(
             $this->capabilities,
-            static fn (Capability $capability): bool =>
-                $capability->name() === $name
+            static fn (Capability $capability): bool => $capability->name() === $name
         );
 
         return $this->sort(
@@ -116,8 +114,7 @@ final class CapabilityRegistry
     }
 
     /**
-     * @param array<int, Capability> $capabilities
-     *
+     * @param  array<int, Capability>  $capabilities
      * @return array<int, Capability>
      */
     private function sort(array $capabilities): array

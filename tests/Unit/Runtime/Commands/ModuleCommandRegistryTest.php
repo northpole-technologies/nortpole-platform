@@ -14,7 +14,7 @@ final class ModuleCommandRegistryTest extends TestCase
 {
     public function test_it_registers_a_command_handler(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'crm.customer.create',
@@ -50,7 +50,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_registers_multiple_command_handlers(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry
             ->register(
@@ -86,7 +86,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_rejects_a_second_handler_for_the_same_command(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'crm.customer.create',
@@ -114,7 +114,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_command_name(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -133,7 +133,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_handler_class(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -152,7 +152,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_rejects_an_empty_module_owner(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $this->expectException(
             InvalidArgumentException::class,
@@ -171,7 +171,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_returns_null_for_an_unknown_command(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         self::assertNull(
             $registry->handler(
@@ -194,7 +194,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_returns_registered_handlers_sorted_by_command_name(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry
             ->register(
@@ -227,7 +227,7 @@ final class ModuleCommandRegistryTest extends TestCase
 
     public function test_it_can_be_cleared(): void
     {
-        $registry = new ModuleCommandRegistry();
+        $registry = new ModuleCommandRegistry;
 
         $registry->register(
             'crm.customer.create',

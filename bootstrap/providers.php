@@ -1,6 +1,9 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use Northpole\Core\PlatformServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    Northpole\Core\PlatformServiceProvider::class,
+    AppServiceProvider::class,
+    PlatformServiceProvider::class,
 ];

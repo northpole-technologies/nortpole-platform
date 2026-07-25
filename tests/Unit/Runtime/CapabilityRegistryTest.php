@@ -13,7 +13,7 @@ final class CapabilityRegistryTest extends TestCase
 {
     public function test_it_stores_capabilities(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $capability = new Capability(
             moduleSlug: 'crm',
@@ -42,7 +42,7 @@ final class CapabilityRegistryTest extends TestCase
 
     public function test_it_orders_capabilities_by_module_and_name(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $registry->addMany([
             new Capability(
@@ -66,8 +66,7 @@ final class CapabilityRegistryTest extends TestCase
                 'inventory:stock',
             ],
             array_map(
-                static fn (Capability $capability): string =>
-                    $capability->key(),
+                static fn (Capability $capability): string => $capability->key(),
                 $registry->all()
             )
         );
@@ -75,7 +74,7 @@ final class CapabilityRegistryTest extends TestCase
 
     public function test_it_filters_capabilities_by_module(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $registry->addMany([
             new Capability(
@@ -102,8 +101,7 @@ final class CapabilityRegistryTest extends TestCase
                 'customers',
             ],
             array_map(
-                static fn (Capability $capability): string =>
-                    $capability->name(),
+                static fn (Capability $capability): string => $capability->name(),
                 $capabilities
             )
         );
@@ -111,7 +109,7 @@ final class CapabilityRegistryTest extends TestCase
 
     public function test_multiple_modules_can_share_a_capability_name(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $registry->addMany([
             new Capability(
@@ -148,7 +146,7 @@ final class CapabilityRegistryTest extends TestCase
 
     public function test_adding_the_same_capability_replaces_it(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $first = new Capability(
             moduleSlug: 'crm',
@@ -177,7 +175,7 @@ final class CapabilityRegistryTest extends TestCase
 
     public function test_it_can_be_cleared(): void
     {
-        $registry = new CapabilityRegistry();
+        $registry = new CapabilityRegistry;
 
         $registry->add(
             new Capability(

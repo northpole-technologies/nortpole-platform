@@ -19,8 +19,8 @@ class ModuleLoader
 
         $modules = [];
 
-        foreach (glob($this->modulePath . '/*', GLOB_ONLYDIR) as $directory) {
-            $manifest = $directory . '/module.json';
+        foreach (glob($this->modulePath.'/*', GLOB_ONLYDIR) as $directory) {
+            $manifest = $directory.'/module.json';
 
             if (! file_exists($manifest)) {
                 continue;

@@ -13,7 +13,7 @@ final class NavigationRegistryTest extends TestCase
 {
     public function test_it_stores_navigation_items(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $item = new NavigationItem(
             moduleSlug: 'crm',
@@ -37,7 +37,7 @@ final class NavigationRegistryTest extends TestCase
 
     public function test_it_orders_items_by_order_then_label(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $registry->addMany([
             new NavigationItem(
@@ -67,8 +67,7 @@ final class NavigationRegistryTest extends TestCase
                 'Stock',
             ],
             array_map(
-                static fn (NavigationItem $item): string =>
-                    $item->label(),
+                static fn (NavigationItem $item): string => $item->label(),
                 $registry->all()
             )
         );
@@ -76,7 +75,7 @@ final class NavigationRegistryTest extends TestCase
 
     public function test_it_filters_items_by_module(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $registry->addMany([
             new NavigationItem(
@@ -102,7 +101,7 @@ final class NavigationRegistryTest extends TestCase
 
     public function test_adding_the_same_item_replaces_it(): void
     {
-        $registry = new NavigationRegistry();
+        $registry = new NavigationRegistry;
 
         $first = new NavigationItem(
             moduleSlug: 'crm',

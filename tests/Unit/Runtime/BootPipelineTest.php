@@ -38,7 +38,7 @@ final class BootPipelineTest extends TestCase
             executionLog: $executionLog,
         );
 
-        $pipeline = new BootPipeline();
+        $pipeline = new BootPipeline;
 
         $pipeline
             ->add($laterStage)
@@ -67,8 +67,7 @@ final class BootPipelineTest extends TestCase
         $this->assertSame(
             ['earlier', 'later'],
             array_map(
-                static fn (BootStageContract $stage): string =>
-                    $stage->name(),
+                static fn (BootStageContract $stage): string => $stage->name(),
                 $pipeline->stages(),
             ),
         );
@@ -81,7 +80,7 @@ final class BootPipelineTest extends TestCase
 
     public function test_pipeline_uses_the_supplied_stage_registry(): void
     {
-        $registry = new StageRegistry();
+        $registry = new StageRegistry;
 
         $pipeline = new BootPipeline($registry);
 
@@ -109,7 +108,7 @@ final class BootPipelineTest extends TestCase
 
     public function test_pipeline_rejects_duplicate_stage_names(): void
     {
-        $pipeline = new BootPipeline();
+        $pipeline = new BootPipeline;
 
         $pipeline->add(
             $this->createStage(
@@ -136,43 +135,38 @@ final class BootPipelineTest extends TestCase
 
     private function createRuntime(): Runtime
     {
-        $repository = new ModuleRepository();
+        $repository = new ModuleRepository;
 
         return new Runtime(
             new ModuleDiscovery(
-                new ModuleFinder(),
-                new ManifestLoader(),
+                new ModuleFinder,
+                new ManifestLoader,
                 $repository,
             ),
             $repository,
-            new ModuleDependencyResolver(),
+            new ModuleDependencyResolver,
             base_path('modules'),
         );
     }
 
     /**
-     * @param array<int, string> $executionLog
+     * @param  array<int, string>  $executionLog
      */
     private function createStage(
         string $name,
         int $priority,
         array &$executionLog = [],
     ): BootStageContract {
-        return new class(
-            $name,
-            $priority,
-            $executionLog,
-        ) implements BootStageContract
+        return new class($name, $priority, $executionLog) implements BootStageContract
         {
             /**
-             * @param array<int, string> $executionLog
+             * @param  array<int, string>  $executionLog
              */
             public function __construct(
                 private readonly string $stageName,
                 private readonly int $stagePriority,
                 private array &$executionLog,
-            ) {
-            }
+            ) {}
 
             public function name(): string
             {

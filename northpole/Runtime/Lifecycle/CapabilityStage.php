@@ -13,8 +13,7 @@ final class CapabilityStage implements BootStageContract
 {
     public function __construct(
         private readonly CapabilityRegistry $registry,
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

@@ -60,7 +60,7 @@ final class ModuleManifest implements ModuleManifestContract
     }
 
     /**
-     * @param array<int, mixed> $dependencies
+     * @param  array<int, mixed>  $dependencies
      */
     private function validateLegacyDependencies(
         array $dependencies
@@ -78,7 +78,7 @@ final class ModuleManifest implements ModuleManifestContract
     }
 
     /**
-     * @param array<array-key, mixed> $dependencies
+     * @param  array<array-key, mixed>  $dependencies
      */
     private function validateVersionedDependencies(
         array $dependencies
