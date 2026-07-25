@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ModuleRegistryController;
 use App\Http\Controllers\Api\Organisation\PermissionController;
+use App\Http\Controllers\Api\RuntimeDiagnosticsController;
 use App\Http\Controllers\Api\Organisation\RoleController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PluginController;
@@ -237,6 +238,14 @@ Route::prefix('runtime')->group(function (): void {
         [
             \App\Http\Controllers\Api\RuntimeMetadataController::class,
             'graph',
+        ],
+    );
+
+    Route::get(
+        '/diagnostics',
+        [
+            RuntimeDiagnosticsController::class,
+            'show',
         ],
     );
 });

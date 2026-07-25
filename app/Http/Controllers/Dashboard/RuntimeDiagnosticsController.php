@@ -9,24 +9,20 @@ use Illuminate\Contracts\View\View;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
 use Northpole\Runtime\Configuration\ModuleConfigurationRegistry;
+use Northpole\Runtime\Diagnostics\RuntimeDiagnosticsService;
 use Northpole\Runtime\Events\ModuleEventRegistry;
 use Northpole\Runtime\Health\ModuleHealth;
-use Northpole\Runtime\Health\RuntimeHealthService;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Navigation\NavigationRegistry;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
-use Northpole\Runtime\Repair\RuntimeRepairEngine;
-use Northpole\Runtime\Validation\RuntimeValidationEngine;
 
 final class RuntimeDiagnosticsController extends Controller
 {
     public function __construct(
-        private readonly RuntimeHealthService $runtimeHealthService,
-        private readonly RuntimeValidationEngine $validationEngine,
-        private readonly RuntimeRepairEngine $repairEngine,
+        private readonly RuntimeDiagnosticsService $diagnostics,
         private readonly StageRegistry $stageRegistry,
         private readonly CapabilityRegistry $capabilityRegistry,
         private readonly ModuleCommandRegistry $commandRegistry,
@@ -41,11 +37,11 @@ final class RuntimeDiagnosticsController extends Controller
 
     public function __invoke(): View
     {
-        $runtimeHealth = $this->runtimeHealthService->report();
-        $validationResult = $this->validationEngine->validate();
-        $repairResult = $this->repairEngine->recommend(
-            $validationResult,
-        );
+        $diagnostics = $this->diagnostics->inspect();
+
+        $runtimeHealth = $diagnostics['runtimeHealth'];
+        $validationResult = $diagnostics['validationResult'];
+        $repairResult = $diagnostics['repairResult'];
 
         $moduleIssues = [];
 
@@ -132,13 +128,13 @@ final class RuntimeDiagnosticsController extends Controller
                         ? 'clear'
                         : 'recommended',
                     'recommendations' => $repairResult->count(),
-                    'providers' => $this->repairEngine->providerCount(),
+                    'providers' => $diagnostics['repairs']['providers'],
                 ],
                 'validationSummary' => [
                     'status' => $validationResult->passes()
                         ? 'passed'
                         : 'failed',
-                    'rules' => $this->validationEngine->count(),
+                    'rules' => $diagnostics['validation']['rules'],
                     'issues' => $validationResult->count(),
                     'errors' => $validationResult->errorCount(),
                     'warnings' => $validationResult->warningCount(),
