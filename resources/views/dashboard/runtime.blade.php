@@ -120,6 +120,30 @@
             border-color: rgba(119,219,255,.55);
         }
 
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .graph-link {
+            padding: 8px 14px;
+            border: 1px solid rgba(119, 219, 255, 0.25);
+            border-radius: 999px;
+            background: rgba(13, 28, 46, 0.72);
+            color: #b8cde2;
+            text-decoration: none;
+            font-size: 12px;
+            transition:
+                border-color 160ms ease,
+                transform 160ms ease;
+        }
+
+        .graph-link:hover {
+            border-color: rgba(119, 219, 255, 0.55);
+            transform: translateY(-1px);
+        }
+
         .environment {
             padding: 8px 12px;
             border: 1px solid rgba(160, 181, 207, 0.18);
