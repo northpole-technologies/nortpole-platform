@@ -1,0 +1,233 @@
+{
+    "generated_at": "2026-07-25T16:18:33+00:00",
+    "runtime": {
+        "summary": {
+            "status": "healthy",
+            "modules": {
+                "total": 4,
+                "enabled": 4,
+                "disabled": 0
+            },
+            "commands": 1,
+            "queries": 1,
+            "published_events": 1,
+            "event_subscriptions": 0,
+            "permissions": 8,
+            "capabilities": 6,
+            "navigation_items": 1,
+            "notifications": 0,
+            "scheduled_jobs": 0
+        },
+        "modules": [
+            {
+                "name": "CRM",
+                "slug": "crm",
+                "version": "1.0.0",
+                "description": "Customer relationship management for organisations, contacts, notes, tasks and activities.",
+                "enabled": true,
+                "path": "C:\\Development\\northpole-platform\\backend\\modules\\CRM",
+                "manifest_path": "C:\\Development\\northpole-platform\\backend\\modules\\CRM\\module.json",
+                "providers": [
+                    "Modules\\CRM\\Providers\\CRMServiceProvider"
+                ],
+                "dependencies": [],
+                "routes": {
+                    "api": "routes/api.php",
+                    "web": "routes/web.php"
+                },
+                "views": "resources/views",
+                "migrations": "database/migrations",
+                "configuration": [],
+                "settings": [],
+                "capabilities": [
+                    "customers",
+                    "contacts",
+                    "notes",
+                    "tasks",
+                    "activities"
+                ],
+                "permissions": [
+                    "crm.customers.view",
+                    "crm.customers.create",
+                    "crm.customers.update",
+                    "crm.customers.delete"
+                ],
+                "navigation": [
+                    {
+                        "label": "Customers",
+                        "route": "crm.customers.index",
+                        "icon": "users",
+                        "permission": "crm.customers.view",
+                        "group": "CRM",
+                        "order": 10
+                    }
+                ],
+                "published_events": [
+                    "crm.customer.created"
+                ],
+                "event_subscribers": [],
+                "notifications": [],
+                "commands": {
+                    "crm.customer.create": "Modules\\CRM\\Commands\\CreateCustomerHandler"
+                },
+                "queries": {
+                    "crm.customer.find": "Modules\\CRM\\Queries\\FindCustomerHandler"
+                },
+                "scheduled_jobs": []
+            },
+            {
+                "name": "HomeDoctor",
+                "slug": "home-doctor",
+                "version": "0.1.0",
+                "description": "Home Doctor module for the NorthPole Platform.",
+                "enabled": true,
+                "path": "C:\\Development\\northpole-platform\\backend\\modules\\HomeDoctor",
+                "manifest_path": "C:\\Development\\northpole-platform\\backend\\modules\\HomeDoctor\\module.json",
+                "providers": [
+                    "Modules\\HomeDoctor\\Providers\\HomeDoctorServiceProvider"
+                ],
+                "dependencies": [],
+                "routes": [],
+                "views": null,
+                "migrations": null,
+                "configuration": [],
+                "settings": [],
+                "capabilities": [],
+                "permissions": [],
+                "navigation": [],
+                "published_events": [],
+                "event_subscribers": [],
+                "notifications": [],
+                "commands": [],
+                "queries": [],
+                "scheduled_jobs": []
+            },
+            {
+                "name": "Inventory",
+                "slug": "inventory",
+                "version": "1.0.0",
+                "description": "Inventory management module.",
+                "enabled": true,
+                "path": "C:\\Development\\northpole-platform\\backend\\modules\\Inventory",
+                "manifest_path": "C:\\Development\\northpole-platform\\backend\\modules\\Inventory\\module.json",
+                "providers": [
+                    "Modules\\Inventory\\Providers\\InventoryServiceProvider"
+                ],
+                "dependencies": [],
+                "routes": {
+                    "api": "routes/api.php",
+                    "web": "routes/web.php"
+                },
+                "views": "resources/views",
+                "migrations": "database/migrations",
+                "configuration": [],
+                "settings": [],
+                "capabilities": [
+                    "stock"
+                ],
+                "permissions": [
+                    "inventory.stock.view",
+                    "inventory.stock.create",
+                    "inventory.stock.update",
+                    "inventory.stock.delete"
+                ],
+                "navigation": [],
+                "published_events": [],
+                "event_subscribers": [],
+                "notifications": [],
+                "commands": [],
+                "queries": [],
+                "scheduled_jobs": []
+            },
+            {
+                "name": "SantaBuddy",
+                "slug": "santa-buddy",
+                "version": "1.0.0",
+                "description": "SantaBuddy module for the Northpole Platform.",
+                "enabled": true,
+                "path": "C:\\Development\\northpole-platform\\backend\\modules\\SantaBuddy",
+                "manifest_path": "C:\\Development\\northpole-platform\\backend\\modules\\SantaBuddy\\module.json",
+                "providers": [
+                    "Modules\\SantaBuddy\\Providers\\SantaBuddyServiceProvider"
+                ],
+                "dependencies": [],
+                "routes": {
+                    "web": "routes/web.php",
+                    "api": "routes/api.php"
+                },
+                "views": "resources/views",
+                "migrations": "database/migrations",
+                "configuration": [],
+                "settings": [],
+                "capabilities": [],
+                "permissions": [],
+                "navigation": [],
+                "published_events": [],
+                "event_subscribers": [],
+                "notifications": [],
+                "commands": [],
+                "queries": [],
+                "scheduled_jobs": []
+            }
+        ],
+        "commands": {
+            "crm": {
+                "crm.customer.create": "Modules\\CRM\\Commands\\CreateCustomerHandler"
+            }
+        },
+        "queries": {
+            "crm": {
+                "crm.customer.find": "Modules\\CRM\\Queries\\FindCustomerHandler"
+            }
+        },
+        "events": {
+            "crm": {
+                "publishes": [
+                    "crm.customer.created"
+                ],
+                "subscribes": []
+            }
+        },
+        "permissions": {
+            "crm": [
+                "crm.customers.create",
+                "crm.customers.delete",
+                "crm.customers.update",
+                "crm.customers.view"
+            ],
+            "inventory": [
+                "inventory.stock.create",
+                "inventory.stock.delete",
+                "inventory.stock.update",
+                "inventory.stock.view"
+            ]
+        },
+        "roles": [],
+        "capabilities": {
+            "crm": [
+                "activities",
+                "contacts",
+                "customers",
+                "notes",
+                "tasks"
+            ],
+            "inventory": [
+                "stock"
+            ]
+        },
+        "navigation": {
+            "crm": [
+                {
+                    "label": "Customers",
+                    "route": "crm.customers.index",
+                    "icon": "users",
+                    "permission": "crm.customers.view",
+                    "group": "CRM",
+                    "order": 10
+                }
+            ]
+        },
+        "notifications": [],
+        "scheduled_jobs": []
+    }
+}
