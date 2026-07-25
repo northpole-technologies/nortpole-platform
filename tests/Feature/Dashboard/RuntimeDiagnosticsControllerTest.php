@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Dashboard;
 
+use Northpole\Runtime\Validation\ValidationResult;
 use Tests\TestCase;
 
 final class RuntimeDiagnosticsControllerTest extends TestCase
@@ -16,6 +17,9 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertOk()
             ->assertViewIs('dashboard.diagnostics')
             ->assertViewHas('runtimeHealth')
+            ->assertViewHas('validationResult')
+            ->assertViewHas('validationSummary')
+            ->assertViewHas('validationIssues')
             ->assertViewHas('summary')
             ->assertViewHas('registryCounts')
             ->assertViewHas('moduleIssues')
@@ -32,8 +36,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertOk()
             ->assertViewHas(
                 'summary',
-                static fn (mixed $summary): bool =>
-                    is_array($summary)
+                static fn (mixed $summary): bool => is_array($summary)
                     && array_key_exists('status', $summary)
                     && array_key_exists('score', $summary)
                     && array_key_exists('modules', $summary)
@@ -46,6 +49,36 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                         'bootStages',
                         $summary,
                     ),
+            );
+    }
+
+    public function test_runtime_diagnostics_receives_validation_data(): void
+    {
+        $this->get(
+            route('control-centre.runtime.diagnostics'),
+        )
+            ->assertOk()
+            ->assertViewHas(
+                'validationResult',
+                static fn (mixed $result): bool => $result instanceof ValidationResult,
+            )
+            ->assertViewHas(
+                'validationSummary',
+                static fn (mixed $summary): bool => is_array($summary)
+                    && array_key_exists('status', $summary)
+                    && array_key_exists('rules', $summary)
+                    && array_key_exists('issues', $summary)
+                    && array_key_exists('errors', $summary)
+                    && array_key_exists('warnings', $summary)
+                    && array_key_exists(
+                        'information',
+                        $summary,
+                    )
+                    && $summary['rules'] === 2,
+            )
+            ->assertViewHas(
+                'validationIssues',
+                static fn (mixed $issues): bool => is_array($issues),
             );
     }
 

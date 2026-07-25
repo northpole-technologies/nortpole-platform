@@ -18,11 +18,13 @@ use Northpole\Runtime\Navigation\NavigationRegistry;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
+use Northpole\Runtime\Validation\RuntimeValidationEngine;
 
 final class RuntimeDiagnosticsController extends Controller
 {
     public function __construct(
         private readonly RuntimeHealthService $runtimeHealthService,
+        private readonly RuntimeValidationEngine $validationEngine,
         private readonly StageRegistry $stageRegistry,
         private readonly CapabilityRegistry $capabilityRegistry,
         private readonly ModuleCommandRegistry $commandRegistry,
@@ -38,6 +40,7 @@ final class RuntimeDiagnosticsController extends Controller
     public function __invoke(): View
     {
         $runtimeHealth = $this->runtimeHealthService->report();
+        $validationResult = $this->validationEngine->validate();
 
         $moduleIssues = [];
 
@@ -60,8 +63,7 @@ final class RuntimeDiagnosticsController extends Controller
         $healthyModules = count(
             array_filter(
                 $runtimeHealth->modules(),
-                static fn (ModuleHealth $health): bool =>
-                    $health->status() === 'healthy',
+                static fn (ModuleHealth $health): bool => $health->status() === 'healthy',
             ),
         );
 
@@ -116,6 +118,18 @@ final class RuntimeDiagnosticsController extends Controller
             'dashboard.diagnostics',
             [
                 'runtimeHealth' => $runtimeHealth,
+                'validationResult' => $validationResult,
+                'validationIssues' => $validationResult->toArray(),
+                'validationSummary' => [
+                    'status' => $validationResult->passes()
+                        ? 'passed'
+                        : 'failed',
+                    'rules' => $this->validationEngine->count(),
+                    'issues' => $validationResult->count(),
+                    'errors' => $validationResult->errorCount(),
+                    'warnings' => $validationResult->warningCount(),
+                    'information' => $validationResult->infoCount(),
+                ],
                 'summary' => [
                     'status' => $runtimeHealth->status(),
                     'score' => $runtimeHealth->score(),

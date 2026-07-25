@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Northpole\Core\Registration;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Foundation\Application;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Commands\ModuleCommandBus;
@@ -15,27 +16,28 @@ use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Events\ModuleEventBus;
 use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistry;
+use Northpole\Runtime\Events\Subscribers\ModuleInstalledSubscriber;
 use Northpole\Runtime\Health\RuntimeHealthService;
+use Northpole\Runtime\Jobs\Laravel\LaravelScheduledJobAdapter;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
-use Northpole\Runtime\Lifecycle\ConfigurationStage;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\CommandHandlerStage;
 use Northpole\Runtime\Lifecycle\ConfigStage;
+use Northpole\Runtime\Lifecycle\ConfigurationStage;
 use Northpole\Runtime\Lifecycle\EventSubscriberStage;
 use Northpole\Runtime\Lifecycle\MigrationStage;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\NotificationStage;
 use Northpole\Runtime\Lifecycle\PermissionStage;
-use Northpole\Runtime\Lifecycle\RoleDefinitionStage;
-use Northpole\Runtime\Lifecycle\ScheduledJobStage;
 use Northpole\Runtime\Lifecycle\ProviderStage;
 use Northpole\Runtime\Lifecycle\QueryHandlerStage;
+use Northpole\Runtime\Lifecycle\RoleDefinitionStage;
 use Northpole\Runtime\Lifecycle\RouteStage;
+use Northpole\Runtime\Lifecycle\ScheduledJobStage;
 use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Lifecycle\ViewStage;
-use Northpole\Runtime\Jobs\Laravel\LaravelScheduledJobAdapter;
-use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
-use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Manifest\ManifestLoader;
 use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
@@ -51,6 +53,9 @@ use Northpole\Runtime\Roles\RoleDefinitionRegistry;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
 use Northpole\Runtime\Synchronisation\TenantAccessSynchroniser;
+use Northpole\Runtime\Validation\Rules\CommandHandlerValidationRule;
+use Northpole\Runtime\Validation\Rules\QueryHandlerValidationRule;
+use Northpole\Runtime\Validation\RuntimeValidationEngine;
 
 final class RuntimeServiceRegistrar
 {
@@ -94,6 +99,10 @@ final class RuntimeServiceRegistrar
         );
 
         $this->registerRuntime(
+            $application
+        );
+
+        $this->registerRuntimeValidation(
             $application
         );
 
@@ -237,7 +246,7 @@ final class RuntimeServiceRegistrar
             ): void {
                 $registry->listen(
                     eventName: 'module.installed',
-                    listener: \Northpole\Runtime\Events\Subscribers\ModuleInstalledSubscriber::class,
+                    listener: ModuleInstalledSubscriber::class,
                     module: 'platform',
                 );
             },
@@ -388,6 +397,7 @@ final class RuntimeServiceRegistrar
             },
         );
     }
+
     private function registerNotifications(
         Application $application
     ): void {
@@ -443,7 +453,7 @@ final class RuntimeServiceRegistrar
                 return new LaravelScheduledJobAdapter(
                     application: $application,
                     schedule: $application->make(
-                        \Illuminate\Console\Scheduling\Schedule::class
+                        Schedule::class
                     ),
                 );
             },
@@ -476,6 +486,41 @@ final class RuntimeServiceRegistrar
         );
     }
 
+    private function registerRuntimeValidation(
+        Application $application
+    ): void {
+        $application->singleton(
+            RuntimeValidationEngine::class,
+            function (
+                Application $application
+            ): RuntimeValidationEngine {
+                $modulesResolver = static function () use (
+                    $application
+                ): array {
+                    return $application->make(
+                        Runtime::class
+                    )->modules();
+                };
+
+                return (new RuntimeValidationEngine)
+                    ->registerMany([
+                        new CommandHandlerValidationRule(
+                            modulesResolver: $modulesResolver,
+                            registry: $application->make(
+                                ModuleCommandRegistry::class
+                            ),
+                        ),
+                        new QueryHandlerValidationRule(
+                            modulesResolver: $modulesResolver,
+                            registry: $application->make(
+                                ModuleQueryRegistry::class
+                            ),
+                        ),
+                    ]);
+            },
+        );
+    }
+
     private function registerRuntimeHealth(
         Application $application
     ): void {
@@ -492,6 +537,7 @@ final class RuntimeServiceRegistrar
             },
         );
     }
+
     private function registerBootPipeline(
         Application $application
     ): void {
