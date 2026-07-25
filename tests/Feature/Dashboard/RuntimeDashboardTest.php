@@ -90,6 +90,41 @@ final class RuntimeDashboardTest extends TestCase
             );
     }
 
+    public function test_registry_metrics_link_to_the_registry_explorer(): void
+    {
+        $response = $this->get('/control-centre');
+
+        $response
+            ->assertOk()
+            ->assertSee(
+                route(
+                    'control-centre.runtime.registries.show',
+                    ['registry' => 'commands'],
+                ),
+                false,
+            )
+            ->assertSee(
+                route(
+                    'control-centre.runtime.registries.show',
+                    ['registry' => 'queries'],
+                ),
+                false,
+            )
+            ->assertSee(
+                route(
+                    'control-centre.runtime.registries.show',
+                    ['registry' => 'events'],
+                ),
+                false,
+            )
+            ->assertSee(
+                route(
+                    'control-centre.runtime.registries.show',
+                    ['registry' => 'permissions'],
+                ),
+                false,
+            );
+    }
     public function test_the_home_page_redirects_to_the_control_centre(): void
     {
         $this->get('/')

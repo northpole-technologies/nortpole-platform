@@ -330,12 +330,29 @@
             gap: 12px;
         }
 
+        .metric-link {
+            display: block;
+            border-radius: 18px;
+            text-decoration: none;
+        }
+
         .metric {
             min-height: 118px;
             padding: 18px;
             border: 1px solid rgba(154, 184, 218, 0.12);
             border-radius: 18px;
             background: rgba(11, 31, 51, 0.66);
+            transition:
+                border-color 160ms ease,
+                box-shadow 160ms ease,
+                transform 160ms ease;
+        }
+
+        .metric-link:hover .metric {
+            border-color: rgba(119, 219, 255, 0.4);
+            box-shadow:
+                0 20px 42px rgba(0, 0, 0, 0.22);
+            transform: translateY(-2px);
         }
 
         .metric span {
@@ -569,6 +586,15 @@
             <div class="topbar-actions">
                 <a
                     class="graph-link"
+                    href="{{ route(
+                        'control-centre.runtime.diagnostics',
+                    ) }}"
+                >
+                    Diagnostics
+                </a>
+
+                <a
+                    class="graph-link"
                     href="{{ route('control-centre.runtime.graph') }}"
                 >
                     Dependency Graph
@@ -658,10 +684,25 @@
 
             <div class="metrics">
                 @foreach ($metrics as $metric)
-                    <article class="metric">
-                        <span>{{ $metric['label'] }}</span>
-                        <strong>{{ $metric['value'] }}</strong>
-                    </article>
+                    @if (isset($metric['registry']))
+                        <a
+                            class="metric-link"
+                            href="{{ route(
+                                'control-centre.runtime.registries.show',
+                                ['registry' => $metric['registry']],
+                            ) }}"
+                        >
+                            <article class="metric">
+                                <span>{{ $metric['label'] }}</span>
+                                <strong>{{ $metric['value'] }}</strong>
+                            </article>
+                        </a>
+                    @else
+                        <article class="metric">
+                            <span>{{ $metric['label'] }}</span>
+                            <strong>{{ $metric['value'] }}</strong>
+                        </article>
+                    @endif
                 @endforeach
             </div>
         </section>

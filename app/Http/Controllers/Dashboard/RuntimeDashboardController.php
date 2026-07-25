@@ -154,26 +154,32 @@ final class RuntimeDashboardController extends Controller
                     [
                         'label' => 'Capabilities',
                         'value' => $this->capabilityRegistry->count(),
+                        'registry' => 'capabilities',
                     ],
                     [
                         'label' => 'Commands',
                         'value' => $this->commandRegistry->count(),
+                        'registry' => 'commands',
                     ],
                     [
                         'label' => 'Queries',
                         'value' => $this->queryRegistry->count(),
+                        'registry' => 'queries',
                     ],
                     [
                         'label' => 'Event listeners',
                         'value' => $this->eventRegistry->count(),
+                        'registry' => 'events',
                     ],
                     [
                         'label' => 'Navigation items',
                         'value' => $this->navigationRegistry->count(),
+                        'registry' => 'navigation',
                     ],
                     [
                         'label' => 'Permissions',
                         'value' => $this->permissionRegistry->count(),
+                        'registry' => 'permissions',
                     ],
                     [
                         'label' => 'Configuration',
@@ -182,10 +188,12 @@ final class RuntimeDashboardController extends Controller
                     [
                         'label' => 'Notifications',
                         'value' => $this->notificationRegistry->count(),
+                        'registry' => 'notifications',
                     ],
                     [
                         'label' => 'Scheduled jobs',
                         'value' => $this->scheduledJobRegistry->count(),
+                        'registry' => 'scheduled-jobs',
                     ],
                 ],
                 'modules' => $modules,
