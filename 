@@ -1,0 +1,129 @@
+[1mdiff --git a/northpole/Runtime/Dependencies/ModuleDependencyResolver.php b/northpole/Runtime/Dependencies/ModuleDependencyResolver.php[m
+[1mdeleted file mode 100644[m
+[1mindex 6be1263..0000000[m
+[1m--- a/northpole/Runtime/Dependencies/ModuleDependencyResolver.php[m
+[1m+++ /dev/null[m
+[36m@@ -1,123 +0,0 @@[m
+[31m-<?php[m
+[31m-[m
+[31m-namespace Northpole\Runtime\Dependencies;[m
+[31m-[m
+[31m-use Northpole\Runtime\Exceptions\ModuleDependencyException;[m
+[31m-use Northpole\Runtime\Manifest\ModuleManifest;[m
+[31m-use Northpole\Runtime\Modules\ModuleRepository;[m
+[31m-[m
+[31m-final class ModuleDependencyResolver[m
+[31m-{[m
+[31m-    public function __construct([m
+[31m-        private readonly ModuleRepository $repository[m
+[31m-    ) {}[m
+[31m-[m
+[31m-    /**[m
+[31m-     * Resolve all enabled modules into dependency-safe boot order.[m
+[31m-     *[m
+[31m-     * @return array<string, ModuleManifest>[m
+[31m-     */[m
+[31m-    public function resolve(): array[m
+[31m-    {[m
+[31m-        $enabledModules = $this->repository->enabled();[m
+[31m-[m
+[31m-        ksort($enabledModules);[m
+[31m-[m
+[31m-        $resolved = [];[m
+[31m-        $visiting = [];[m
+[31m-        $visited = [];[m
+[31m-[m
+[31m-        foreach ($enabledModules as $module) {[m
+[31m-            $this->visit([m
+[31m-                $module,[m
+[31m-                $resolved,[m
+[31m-                $visiting,[m
+[31m-                $visited,[m
+[31m-                [][m
+[31m-            );[m
+[31m-        }[m
+[31m-[m
+[31m-        return $resolved;[m
+[31m-    }[m
+[31m-[m
+[31m-    /**[m
+[31m-     * @param  array<string, ModuleManifest>  $resolved[m
+[31m-     * @param  array<string, bool>  $visiting[m
+[31m-     * @param  array<string, bool>  $visited[m
+[31m-     * @param  array<int, string>  $path[m
+[31m-     */[m
+[31m-    private function visit([m
+[31m-        ModuleManifest $module,[m
+[31m-        array &$resolved,[m
+[31m-        array &$visiting,[m
+[31m-        array &$visited,[m
+[31m-        array $path[m
+[31m-    ): void {[m
+[31m-        $slug = $module->slug();[m
+[31m-[m
+[31m-        if (isset($visited[$slug])) {[m
+[31m-            return;[m
+[31m-        }[m
+[31m-[m
+[31m-        if (isset($visiting[$slug])) {[m
+[31m-            $cycleStart = array_search([m
+[31m-                $slug,[m
+[31m-                $path,[m
+[31m-                true[m
+[31m-            );[m
+[31m-[m
+[31m-            $cycle = $cycleStart === false[m
+[31m-                ? [...$path, $slug][m
+[31m-                : [[m
+[31m-                    ...array_slice($path, $cycleStart),[m
+[31m-                    $slug,[m
+[31m-                ];[m
+[31m-[m
+[31m-            throw ModuleDependencyException::circular($cycle);[m
+[31m-        }[m
+[31m-[m
+[31m-        $visiting[$slug] = true;[m
+[31m-        $path[] = $slug;[m
+[31m-[m
+[31m-        $dependencies = $module->dependencies();[m
+[31m-[m
+[31m-        sort($dependencies);[m
+[31m-[m
+[31m-        foreach ($dependencies as $dependencySlug) {[m
+[31m-            if ($dependencySlug === $slug) {[m
+[31m-                throw ModuleDependencyException::selfReference($slug);[m
+[31m-            }[m
+[31m-[m
+[31m-            $dependency = $this->repository->get([m
+[31m-                $dependencySlug[m
+[31m-            );[m
+[31m-[m
+[31m-            if ($dependency === null) {[m
+[31m-                throw ModuleDependencyException::missing([m
+[31m-                    $slug,[m
+[31m-                    $dependencySlug[m
+[31m-                );[m
+[31m-            }[m
+[31m-[m
+[31m-            if (! $dependency->enabled()) {[m
+[31m-                throw ModuleDependencyException::disabled([m
+[31m-                    $slug,[m
+[31m-                    $dependencySlug[m
+[31m-                );[m
+[31m-            }[m
+[31m-[m
+[31m-            $this->visit([m
+[31m-                $dependency,[m
+[31m-                $resolved,[m
+[31m-                $visiting,[m
+[31m-                $visited,[m
+[31m-                $path[m
+[31m-            );[m
+[31m-        }[m
+[31m-[m
+[31m-        unset($visiting[$slug]);[m
+[31m-[m
+[31m-        $visited[$slug] = true;[m
+[31m-        $resolved[$slug] = $module;[m
+[31m-    }[m
+[31m-}[m
