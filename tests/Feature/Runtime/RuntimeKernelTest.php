@@ -7,8 +7,12 @@ namespace Tests\Feature\Runtime;
 use Northpole\Runtime\Commands\ModuleCommandBus;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\StageRegistry;
+use Northpole\Runtime\Notifications\ModuleNotificationRegistrar;
+use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Tests\TestCase;
 
 final class RuntimeKernelTest extends TestCase
@@ -62,6 +66,8 @@ final class RuntimeKernelTest extends TestCase
                 'permissions',
                 'navigation',
                 'event-subscribers',
+                'notifications',
+                'scheduled-jobs',
                 'command-handlers',
                 'query-handlers',
             ],
@@ -72,7 +78,7 @@ final class RuntimeKernelTest extends TestCase
         );
 
         $this->assertSame(
-            11,
+            13,
             $registry->count(),
         );
     }
@@ -122,6 +128,70 @@ final class RuntimeKernelTest extends TestCase
         $this->assertSame(
             $registry,
             $bus->registry(),
+        );
+    }
+
+    public function test_notification_registry_is_a_singleton(): void
+    {
+        $first = $this->app->make(
+            ModuleNotificationRegistry::class,
+        );
+
+        $second = $this->app->make(
+            ModuleNotificationRegistry::class,
+        );
+
+        $this->assertSame(
+            $first,
+            $second,
+        );
+    }
+
+    public function test_notification_registrar_uses_the_application_registry(): void
+    {
+        $registry = $this->app->make(
+            ModuleNotificationRegistry::class,
+        );
+
+        $registrar = $this->app->make(
+            ModuleNotificationRegistrar::class,
+        );
+
+        $this->assertSame(
+            $registry,
+            $registrar->registry(),
+        );
+    }
+
+    public function test_scheduled_job_registry_is_a_singleton(): void
+    {
+        $first = $this->app->make(
+            ModuleScheduledJobRegistry::class,
+        );
+
+        $second = $this->app->make(
+            ModuleScheduledJobRegistry::class,
+        );
+
+        $this->assertSame(
+            $first,
+            $second,
+        );
+    }
+
+    public function test_scheduled_job_registrar_uses_the_application_registry(): void
+    {
+        $registry = $this->app->make(
+            ModuleScheduledJobRegistry::class,
+        );
+
+        $registrar = $this->app->make(
+            ModuleScheduledJobRegistrar::class,
+        );
+
+        $this->assertSame(
+            $registry,
+            $registrar->registry(),
         );
     }
 }

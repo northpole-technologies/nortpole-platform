@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Northpole\Runtime\Lifecycle;
 
 use Northpole\Runtime\Contracts\BootStageContract;
@@ -23,14 +25,8 @@ final class ProviderStage implements BootStageContract
 
     public function boot(BootContext $context): void
     {
-        $resources = $context->resources();
-
-        if (! $resources->hasProvider()) {
-            return;
+        foreach ($context->resources()->providers() as $provider) {
+            $this->application->registerProvider($provider);
         }
-
-        $this->application->registerProvider(
-            $resources->provider()
-        );
     }
 }

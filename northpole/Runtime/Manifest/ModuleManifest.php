@@ -27,10 +27,49 @@ final class ModuleManifest implements ModuleManifestContract
             }
         }
 
+        $this->validateProviders();
         $this->validateDependencies();
         $this->validateEvents();
+        $this->validateNotifications();
         $this->validateCommands();
         $this->validateQueries();
+        $this->validateJobs();
+    }
+
+    private function validateProviders(): void
+    {
+        if (
+            isset($this->data['provider'])
+            && ! is_string($this->data['provider'])
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [provider] must be a string'
+            );
+        }
+
+        if (! isset($this->data['providers'])) {
+            return;
+        }
+
+        if (
+            ! is_array($this->data['providers'])
+            || ! array_is_list($this->data['providers'])
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [providers] must be a list'
+            );
+        }
+
+        foreach ($this->data['providers'] as $provider) {
+            if (
+                ! is_string($provider)
+                || trim($provider) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest field [providers] must contain non-empty provider class names'
+                );
+            }
+        }
     }
 
     private function validateDependencies(): void
@@ -203,6 +242,164 @@ final class ModuleManifest implements ModuleManifestContract
         }
     }
 
+    private function validateNotifications(): void
+    {
+        if (! isset($this->data['notifications'])) {
+            return;
+        }
+
+        if (! is_array($this->data['notifications'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [notifications] must be an object'
+            );
+        }
+
+        $this->validateSentNotifications(
+            $this->data['notifications']['sends'] ?? []
+        );
+    }
+
+    private function validateSentNotifications(
+        mixed $notifications
+    ): void {
+        if (
+            ! is_array($notifications)
+            || ! array_is_list($notifications)
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [notifications.sends] must be a list'
+            );
+        }
+
+        foreach ($notifications as $index => $notification) {
+            if (! is_array($notification)) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest notification [%d] must be an object',
+                        $index
+                    )
+                );
+            }
+
+            $this->validateNotificationStringField(
+                $notification,
+                $index,
+                'name'
+            );
+
+            $this->validateNotificationStringField(
+                $notification,
+                $index,
+                'class'
+            );
+
+            $this->validateNotificationChannels(
+                $notification,
+                $index
+            );
+
+            $this->validateNotificationQueue(
+                $notification,
+                $index
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $notification
+     */
+    private function validateNotificationStringField(
+        array $notification,
+        int $index,
+        string $field
+    ): void {
+        $value = $notification[$field] ?? null;
+
+        if (
+            ! is_string($value)
+            || trim($value) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest notification [%d] must define a non-empty %s',
+                    $index,
+                    $field
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $notification
+     */
+    private function validateNotificationChannels(
+        array $notification,
+        int $index
+    ): void {
+        $channels = $notification['channels'] ?? null;
+
+        if (
+            ! is_array($channels)
+            || ! array_is_list($channels)
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest notification [%d] field [channels] must be a list',
+                    $index
+                )
+            );
+        }
+
+        if ($channels === []) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest notification [%d] must define at least one channel',
+                    $index
+                )
+            );
+        }
+
+        foreach ($channels as $channel) {
+            if (
+                ! is_string($channel)
+                || trim($channel) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest notification [%d] field [channels] must contain non-empty strings',
+                        $index
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $notification
+     */
+    private function validateNotificationQueue(
+        array $notification,
+        int $index
+    ): void {
+        if (! array_key_exists('queue', $notification)) {
+            return;
+        }
+
+        $queue = $notification['queue'];
+
+        if (
+            ! is_string($queue)
+            || trim($queue) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest notification [%d] field [queue] must be a non-empty string',
+                    $index
+                )
+            );
+        }
+    }
+
     private function validateCommands(): void
     {
         if (! isset($this->data['commands'])) {
@@ -307,6 +504,235 @@ final class ModuleManifest implements ModuleManifestContract
         }
     }
 
+    private function validateJobs(): void
+    {
+        if (! isset($this->data['jobs'])) {
+            return;
+        }
+
+        if (! is_array($this->data['jobs'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [jobs] must be an object'
+            );
+        }
+
+        $this->validateScheduledJobs(
+            $this->data['jobs']['scheduled'] ?? []
+        );
+    }
+
+    private function validateScheduledJobs(
+        mixed $scheduledJobs
+    ): void {
+        if (
+            ! is_array($scheduledJobs)
+            || ! array_is_list($scheduledJobs)
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [jobs.scheduled] must be a list'
+            );
+        }
+
+        foreach (
+            $scheduledJobs as $index => $scheduledJob
+        ) {
+            if (! is_array($scheduledJob)) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest scheduled job [%d] must be an object',
+                        $index
+                    )
+                );
+            }
+
+            $this->validateScheduledJobClass(
+                $scheduledJob,
+                $index
+            );
+
+            $this->validateScheduledJobFrequency(
+                $scheduledJob,
+                $index
+            );
+
+            $this->validateScheduledJobTime(
+                $scheduledJob,
+                $index
+            );
+
+            $this->validateScheduledJobQueue(
+                $scheduledJob,
+                $index
+            );
+
+            $this->validateScheduledJobBooleanOption(
+                $scheduledJob,
+                $index,
+                'without_overlapping'
+            );
+
+            $this->validateScheduledJobBooleanOption(
+                $scheduledJob,
+                $index,
+                'run_in_background'
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheduledJob
+     */
+    private function validateScheduledJobClass(
+        array $scheduledJob,
+        int $index
+    ): void {
+        $class = $scheduledJob['class'] ?? null;
+
+        if (
+            ! is_string($class)
+            || trim($class) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] must define a non-empty class',
+                    $index
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheduledJob
+     */
+    private function validateScheduledJobFrequency(
+        array $scheduledJob,
+        int $index
+    ): void {
+        $frequency = $scheduledJob['frequency'] ?? null;
+
+        if (
+            ! is_string($frequency)
+            || trim($frequency) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] must define a non-empty frequency',
+                    $index
+                )
+            );
+        }
+
+        $supportedFrequencies = [
+            'every-minute',
+            'every-five-minutes',
+            'every-ten-minutes',
+            'every-fifteen-minutes',
+            'every-thirty-minutes',
+            'hourly',
+            'daily',
+            'weekly',
+            'monthly',
+        ];
+
+        $normalisedFrequency = strtolower(
+            trim($frequency)
+        );
+
+        if (
+            ! in_array(
+                $normalisedFrequency,
+                $supportedFrequencies,
+                true
+            )
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] has unsupported frequency [%s]',
+                    $index,
+                    $normalisedFrequency
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheduledJob
+     */
+    private function validateScheduledJobTime(
+        array $scheduledJob,
+        int $index
+    ): void {
+        if (! array_key_exists('at', $scheduledJob)) {
+            return;
+        }
+
+        $time = $scheduledJob['at'];
+
+        if (
+            ! is_string($time)
+            || preg_match(
+                '/^(?:[01]\d|2[0-3]):[0-5]\d$/',
+                trim($time)
+            ) !== 1
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] field [at] must use 24-hour HH:MM format',
+                    $index
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheduledJob
+     */
+    private function validateScheduledJobQueue(
+        array $scheduledJob,
+        int $index
+    ): void {
+        if (! array_key_exists('queue', $scheduledJob)) {
+            return;
+        }
+
+        $queue = $scheduledJob['queue'];
+
+        if (
+            ! is_string($queue)
+            || trim($queue) === ''
+        ) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] field [queue] must be a non-empty string',
+                    $index
+                )
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheduledJob
+     */
+    private function validateScheduledJobBooleanOption(
+        array $scheduledJob,
+        int $index,
+        string $option
+    ): void {
+        if (! array_key_exists($option, $scheduledJob)) {
+            return;
+        }
+
+        if (! is_bool($scheduledJob[$option])) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Module manifest scheduled job [%d] field [%s] must be a boolean',
+                    $index,
+                    $option
+                )
+            );
+        }
+    }
+
     public function name(): string
     {
         return (string) $this->data['name'];
@@ -329,7 +755,30 @@ final class ModuleManifest implements ModuleManifestContract
 
     public function provider(): ?string
     {
-        return $this->data['provider'] ?? null;
+        return $this->providers()[0] ?? null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function providers(): array
+    {
+        $providers = [];
+
+        $legacyProvider = $this->data['provider'] ?? null;
+
+        if (
+            is_string($legacyProvider)
+            && trim($legacyProvider) !== ''
+        ) {
+            $providers[trim($legacyProvider)] = true;
+        }
+
+        foreach ($this->data['providers'] ?? [] as $provider) {
+            $providers[trim($provider)] = true;
+        }
+
+        return array_keys($providers);
     }
 
     public function enabled(): bool
@@ -477,6 +926,61 @@ final class ModuleManifest implements ModuleManifestContract
     }
 
     /**
+     * @return array<int, array{
+     *     name: string,
+     *     class: string,
+     *     channels: array<int, string>,
+     *     queue?: string
+     * }>
+     */
+    public function notifications(): array
+    {
+        $notifications =
+            $this->data['notifications']['sends'] ?? [];
+
+        $normalisedNotifications = [];
+
+        foreach ($notifications as $notification) {
+            $normalisedChannels = [];
+
+            foreach ($notification['channels'] as $channel) {
+                $normalisedChannel = trim($channel);
+
+                $normalisedChannels[
+                    $normalisedChannel
+                ] = $normalisedChannel;
+            }
+
+            ksort(
+                $normalisedChannels
+            );
+
+            $normalisedNotification = [
+                'name' => trim(
+                    $notification['name']
+                ),
+                'class' => trim(
+                    $notification['class']
+                ),
+                'channels' => array_values(
+                    $normalisedChannels
+                ),
+            ];
+
+            if (array_key_exists('queue', $notification)) {
+                $normalisedNotification['queue'] = trim(
+                    $notification['queue']
+                );
+            }
+
+            $normalisedNotifications[] =
+                $normalisedNotification;
+        }
+
+        return $normalisedNotifications;
+    }
+
+    /**
      * @return array<string, string>
      */
     public function handledCommands(): array
@@ -514,6 +1018,67 @@ final class ModuleManifest implements ModuleManifestContract
         }
 
         return $normalisedQueries;
+    }
+
+    /**
+     * @return array<int, array{
+     *     class: string,
+     *     frequency: string,
+     *     at?: string,
+     *     queue?: string,
+     *     without_overlapping?: bool,
+     *     run_in_background?: bool
+     * }>
+     */
+    public function scheduledJobs(): array
+    {
+        $scheduledJobs = $this->data['jobs']['scheduled'] ?? [];
+        $normalisedJobs = [];
+
+        foreach ($scheduledJobs as $scheduledJob) {
+            $normalisedJob = [
+                'class' => trim($scheduledJob['class']),
+                'frequency' => strtolower(
+                    trim($scheduledJob['frequency'])
+                ),
+            ];
+
+            if (array_key_exists('at', $scheduledJob)) {
+                $normalisedJob['at'] = trim(
+                    $scheduledJob['at']
+                );
+            }
+
+            if (array_key_exists('queue', $scheduledJob)) {
+                $normalisedJob['queue'] = trim(
+                    $scheduledJob['queue']
+                );
+            }
+
+            if (
+                array_key_exists(
+                    'without_overlapping',
+                    $scheduledJob
+                )
+            ) {
+                $normalisedJob['without_overlapping'] =
+                    $scheduledJob['without_overlapping'];
+            }
+
+            if (
+                array_key_exists(
+                    'run_in_background',
+                    $scheduledJob
+                )
+            ) {
+                $normalisedJob['run_in_background'] =
+                    $scheduledJob['run_in_background'];
+            }
+
+            $normalisedJobs[] = $normalisedJob;
+        }
+
+        return $normalisedJobs;
     }
 
     /**

@@ -10,6 +10,7 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\ServiceProvider;
 use Northpole\Console\Support\ModuleScaffolder;
 use Northpole\Console\Support\StubWriter;
+use Northpole\Core\Registration\RuntimeServiceRegistrar;
 use Northpole\Lifecycle\LifecyclePipeline;
 use Northpole\Lifecycle\LifecycleStageRegistry;
 use Northpole\Lifecycle\ModuleLifecycleManager;
@@ -20,315 +21,66 @@ use Northpole\Lifecycle\Stages\ResolveInstallationStage;
 use Northpole\Lifecycle\Stages\ResolveManifestStage;
 use Northpole\Lifecycle\Stages\UninstallStage;
 use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
-use Northpole\Runtime\Capabilities\CapabilityRegistry;
-use Northpole\Runtime\Commands\ModuleCommandBus;
-use Northpole\Runtime\Commands\ModuleCommandRegistrar;
-use Northpole\Runtime\Commands\ModuleCommandRegistry;
-use Northpole\Runtime\Discovery\ModuleDiscovery;
-use Northpole\Runtime\Events\ModuleEventBus;
-use Northpole\Runtime\Events\ModuleEventRegistrar;
-use Northpole\Runtime\Events\ModuleEventRegistry;
+use Northpole\Runtime\Jobs\Laravel\LaravelScheduledJobAdapter;
+use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
 use Northpole\Runtime\Lifecycle\BootPipeline;
-use Northpole\Runtime\Lifecycle\CapabilityStage;
-use Northpole\Runtime\Lifecycle\CommandHandlerStage;
-use Northpole\Runtime\Lifecycle\ConfigStage;
-use Northpole\Runtime\Lifecycle\EventSubscriberStage;
-use Northpole\Runtime\Lifecycle\MigrationStage;
-use Northpole\Runtime\Lifecycle\NavigationStage;
-use Northpole\Runtime\Lifecycle\PermissionStage;
-use Northpole\Runtime\Lifecycle\ProviderStage;
-use Northpole\Runtime\Lifecycle\QueryHandlerStage;
-use Northpole\Runtime\Lifecycle\RouteStage;
-use Northpole\Runtime\Lifecycle\StageRegistry;
-use Northpole\Runtime\Lifecycle\ViewStage;
-use Northpole\Runtime\Manifest\ManifestLoader;
-use Northpole\Runtime\Modules\ModuleDependencyResolver;
-use Northpole\Runtime\Modules\ModuleFinder;
-use Northpole\Runtime\Modules\ModuleRepository;
-use Northpole\Runtime\Navigation\NavigationRegistry;
-use Northpole\Runtime\Permissions\PermissionRegistry;
-use Northpole\Runtime\Queries\ModuleQueryBus;
-use Northpole\Runtime\Queries\ModuleQueryRegistrar;
-use Northpole\Runtime\Queries\ModuleQueryRegistry;
 use Northpole\Runtime\Runtime;
-use Northpole\Runtime\Support\ApplicationAdapter;
 
 final class PlatformServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(
-            ApplicationAdapter::class,
-            function (Application $application): ApplicationAdapter {
-                return new ApplicationAdapter($application);
-            },
+        (new RuntimeServiceRegistrar)->register(
+            $this->app
         );
 
-        $this->app->singleton(
-            ModuleRepository::class,
-            function (): ModuleRepository {
-                return new ModuleRepository;
-            },
+        $this->registerLifecycleServices();
+        $this->registerConsoleServices();
+    }
+
+    public function boot(
+        Runtime $runtime,
+        BootPipeline $pipeline,
+        ModuleScheduledJobRegistry $scheduledJobs,
+        LaravelScheduledJobAdapter $scheduledJobAdapter,
+    ): void {
+        $runtime->discover();
+
+        $pipeline->boot(
+            $runtime
         );
 
-        $this->app->singleton(
-            ModuleFinder::class,
-            function (): ModuleFinder {
-                return new ModuleFinder;
-            },
+        $scheduledJobAdapter->register(
+            $scheduledJobs
         );
+    }
 
-        $this->app->singleton(
-            ManifestLoader::class,
-            function (): ManifestLoader {
-                return new ManifestLoader;
-            },
-        );
-
-        $this->app->singleton(
-            ModuleDependencyResolver::class,
-            function (): ModuleDependencyResolver {
-                return new ModuleDependencyResolver;
-            },
-        );
-
-        $this->app->singleton(
-            CapabilityRegistry::class,
-            function (): CapabilityRegistry {
-                return new CapabilityRegistry;
-            },
-        );
-
-        $this->app->singleton(
-            PermissionRegistry::class,
-            function (): PermissionRegistry {
-                return new PermissionRegistry;
-            },
-        );
-
-        $this->app->singleton(
-            NavigationRegistry::class,
-            function (): NavigationRegistry {
-                return new NavigationRegistry;
-            },
-        );
-
-        $this->app->singleton(
-            ModuleEventRegistry::class,
-            function (): ModuleEventRegistry {
-                return new ModuleEventRegistry;
-            },
-        );
-
-        $this->app->afterResolving(
-            ModuleEventRegistry::class,
-            function (ModuleEventRegistry $registry): void {
-                $registry->listen(
-                    eventName: 'module.installed',
-                    listener: \Northpole\Runtime\Events\Subscribers\ModuleInstalledSubscriber::class,
-                    module: 'platform',
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleEventRegistrar::class,
-            function (
-                Application $application,
-            ): ModuleEventRegistrar {
-                return new ModuleEventRegistrar(
-                    $application->make(
-                        ModuleEventRegistry::class,
-                    ),
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleEventBus::class,
-            function (Application $application): ModuleEventBus {
-                return new ModuleEventBus(
-                    registry: $application->make(
-                        ModuleEventRegistry::class,
-                    ),
-                    listenerResolver: static function (
-                        string $listener,
-                    ) use ($application): object {
-                        return $application->make($listener);
-                    },
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleCommandRegistry::class,
-            function (): ModuleCommandRegistry {
-                return new ModuleCommandRegistry;
-            },
-        );
-
-        $this->app->singleton(
-            ModuleCommandRegistrar::class,
-            function (
-                Application $application,
-            ): ModuleCommandRegistrar {
-                return new ModuleCommandRegistrar(
-                    $application->make(
-                        ModuleCommandRegistry::class,
-                    ),
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleCommandBus::class,
-            function (Application $application): ModuleCommandBus {
-                return new ModuleCommandBus(
-                    registry: $application->make(
-                        ModuleCommandRegistry::class,
-                    ),
-                    handlerResolver: static function (
-                        string $handler,
-                    ) use ($application): object {
-                        return $application->make($handler);
-                    },
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleQueryRegistry::class,
-            function (): ModuleQueryRegistry {
-                return new ModuleQueryRegistry;
-            },
-        );
-
-        $this->app->singleton(
-            ModuleQueryRegistrar::class,
-            function (
-                Application $application,
-            ): ModuleQueryRegistrar {
-                return new ModuleQueryRegistrar(
-                    $application->make(
-                        ModuleQueryRegistry::class,
-                    ),
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleQueryBus::class,
-            function (Application $application): ModuleQueryBus {
-                return new ModuleQueryBus(
-                    registry: $application->make(
-                        ModuleQueryRegistry::class,
-                    ),
-                    handlerResolver: static function (
-                        string $handler,
-                    ) use ($application): object {
-                        return $application->make($handler);
-                    },
-                );
-            },
-        );
-
-        $this->app->singleton(
-            ModuleDiscovery::class,
-            function (Application $application): ModuleDiscovery {
-                return new ModuleDiscovery(
-                    $application->make(ModuleFinder::class),
-                    $application->make(ManifestLoader::class),
-                    $application->make(ModuleRepository::class),
-                );
-            },
-        );
-
-        $this->app->singleton(
-            Runtime::class,
-            function (Application $application): Runtime {
-                return new Runtime(
-                    $application->make(ModuleDiscovery::class),
-                    $application->make(ModuleRepository::class),
-                    $application->make(
-                        ModuleDependencyResolver::class,
-                    ),
-                    $application->basePath('modules'),
-                );
-            },
-        );
-
-        $this->app->singleton(
-            StageRegistry::class,
-            function (Application $application): StageRegistry {
-                $adapter = $application->make(
-                    ApplicationAdapter::class,
-                );
-
-                return (new StageRegistry)->registerMany([
-                    new ConfigStage($adapter),
-                    new ProviderStage($adapter),
-                    new RouteStage($adapter),
-                    new ViewStage($adapter),
-                    new MigrationStage($adapter),
-                    new CapabilityStage(
-                        $application->make(
-                            CapabilityRegistry::class,
-                        ),
-                    ),
-                    new PermissionStage(
-                        $application->make(
-                            PermissionRegistry::class,
-                        ),
-                    ),
-                    new NavigationStage(
-                        $application->make(
-                            NavigationRegistry::class,
-                        ),
-                    ),
-                    new EventSubscriberStage(
-                        $application->make(
-                            ModuleEventRegistrar::class,
-                        ),
-                    ),
-                    new CommandHandlerStage(
-                        $application->make(
-                            ModuleCommandRegistrar::class,
-                        ),
-                    ),
-                    new QueryHandlerStage(
-                        $application->make(
-                            ModuleQueryRegistrar::class,
-                        ),
-                    ),
-                ]);
-            },
-        );
-
-        $this->app->singleton(
-            BootPipeline::class,
-            function (Application $application): BootPipeline {
-                return new BootPipeline(
-                    $application->make(StageRegistry::class),
-                );
-            },
-        );
-
+    private function registerLifecycleServices(): void
+    {
         $this->app->singleton(
             LifecycleStageRegistry::class,
             function (
-                Application $application,
+                Application $application
             ): LifecycleStageRegistry {
                 return (new LifecycleStageRegistry)
                     ->registerMany([
                         new ResolveInstallationStage,
                         new ResolveManifestStage(
-                            $application->make(Runtime::class),
+                            $application->make(
+                                Runtime::class
+                            ),
                         ),
                         new ValidateDependenciesStage(
-                            $application->make(Runtime::class),
-                            $application->make(TenantContext::class),
+                            $application->make(
+                                Runtime::class
+                            ),
+                            $application->make(
+                                TenantContext::class
+                            ),
                         ),
-                        $application->make(InstallStage::class),
+                        $application->make(
+                            InstallStage::class
+                        ),
                         new EnableStage,
                         new DisableStage,
                         new UninstallStage,
@@ -338,22 +90,27 @@ final class PlatformServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             LifecyclePipeline::class,
-            function (Application $application): LifecyclePipeline {
+            function (
+                Application $application
+            ): LifecyclePipeline {
                 return new LifecyclePipeline(
                     $application->make(
-                        LifecycleStageRegistry::class,
+                        LifecycleStageRegistry::class
                     ),
                     $application->make(
-                        ConnectionInterface::class,
+                        ConnectionInterface::class
                     ),
                 );
             },
         );
 
         $this->app->singleton(
-            ModuleLifecycleManager::class,
+            ModuleLifecycleManager::class
         );
+    }
 
+    private function registerConsoleServices(): void
+    {
         $this->app->singleton(
             StubWriter::class,
             function (): StubWriter {
@@ -363,33 +120,21 @@ final class PlatformServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             ModuleScaffolder::class,
-            function (Application $application): ModuleScaffolder {
+            function (
+                Application $application
+            ): ModuleScaffolder {
                 return new ModuleScaffolder(
                     stubWriter: $application->make(
-                        StubWriter::class,
+                        StubWriter::class
                     ),
                     modulesPath: $application->basePath(
-                        'modules',
+                        'modules'
                     ),
                     stubsPath: $application->basePath(
-                        'northpole/Console/Stubs',
+                        'northpole/Console/Stubs'
                     ),
                 );
             },
         );
     }
-
-    public function boot(
-        Runtime $runtime,
-        BootPipeline $pipeline,
-    ): void {
-        $runtime->discover();
-
-        $pipeline->boot($runtime);
-    }
 }
-
-
-
-
-

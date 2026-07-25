@@ -10,6 +10,142 @@ use PHPUnit\Framework\TestCase;
 
 final class ModuleManifestTest extends TestCase
 {
+    public function test_it_returns_a_legacy_service_provider(): void
+    {
+        $manifest = $this->manifest([
+            'provider' => 'Modules\\Reports\\Providers\\ReportsServiceProvider',
+        ]);
+
+        self::assertSame(
+            'Modules\\Reports\\Providers\\ReportsServiceProvider',
+            $manifest->provider()
+        );
+
+        self::assertSame(
+            [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+            ],
+            $manifest->providers()
+        );
+    }
+
+    public function test_it_returns_multiple_service_providers(): void
+    {
+        $manifest = $this->manifest([
+            'providers' => [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+            $manifest->providers()
+        );
+
+        self::assertSame(
+            'Modules\\Reports\\Providers\\ReportsServiceProvider',
+            $manifest->provider()
+        );
+    }
+
+    public function test_it_merges_legacy_and_multiple_service_providers(): void
+    {
+        $manifest = $this->manifest([
+            'provider' => 'Modules\\Reports\\Providers\\ReportsServiceProvider',
+            'providers' => [
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+            $manifest->providers()
+        );
+    }
+
+    public function test_it_trims_and_removes_duplicate_service_providers(): void
+    {
+        $manifest = $this->manifest([
+            'provider' => ' Modules\\Reports\\Providers\\ReportsServiceProvider ',
+            'providers' => [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+                ' Modules\\Reports\\Providers\\ExportServiceProvider ',
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                'Modules\\Reports\\Providers\\ReportsServiceProvider',
+                'Modules\\Reports\\Providers\\ExportServiceProvider',
+            ],
+            $manifest->providers()
+        );
+    }
+
+    public function test_it_returns_no_service_providers_when_not_defined(): void
+    {
+        $manifest = $this->manifest();
+
+        self::assertNull($manifest->provider());
+        self::assertSame([], $manifest->providers());
+    }
+
+    public function test_it_rejects_a_non_string_legacy_provider(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [provider] must be a string'
+        );
+
+        $this->manifest([
+            'provider' => 123,
+        ]);
+    }
+
+    public function test_it_rejects_a_non_list_providers_field(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [providers] must be a list'
+        );
+
+        $this->manifest([
+            'providers' => [
+                'primary' => 'Modules\\Reports\\Providers\\ReportsServiceProvider',
+            ],
+        ]);
+    }
+
+    public function test_it_rejects_an_empty_provider_in_the_providers_list(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Module manifest field [providers] must contain non-empty provider class names'
+        );
+
+        $this->manifest([
+            'providers' => [
+                '',
+            ],
+        ]);
+    }
     public function test_it_returns_legacy_dependency_slugs(): void
     {
         $manifest = $this->manifest([

@@ -7,9 +7,12 @@ use RuntimeException;
 
 final class ModuleResources
 {
-    private bool $providerResolved = false;
+    private bool $providersResolved = false;
 
-    private ?string $resolvedProvider = null;
+    /**
+     * @var array<int, string>|null
+     */
+    private ?array $resolvedProviders = null;
 
     /**
      * @var array<string, string>|null
@@ -40,16 +43,19 @@ final class ModuleResources
 
     public function hasProvider(): bool
     {
-        $this->resolveProvider();
+        return $this->hasProviders();
+    }
 
-        return $this->resolvedProvider !== null;
+    public function hasProviders(): bool
+    {
+        return $this->providers() !== [];
     }
 
     public function provider(): string
     {
-        $this->resolveProvider();
+        $provider = $this->providers()[0] ?? null;
 
-        if ($this->resolvedProvider === null) {
+        if ($provider === null) {
             throw new RuntimeException(
                 sprintf(
                     'Module "%s" does not define a service provider.',
@@ -58,7 +64,17 @@ final class ModuleResources
             );
         }
 
-        return $this->resolvedProvider;
+        return $provider;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function providers(): array
+    {
+        $this->resolveProviders();
+
+        return $this->resolvedProviders ?? [];
     }
 
     public function hasConfiguration(): bool
@@ -227,23 +243,28 @@ final class ModuleResources
         return $this->resolvedMigrationsPath;
     }
 
-    private function resolveProvider(): void
+    private function resolveProviders(): void
     {
-        if ($this->providerResolved) {
+        if ($this->providersResolved) {
             return;
         }
 
-        $provider = $this->module->provider();
+        $providers = [];
 
-        $provider = is_string($provider)
-            ? trim($provider)
-            : '';
+        foreach ($this->module->providers() as $provider) {
+            $provider = is_string($provider)
+                ? trim($provider)
+                : '';
 
-        $this->resolvedProvider = $provider !== ''
-            ? $provider
-            : null;
+            if ($provider === '') {
+                continue;
+            }
 
-        $this->providerResolved = true;
+            $providers[$provider] = true;
+        }
+
+        $this->resolvedProviders = array_keys($providers);
+        $this->providersResolved = true;
     }
 
     private function resolveViewsPath(): void

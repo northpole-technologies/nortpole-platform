@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Runtime;
 
 use Northpole\Runtime\Contracts\ModuleManifestContract;
@@ -13,31 +15,18 @@ use Northpole\Runtime\Modules\ModuleRepository;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
 use Tests\Fixtures\Runtime\RecordingServiceProvider;
+use Tests\Fixtures\Runtime\SecondaryRecordingServiceProvider;
 use Tests\TestCase;
 
 final class ProviderStageTest extends TestCase
 {
     public function test_it_registers_a_module_service_provider(): void
     {
-        $runtime = $this->createRuntime();
+        $manifest = $this->createManifest([
+            RecordingServiceProvider::class,
+        ]);
 
-        $manifest = $this->createMock(ModuleManifestContract::class);
-
-        $manifest
-            ->expects($this->once())
-            ->method('provider')
-            ->willReturn(RecordingServiceProvider::class);
-
-        $stage = new ProviderStage(
-            new ApplicationAdapter($this->app)
-        );
-
-        $stage->boot(
-            new BootContext(
-                $runtime,
-                $manifest
-            )
-        );
+        $this->bootManifest($manifest);
 
         $this->assertTrue(
             $this->app->bound(RecordingServiceProvider::BINDING)
@@ -49,57 +38,90 @@ final class ProviderStageTest extends TestCase
         );
     }
 
-    public function test_it_skips_a_module_without_a_service_provider(): void
+    public function test_it_registers_multiple_module_service_providers(): void
     {
-        $runtime = $this->createRuntime();
+        $manifest = $this->createManifest([
+            RecordingServiceProvider::class,
+            SecondaryRecordingServiceProvider::class,
+        ]);
 
-        $manifest = $this->createMock(ModuleManifestContract::class);
+        $this->bootManifest($manifest);
 
-        $manifest
-            ->expects($this->once())
-            ->method('provider')
-            ->willReturn(null);
-
-        $stage = new ProviderStage(
-            new ApplicationAdapter($this->app)
+        $this->assertSame(
+            'provider-registered',
+            $this->app->make(RecordingServiceProvider::BINDING)
         );
 
-        $stage->boot(
-            new BootContext(
-                $runtime,
-                $manifest
+        $this->assertSame(
+            'secondary-provider-registered',
+            $this->app->make(
+                SecondaryRecordingServiceProvider::BINDING
             )
-        );
-
-        $this->assertFalse(
-            $this->app->bound(RecordingServiceProvider::BINDING)
         );
     }
 
-    public function test_it_skips_an_empty_service_provider_name(): void
+    public function test_it_registers_duplicate_provider_names_once(): void
     {
-        $runtime = $this->createRuntime();
+        $manifest = $this->createManifest([
+            RecordingServiceProvider::class,
+            RecordingServiceProvider::class,
+        ]);
 
-        $manifest = $this->createMock(ModuleManifestContract::class);
+        $this->bootManifest($manifest);
+
+        $this->assertSame(
+            'provider-registered',
+            $this->app->make(RecordingServiceProvider::BINDING)
+        );
+    }
+
+    public function test_it_skips_a_module_without_service_providers(): void
+    {
+        $manifest = $this->createManifest([]);
+
+        $this->bootManifest($manifest);
+
+        $this->assertFalse(
+            $this->app->bound(RecordingServiceProvider::BINDING)
+        );
+
+        $this->assertFalse(
+            $this->app->bound(
+                SecondaryRecordingServiceProvider::BINDING
+            )
+        );
+    }
+
+    /**
+     * @param  array<int, string>  $providers
+     */
+    private function createManifest(
+        array $providers
+    ): ModuleManifestContract {
+        $manifest = $this->createMock(
+            ModuleManifestContract::class
+        );
 
         $manifest
             ->expects($this->once())
-            ->method('provider')
-            ->willReturn('   ');
+            ->method('providers')
+            ->willReturn($providers);
 
+        return $manifest;
+    }
+
+    private function bootManifest(
+        ModuleManifestContract $manifest
+    ): void {
         $stage = new ProviderStage(
             new ApplicationAdapter($this->app)
         );
 
         $stage->boot(
             new BootContext(
-                $runtime,
+                $this->createRuntime(),
                 $manifest
             )
-        );
-
-        $this->assertFalse(
-            $this->app->bound(RecordingServiceProvider::BINDING)
         );
     }
 

@@ -14,7 +14,19 @@ interface ModuleManifestContract
 
     public function description(): ?string;
 
+    /**
+     * Returns the first declared module service provider.
+     *
+     * This method is retained for backwards compatibility.
+     */
     public function provider(): ?string;
+
+    /**
+     * Returns all declared module service providers.
+     *
+     * @return array<int, string>
+     */
+    public function providers(): array;
 
     public function enabled(): bool;
 
@@ -82,6 +94,18 @@ interface ModuleManifestContract
     public function eventSubscribers(): array;
 
     /**
+     * Returns notifications declared by this module.
+     *
+     * @return array<int, array{
+     *     name: string,
+     *     class: string,
+     *     channels: array<int, string>,
+     *     queue?: string
+     * }>
+     */
+    public function notifications(): array;
+
+    /**
      * Returns command names mapped to the handler classes owned by this module.
      *
      * @return array<string, string>
@@ -94,6 +118,20 @@ interface ModuleManifestContract
      * @return array<string, string>
      */
     public function handledQueries(): array;
+
+    /**
+     * Returns scheduled jobs declared by this module.
+     *
+     * @return array<int, array{
+     *     class: string,
+     *     frequency: string,
+     *     at?: string,
+     *     queue?: string,
+     *     without_overlapping?: bool,
+     *     run_in_background?: bool
+     * }>
+     */
+    public function scheduledJobs(): array;
 
     /**
      * @return array<string, mixed>
