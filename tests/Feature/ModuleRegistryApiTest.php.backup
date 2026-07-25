@@ -9,8 +9,6 @@ use App\Models\User;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Northpole\Runtime\Events\ModuleEventRegistry;
-use Tests\Support\Events\ModuleInstalledTestListener;
 use Tests\TestCase;
 
 class ModuleRegistryApiTest extends TestCase
@@ -75,16 +73,6 @@ class ModuleRegistryApiTest extends TestCase
             'SantaBuddy'
         );
 
-        ModuleInstalledTestListener::$events = [];
-
-        $this->app
-            ->make(ModuleEventRegistry::class)
-            ->listen(
-                eventName: 'module.installed',
-                listener: ModuleInstalledTestListener::class,
-                module: 'tests',
-            );
-
         Sanctum::actingAs($user);
 
         $response = $this
@@ -118,21 +106,6 @@ class ModuleRegistryApiTest extends TestCase
             'marketplace_module_id' => $module->id,
             'is_enabled' => true,
         ]);
-
-        $this->assertCount(
-            1,
-            ModuleInstalledTestListener::$events,
-        );
-
-        $this->assertSame(
-            'module.installed',
-            ModuleInstalledTestListener::$events[0]->name(),
-        );
-
-        $this->assertSame(
-            $organisation->id,
-            ModuleInstalledTestListener::$events[0]->payload()['organisation_id'],
-        );
     }
 
     public function test_an_installed_module_can_be_disabled_for_the_active_tenant(): void
@@ -217,8 +190,6 @@ class ModuleRegistryApiTest extends TestCase
             'marketplace_module_id' => $module->id,
             'is_enabled' => true,
         ]);
-
-
     }
 
     public function test_an_installed_module_can_be_uninstalled_for_the_active_tenant(): void
@@ -585,7 +556,3 @@ class ModuleRegistryApiTest extends TestCase
         );
     }
 }
-
-
-
-

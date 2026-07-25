@@ -120,17 +120,6 @@ final class PlatformServiceProvider extends ServiceProvider
             },
         );
 
-        $this->app->afterResolving(
-            ModuleEventRegistry::class,
-            function (ModuleEventRegistry $registry): void {
-                $registry->listen(
-                    eventName: 'module.installed',
-                    listener: \Northpole\Runtime\Events\Subscribers\ModuleInstalledSubscriber::class,
-                    module: 'platform',
-                );
-            },
-        );
-
         $this->app->singleton(
             ModuleEventRegistrar::class,
             function (
@@ -388,7 +377,6 @@ final class PlatformServiceProvider extends ServiceProvider
         $pipeline->boot($runtime);
     }
 }
-
 
 
 

@@ -8,9 +8,15 @@ use LogicException;
 use Northpole\Lifecycle\Contracts\LifecycleStageContract;
 use Northpole\Lifecycle\Enums\LifecycleOperation;
 use Northpole\Lifecycle\LifecycleContext;
+use Northpole\Runtime\Events\ModuleEventBus;
 
 final class InstallStage implements LifecycleStageContract
 {
+    public function __construct(
+        private readonly ModuleEventBus $eventBus,
+    ) {
+    }
+
     public function name(): string
     {
         return 'install-module';
@@ -56,8 +62,21 @@ final class InstallStage implements LifecycleStageContract
 
         $installation->save();
 
+        $installation = $installation->fresh();
+
         $context->setInstallation(
-            $installation->fresh()
+            $installation
+        );
+
+        $this->eventBus->publish(
+            'module.installed',
+            $context->module()->name,
+            [
+                'installation_id' => $installation->getKey(),
+                'organisation_id' => $installation->organisation_id,
+                'marketplace_module_id' => $installation->marketplace_module_id,
+            ],
         );
     }
 }
+
