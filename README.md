@@ -766,3 +766,226 @@ The platform is developed with a strong focus on reliability:
 
 The current focus is improving developer experience, module tooling and platform visibility.
 
+
+## Current Platform Status
+
+NorthPole is under active development with a stable Runtime foundation already in place.
+
+The project is following a test-first engineering approach, with every Runtime capability backed by automated tests before new functionality is introduced.
+
+### Runtime Foundation
+
+Implemented:
+
+- ✅ Deterministic Runtime boot pipeline
+- ✅ Module discovery
+- ✅ Manifest loading and validation
+- ✅ Dependency resolution
+- ✅ Runtime lifecycle orchestration
+- ✅ Runtime diagnostics
+
+### Communication Layer
+
+Implemented:
+
+- ✅ Command Bus
+- ✅ Query Bus
+- ✅ Event Bus
+- ✅ Command registration
+- ✅ Query registration
+- ✅ Event subscriber registration
+
+### Runtime Registries
+
+Implemented:
+
+- ✅ Configuration Registry
+- ✅ Navigation Registry
+- ✅ Permission Registry
+- ✅ Capability Registry
+- ✅ Notification Registry
+- ✅ Scheduled Job Registry
+
+### Module Lifecycle
+
+Implemented:
+
+- ✅ Install
+- ✅ Enable
+- ✅ Disable
+- ✅ Uninstall
+- ✅ Runtime validation
+- ✅ Tenant-aware module management
+
+### Platform APIs
+
+Implemented:
+
+- ✅ Marketplace API
+- ✅ Organisation API
+- ✅ Runtime metadata endpoints
+- ✅ Tenant-aware module installation
+
+### Engineering Quality
+
+NorthPole places engineering quality ahead of rapid feature growth.
+
+Current priorities include:
+
+- High automated test coverage.
+- Explicit Runtime contracts.
+- Predictable module boundaries.
+- Comprehensive documentation.
+- Backwards-compatible Runtime evolution.
+
+The next phase of development focuses on developer tooling, SDK improvements, Marketplace capabilities and production readiness.
+
+
+## Roadmap
+
+NorthPole is being developed in carefully planned phases. Each phase builds upon the previous one while maintaining full backwards compatibility and comprehensive automated testing.
+
+### Phase 1 - Runtime Foundation (Completed)
+
+- ✅ Modular Runtime architecture
+- ✅ Runtime boot pipeline
+- ✅ Module discovery
+- ✅ Manifest validation
+- ✅ Dependency resolution
+- ✅ Runtime registries
+- ✅ Command Bus
+- ✅ Query Bus
+- ✅ Event Bus
+- ✅ Tenant-aware module lifecycle
+- ✅ Marketplace API
+- ✅ Organisation management
+- ✅ Runtime diagnostics
+- ✅ Runtime metadata API
+
+### Phase 2 - Developer Experience (In Progress)
+
+Current priorities include:
+
+- Improved module scaffolding
+- Additional Artisan tooling
+- Enhanced Runtime diagnostics
+- Developer SDK
+- Runtime documentation
+- Local development improvements
+- Module testing utilities
+- Package publishing tools
+
+### Phase 3 - Marketplace
+
+Planned capabilities include:
+
+- Marketplace publishing
+- Module version management
+- Digital signatures
+- Installation approvals
+- Compatibility verification
+- Automatic dependency installation
+- Module licensing
+- Usage analytics
+
+### Phase 4 - Enterprise Platform
+
+Future enterprise capabilities include:
+
+- Distributed Runtime support
+- High availability
+- Horizontal scaling
+- Multi-region deployment
+- Advanced observability
+- Audit logging
+- Enterprise administration
+- Runtime monitoring
+
+### Phase 5 - AI Native Platform
+
+NorthPole is being designed to support AI from the ground up rather than treating it as an add-on.
+
+Future AI capabilities may include:
+
+- AI-powered module generation
+- Intelligent workflow automation
+- Natural language administration
+- Runtime optimisation recommendations
+- AI-assisted diagnostics
+- AI developer assistants
+- Intelligent module discovery
+- Autonomous maintenance suggestions
+
+Every phase of development follows the same principles:
+
+- Test-first development
+- Stable public APIs
+- Predictable Runtime behaviour
+- Tenant isolation
+- Clear documentation
+- Incremental delivery
+
+
+## Contributing
+
+Contributions are welcome.
+
+NorthPole is being developed with a strong emphasis on quality, consistency and long-term maintainability. Every contribution should align with the architectural principles of the platform.
+
+Before submitting changes, contributors should ensure that:
+
+- All automated tests pass.
+- New functionality includes appropriate test coverage.
+- Public APIs remain backwards compatible where practical.
+- Documentation is updated alongside code changes.
+- Coding standards are followed consistently.
+
+When introducing new Runtime capabilities, contributors should favour extending existing contracts over introducing parallel implementations.
+
+Pull requests that improve reliability, developer experience or documentation are particularly encouraged.
+
+---
+
+## Licence
+
+NorthPole is released under the MIT Licence.
+
+See the LICENSE file included with this repository for complete licensing information.
+
+---
+
+## Acknowledgements
+
+NorthPole exists because of the many developers, architects and open source communities who have demonstrated what thoughtful software engineering can achieve.
+
+The project also benefits from the wider PHP and Laravel ecosystems, whose commitment to quality and innovation continues to inspire developers around the world.
+
+Special thanks to everyone who contributes ideas, reports issues, improves documentation and helps shape the future direction of the platform.
+
+---
+
+## Vision
+
+Software platforms should remove complexity rather than introduce it.
+
+NorthPole has been created with a simple objective:
+
+Build modular software that is predictable, maintainable and enjoyable to develop.
+
+By combining a deterministic Runtime, clear architectural boundaries and comprehensive developer tooling, NorthPole aims to become a platform that organisations can confidently build upon for years to come.
+
+Every design decision is guided by a small number of principles:
+
+- Simplicity over cleverness.
+- Convention over configuration where appropriate.
+- Explicit contracts over hidden behaviour.
+- Automated testing over assumptions.
+- Stability over unnecessary change.
+- Long-term maintainability over short-term convenience.
+
+Whether you are building a single business application or an ecosystem of modular products, NorthPole is designed to provide a reliable foundation that grows with your organisation.
+
+Thank you for taking the time to explore the project.
+
+We hope you enjoy building with NorthPole.
+
