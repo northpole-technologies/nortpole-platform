@@ -24,6 +24,9 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertViewHas('registryCounts')
             ->assertViewHas('moduleIssues')
             ->assertSee('Runtime Diagnostics')
+            ->assertSee('Runtime validation')
+            ->assertSee('Validation status')
+            ->assertSee('Rules executed')
             ->assertSee('Registry statistics')
             ->assertSee('Module diagnostic issues');
     }

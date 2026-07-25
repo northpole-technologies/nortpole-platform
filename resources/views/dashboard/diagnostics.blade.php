@@ -316,6 +316,164 @@
             line-height: 1.6;
         }
 
+        .validation-overview {
+            display: grid;
+            grid-template-columns:
+                repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .validation-stat {
+            min-height: 112px;
+            padding: 18px;
+            border: 1px solid rgba(154, 184, 218, 0.12);
+            border-radius: 18px;
+            background: rgba(11, 31, 51, 0.66);
+        }
+
+        .validation-stat span {
+            display: block;
+            color: #849ab2;
+            font-size: 12px;
+        }
+
+        .validation-stat strong {
+            display: block;
+            margin-top: 16px;
+            font-size: 28px;
+            letter-spacing: -0.05em;
+        }
+
+        .validation-stat.status-passed {
+            border-color: rgba(49, 215, 162, 0.26);
+            background: rgba(49, 215, 162, 0.07);
+        }
+
+        .validation-stat.status-passed strong {
+            color: #67e3bd;
+        }
+
+        .validation-stat.status-failed {
+            border-color: rgba(239, 106, 117, 0.28);
+            background: rgba(239, 106, 117, 0.07);
+        }
+
+        .validation-stat.status-failed strong {
+            color: #ffadb4;
+        }
+
+        .validation-issues {
+            display: grid;
+            gap: 12px;
+        }
+
+        .validation-issue {
+            padding: 18px;
+            border: 1px solid rgba(154, 184, 218, 0.14);
+            border-radius: 16px;
+            background: rgba(11, 31, 51, 0.58);
+        }
+
+        .validation-issue.severity-error {
+            border-color: rgba(239, 106, 117, 0.28);
+            background: rgba(239, 106, 117, 0.07);
+        }
+
+        .validation-issue.severity-warning {
+            border-color: rgba(255, 183, 96, 0.28);
+            background: rgba(255, 183, 96, 0.07);
+        }
+
+        .validation-issue.severity-info {
+            border-color: rgba(119, 219, 255, 0.24);
+            background: rgba(119, 219, 255, 0.06);
+        }
+
+        .validation-issue-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .validation-issue-title {
+            min-width: 0;
+        }
+
+        .validation-issue-title strong {
+            display: block;
+            color: #dce8f5;
+            font-size: 14px;
+        }
+
+        .validation-issue-title span {
+            display: block;
+            margin-top: 5px;
+            color: #8197af;
+            font-size: 12px;
+        }
+
+        .validation-severity {
+            flex: 0 0 auto;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(151, 177, 206, 0.1);
+            color: #9db1c8;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .severity-error .validation-severity {
+            background: rgba(239, 106, 117, 0.14);
+            color: #ffadb4;
+        }
+
+        .severity-warning .validation-severity {
+            background: rgba(255, 183, 96, 0.14);
+            color: #ffc980;
+        }
+
+        .severity-info .validation-severity {
+            background: rgba(119, 219, 255, 0.12);
+            color: #8fe1ff;
+        }
+
+        .validation-issue p {
+            margin: 12px 0 0;
+            color: #a9b9ca;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .validation-context {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(151, 177, 206, 0.1);
+        }
+
+        .validation-context-row {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            gap: 14px;
+            color: #91a5ba;
+            font-size: 12px;
+        }
+
+        .validation-context-row dt {
+            color: #6f879f;
+        }
+
+        .validation-context-row dd {
+            min-width: 0;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
         .footer {
             display: flex;
             justify-content: space-between;
@@ -332,6 +490,11 @@
 
             .registries {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .validation-overview {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
             }
         }
 
@@ -353,8 +516,14 @@
             }
 
             .summary,
-            .registries {
+            .registries,
+            .validation-overview {
                 grid-template-columns: 1fr;
+            }
+
+            .validation-context-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
             }
 
             .summary-item,
@@ -479,6 +648,127 @@
                     @endif
                 @endforeach
             </div>
+        </section>
+
+        <section class="panel section">
+            <div class="section-header">
+                <h2>Runtime validation</h2>
+
+                <p>
+                    Structural validation of registered command and query
+                    handlers.
+                </p>
+            </div>
+
+            <div class="validation-overview">
+                <article
+                    class="validation-stat status-{{ $validationSummary['status'] }}"
+                >
+                    <span>Validation status</span>
+
+                    <strong>
+                        {{ strtoupper(
+                            $validationSummary['status'],
+                        ) }}
+                    </strong>
+                </article>
+
+                <article class="validation-stat">
+                    <span>Rules executed</span>
+                    <strong>{{ $validationSummary['rules'] }}</strong>
+                </article>
+
+                <article class="validation-stat">
+                    <span>Errors</span>
+                    <strong>{{ $validationSummary['errors'] }}</strong>
+                </article>
+
+                <article class="validation-stat">
+                    <span>Warnings</span>
+                    <strong>{{ $validationSummary['warnings'] }}</strong>
+                </article>
+
+                <article class="validation-stat">
+                    <span>Information</span>
+                    <strong>
+                        {{ $validationSummary['information'] }}
+                    </strong>
+                </article>
+            </div>
+
+            @if ($validationIssues === [])
+                <div class="clear">
+                    <strong>Runtime validation passed</strong>
+
+                    <p>
+                        All registered command and query handlers currently
+                        satisfy the runtime validation rules.
+                    </p>
+                </div>
+            @else
+                <div class="validation-issues">
+                    @foreach ($validationIssues as $issue)
+                        <article
+                            class="validation-issue severity-{{ $issue['severity'] }}"
+                        >
+                            <div class="validation-issue-header">
+                                <div class="validation-issue-title">
+                                    <strong>
+                                        {{ $issue['message'] }}
+                                    </strong>
+
+                                    <span>
+                                        {{ $issue['code'] }}
+
+                                        @if ($issue['module'] !== null)
+                                            · {{ $issue['module'] }}
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <span class="validation-severity">
+                                    {{ $issue['severity'] }}
+                                </span>
+                            </div>
+
+                            @if ($issue['context'] !== [])
+                                <dl class="validation-context">
+                                    @foreach (
+                                        $issue['context']
+                                        as $key => $value
+                                    )
+                                        <div
+                                            class="validation-context-row"
+                                        >
+                                            <dt>{{ $key }}</dt>
+
+                                            <dd>
+                                                @if (
+                                                    is_array($value)
+                                                    || is_object($value)
+                                                )
+                                                    {{ json_encode(
+                                                        $value,
+                                                        JSON_UNESCAPED_SLASHES,
+                                                    ) }}
+                                                @elseif (is_bool($value))
+                                                    {{ $value
+                                                        ? 'true'
+                                                        : 'false' }}
+                                                @elseif ($value === null)
+                                                    null
+                                                @else
+                                                    {{ $value }}
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    @endforeach
+                                </dl>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
         </section>
 
         <section class="panel section">
