@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "description": "Inventory management module.",
     "enabled": true,
+    "dependencies": [],
     "provider": "Modules\\Inventory\\Providers\\InventoryServiceProvider",
     "routes": {
         "api": "routes/api.php",
@@ -12,7 +13,25 @@
     "migrations": "database/migrations",
     "views": "resources/views",
     "config": {},
-    "permissions": [],
+    "permissions": [
+        "inventory.stock.view",
+        "inventory.stock.create",
+        "inventory.stock.update",
+        "inventory.stock.delete"
+    ],
+    "roles": [
+        {
+            "key": "sales",
+            "name": "Sales",
+            "description": "Sales team members with access to customer and stock operations.",
+            "permissions": [
+                "inventory.stock.view",
+                "inventory.stock.update"
+            ]
+        }
+    ],
     "navigation": [],
-    "capabilities": []
+    "capabilities": [
+        "stock"
+    ]
 }

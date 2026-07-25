@@ -134,6 +134,164 @@ final class PermissionRegistryTest extends TestCase
         $this->assertSame([], $registry->all());
     }
 
+    public function test_it_creates_a_structured_permission(): void
+    {
+        $permission = Permission::fromArray(
+            moduleSlug: 'crm',
+            definition: [
+                'key' => 'crm.customers.delete',
+                'title' => 'Delete Customers',
+                'description' => 'Allows permanent deletion of customer records.',
+                'group' => 'Customers',
+                'default_roles' => [
+                    'Administrator',
+                    'Manager',
+                ],
+                'dangerous' => true,
+            ],
+        );
+
+        $this->assertSame(
+            'crm',
+            $permission->moduleSlug()
+        );
+
+        $this->assertSame(
+            'crm.customers.delete',
+            $permission->key()
+        );
+
+        $this->assertSame(
+            'Delete Customers',
+            $permission->title()
+        );
+
+        $this->assertSame(
+            'Allows permanent deletion of customer records.',
+            $permission->description()
+        );
+
+        $this->assertSame(
+            'Customers',
+            $permission->group()
+        );
+
+        $this->assertSame(
+            [
+                'Administrator',
+                'Manager',
+            ],
+            $permission->defaultRoles()
+        );
+
+        $this->assertTrue(
+            $permission->dangerous()
+        );
+    }
+
+    public function test_it_generates_a_title_for_string_permissions(): void
+    {
+        $permission = Permission::fromString(
+            moduleSlug: 'crm',
+            name: 'crm.customers.create',
+        );
+
+        $this->assertSame(
+            'Create',
+            $permission->title()
+        );
+
+        $this->assertNull(
+            $permission->description()
+        );
+
+        $this->assertNull(
+            $permission->group()
+        );
+
+        $this->assertSame(
+            [],
+            $permission->defaultRoles()
+        );
+
+        $this->assertFalse(
+            $permission->dangerous()
+        );
+    }
+
+    public function test_it_serialises_permission_metadata(): void
+    {
+        $permission = Permission::fromArray(
+            moduleSlug: 'crm',
+            definition: [
+                'key' => 'crm.customers.delete',
+                'title' => 'Delete Customers',
+                'description' => 'Allows customer deletion.',
+                'group' => 'Customers',
+                'roles' => [
+                    'Administrator',
+                ],
+                'dangerous' => true,
+            ],
+        );
+
+        $this->assertSame(
+            [
+                'module' => 'crm',
+                'key' => 'crm.customers.delete',
+                'name' => 'crm.customers.delete',
+                'title' => 'Delete Customers',
+                'description' => 'Allows customer deletion.',
+                'group' => 'Customers',
+                'default_roles' => [
+                    'Administrator',
+                ],
+                'dangerous' => true,
+            ],
+            $permission->toArray()
+        );
+    }
+
+    public function test_it_rejects_a_structured_permission_without_a_key(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'A permission definition must contain a non-empty key.'
+        );
+
+        Permission::fromArray(
+            moduleSlug: 'crm',
+            definition: [
+                'title' => 'View Customers',
+            ],
+        );
+    }
+
+    public function test_it_rejects_invalid_default_roles(): void
+    {
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'Permission default roles must be non-empty strings.'
+        );
+
+        Permission::fromArray(
+            moduleSlug: 'crm',
+            definition: [
+                'key' => 'crm.customers.view',
+                'default_roles' => [
+                    'Administrator',
+                    '',
+                ],
+            ],
+        );
+    }
+
     public function test_it_rejects_an_empty_module_slug(): void
     {
         $this->expectException(

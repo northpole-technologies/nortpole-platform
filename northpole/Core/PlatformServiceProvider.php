@@ -19,6 +19,7 @@ use Northpole\Lifecycle\Stages\EnableStage;
 use Northpole\Lifecycle\Stages\InstallStage;
 use Northpole\Lifecycle\Stages\ResolveInstallationStage;
 use Northpole\Lifecycle\Stages\ResolveManifestStage;
+use Northpole\Lifecycle\Stages\SynchroniseTenantAccessStage;
 use Northpole\Lifecycle\Stages\UninstallStage;
 use Northpole\Lifecycle\Stages\ValidateDependenciesStage;
 use Northpole\Runtime\Jobs\Laravel\LaravelScheduledJobAdapter;
@@ -80,6 +81,9 @@ final class PlatformServiceProvider extends ServiceProvider
                         ),
                         $application->make(
                             InstallStage::class
+                        ),
+                        $application->make(
+                            SynchroniseTenantAccessStage::class
                         ),
                         new EnableStage,
                         new DisableStage,

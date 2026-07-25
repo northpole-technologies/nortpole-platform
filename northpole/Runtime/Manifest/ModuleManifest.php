@@ -32,9 +32,102 @@ final class ModuleManifest implements ModuleManifestContract
         $this->validateEvents();
         $this->validateNotifications();
         $this->validateSettings();
+        $this->validateRoles();
         $this->validateCommands();
         $this->validateQueries();
         $this->validateJobs();
+    }
+
+    private function validateRoles(): void
+    {
+        if (! isset($this->data['roles'])) {
+            return;
+        }
+
+        if (
+            ! is_array($this->data['roles'])
+            || ! array_is_list($this->data['roles'])
+        ) {
+            throw new InvalidArgumentException(
+                'Module manifest field [roles] must be a list'
+            );
+        }
+
+        foreach ($this->data['roles'] as $role) {
+            if (! is_array($role)) {
+                throw new InvalidArgumentException(
+                    'Module manifest field [roles] must contain structured role definitions'
+                );
+            }
+
+            if (
+                ! isset($role['key'])
+                || ! is_string($role['key'])
+                || trim($role['key']) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definitions must contain a non-empty key'
+                );
+            }
+
+            if (
+                ! isset($role['name'])
+                || ! is_string($role['name'])
+                || trim($role['name']) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definitions must contain a non-empty name'
+                );
+            }
+
+            if (
+                array_key_exists('description', $role)
+                && $role['description'] !== null
+                && ! is_string($role['description'])
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definition descriptions must be strings or null'
+                );
+            }
+
+            if (
+                array_key_exists('permissions', $role)
+                && ! is_array($role['permissions'])
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definition permissions must be lists'
+                );
+            }
+
+            if (
+                isset($role['permissions'])
+                && ! array_is_list($role['permissions'])
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definition permissions must be lists'
+                );
+            }
+
+            foreach ($role['permissions'] ?? [] as $permission) {
+                if (
+                    ! is_string($permission)
+                    || trim($permission) === ''
+                ) {
+                    throw new InvalidArgumentException(
+                        'Module role definition permissions must contain non-empty strings'
+                    );
+                }
+            }
+
+            if (
+                array_key_exists('system', $role)
+                && ! is_bool($role['system'])
+            ) {
+                throw new InvalidArgumentException(
+                    'Module role definition system flags must be booleans'
+                );
+            }
+        }
     }
 
     private function validateProviders(): void
@@ -1193,6 +1286,14 @@ final class ModuleManifest implements ModuleManifestContract
     /**
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function roles(): array
+    {
+        return $this->data['roles'] ?? [];
+    }
+
     public function navigation(): array
     {
         return $this->data['navigation'] ?? [];

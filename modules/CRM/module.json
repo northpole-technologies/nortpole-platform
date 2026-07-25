@@ -19,6 +19,18 @@
         "crm.customers.update",
         "crm.customers.delete"
     ],
+    "roles": [
+        {
+            "key": "sales",
+            "name": "Sales",
+            "description": "Sales team members with access to customer and stock operations.",
+            "permissions": [
+                "crm.customers.view",
+                "crm.customers.create",
+                "crm.customers.update"
+            ]
+        }
+    ],
     "navigation": [
         {
             "label": "Customers",

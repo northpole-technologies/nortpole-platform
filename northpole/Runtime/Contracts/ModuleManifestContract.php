@@ -75,6 +75,13 @@ interface ModuleManifestContract
     public function permissions(): array;
 
     /**
+     * Returns runtime role definitions contributed by this module.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function roles(): array;
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function navigation(): array;

@@ -54,6 +54,96 @@ final class PermissionStageTest extends TestCase
         );
     }
 
+    public function test_it_registers_structured_permissions(): void
+    {
+        $registry = new PermissionRegistry;
+
+        $stage = new PermissionStage($registry);
+
+        $stage->boot(
+            new BootContext(
+                $this->createRuntime(),
+                $this->createManifestMock([
+                    [
+                        'key' => 'crm.customers.delete',
+                        'title' => 'Delete Customers',
+                        'description' => 'Allows permanent deletion of customer records.',
+                        'group' => 'Customers',
+                        'default_roles' => [
+                            'Administrator',
+                        ],
+                        'dangerous' => true,
+                    ],
+                ])
+            )
+        );
+
+        $permission = $registry->get(
+            'crm.customers.delete'
+        );
+
+        $this->assertNotNull($permission);
+
+        $this->assertSame(
+            'Delete Customers',
+            $permission->title()
+        );
+
+        $this->assertSame(
+            'Customers',
+            $permission->group()
+        );
+
+        $this->assertSame(
+            [
+                'Administrator',
+            ],
+            $permission->defaultRoles()
+        );
+
+        $this->assertTrue(
+            $permission->dangerous()
+        );
+    }
+
+    public function test_it_supports_mixed_permission_formats(): void
+    {
+        $registry = new PermissionRegistry;
+
+        $stage = new PermissionStage($registry);
+
+        $stage->boot(
+            new BootContext(
+                $this->createRuntime(),
+                $this->createManifestMock([
+                    'crm.customers.view',
+                    [
+                        'key' => 'crm.customers.delete',
+                        'title' => 'Delete Customers',
+                        'dangerous' => true,
+                    ],
+                ])
+            )
+        );
+
+        $this->assertSame(
+            2,
+            $registry->count()
+        );
+
+        $this->assertTrue(
+            $registry->has(
+                'crm.customers.view'
+            )
+        );
+
+        $this->assertTrue(
+            $registry->has(
+                'crm.customers.delete'
+            )
+        );
+    }
+
     public function test_it_skips_modules_without_permissions(): void
     {
         $registry = new PermissionRegistry;
@@ -71,7 +161,7 @@ final class PermissionStageTest extends TestCase
         $this->assertSame([], $registry->all());
     }
 
-    public function test_it_rejects_non_string_permissions(): void
+    public function test_it_rejects_invalid_permission_values(): void
     {
         $registry = new PermissionRegistry;
 
@@ -82,14 +172,14 @@ final class PermissionStageTest extends TestCase
         );
 
         $this->expectExceptionMessage(
-            'Permissions for module [crm] must be non-empty strings.'
+            'Permissions for module [crm] must be non-empty strings or structured definitions.'
         );
 
         $stage->boot(
             new BootContext(
                 $this->createRuntime(),
                 $this->createManifestMock([
-                    ['name' => 'crm.customers.view'],
+                    123,
                 ])
             )
         );
@@ -106,7 +196,7 @@ final class PermissionStageTest extends TestCase
         );
 
         $this->expectExceptionMessage(
-            'Permissions for module [crm] must be non-empty strings.'
+            'Permissions for module [crm] must be non-empty strings or structured definitions.'
         );
 
         $stage->boot(
@@ -114,6 +204,32 @@ final class PermissionStageTest extends TestCase
                 $this->createRuntime(),
                 $this->createManifestMock([
                     '   ',
+                ])
+            )
+        );
+    }
+
+    public function test_it_rejects_structured_permissions_without_a_key(): void
+    {
+        $registry = new PermissionRegistry;
+
+        $stage = new PermissionStage($registry);
+
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $this->expectExceptionMessage(
+            'A permission definition must contain a non-empty key.'
+        );
+
+        $stage->boot(
+            new BootContext(
+                $this->createRuntime(),
+                $this->createManifestMock([
+                    [
+                        'title' => 'View Customers',
+                    ],
                 ])
             )
         );

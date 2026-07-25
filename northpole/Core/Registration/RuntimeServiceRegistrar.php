@@ -25,6 +25,7 @@ use Northpole\Runtime\Lifecycle\MigrationStage;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\NotificationStage;
 use Northpole\Runtime\Lifecycle\PermissionStage;
+use Northpole\Runtime\Lifecycle\RoleDefinitionStage;
 use Northpole\Runtime\Lifecycle\ScheduledJobStage;
 use Northpole\Runtime\Lifecycle\ProviderStage;
 use Northpole\Runtime\Lifecycle\QueryHandlerStage;
@@ -45,8 +46,10 @@ use Northpole\Runtime\Permissions\PermissionRegistry;
 use Northpole\Runtime\Queries\ModuleQueryBus;
 use Northpole\Runtime\Queries\ModuleQueryRegistrar;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
+use Northpole\Runtime\Roles\RoleDefinitionRegistry;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
+use Northpole\Runtime\Synchronisation\TenantAccessSynchroniser;
 
 final class RuntimeServiceRegistrar
 {
@@ -178,6 +181,29 @@ final class RuntimeServiceRegistrar
             PermissionRegistry::class,
             function (): PermissionRegistry {
                 return new PermissionRegistry;
+            },
+        );
+
+        $application->singleton(
+            RoleDefinitionRegistry::class,
+            function (): RoleDefinitionRegistry {
+                return new RoleDefinitionRegistry;
+            },
+        );
+
+        $application->singleton(
+            TenantAccessSynchroniser::class,
+            function (
+                Application $application
+            ): TenantAccessSynchroniser {
+                return new TenantAccessSynchroniser(
+                    permissions: $application->make(
+                        PermissionRegistry::class
+                    ),
+                    roles: $application->make(
+                        RoleDefinitionRegistry::class
+                    ),
+                );
             },
         );
 
@@ -482,6 +508,11 @@ final class RuntimeServiceRegistrar
                         new PermissionStage(
                             $application->make(
                                 PermissionRegistry::class
+                            ),
+                        ),
+                        new RoleDefinitionStage(
+                            $application->make(
+                                RoleDefinitionRegistry::class
                             ),
                         ),
                         new NavigationStage(

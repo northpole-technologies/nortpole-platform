@@ -4,100 +4,78 @@ declare(strict_types=1);
 
 namespace Northpole\Runtime\Permissions;
 
-final class PermissionRegistry
+use Northpole\Runtime\Support\AbstractRuntimeRegistry;
+
+/**
+ * @extends AbstractRuntimeRegistry<Permission>
+ */
+final class PermissionRegistry extends AbstractRuntimeRegistry
 {
     /**
-     * @var array<string, Permission>
+     * @return array<int, Permission>
      */
-    private array $permissions = [];
+    public function forModule(
+        string $moduleSlug
+    ): array {
+        $normalisedModuleSlug = trim(
+            $moduleSlug
+        );
 
-    public function add(Permission $permission): self
-    {
-        $this->permissions[$permission->key()] = $permission;
-
-        return $this;
-    }
-
-    /**
-     * @param  iterable<int, Permission>  $permissions
-     */
-    public function addMany(iterable $permissions): self
-    {
-        foreach ($permissions as $permission) {
-            $this->add($permission);
+        if ($normalisedModuleSlug === '') {
+            return [];
         }
 
-        return $this;
-    }
-
-    /**
-     * @return array<int, Permission>
-     */
-    public function all(): array
-    {
-        $permissions = array_values(
-            $this->permissions
-        );
-
-        usort(
-            $permissions,
-            static fn (
-                Permission $first,
-                Permission $second,
-            ): int => strcmp(
-                $first->name(),
-                $second->name()
-            )
-        );
-
-        return $permissions;
-    }
-
-    /**
-     * @return array<int, Permission>
-     */
-    public function forModule(string $moduleSlug): array
-    {
         $permissions = array_filter(
-            $this->permissions,
-            static fn (Permission $permission): bool => $permission->moduleSlug() === $moduleSlug
+            $this->items,
+            static fn (
+                Permission $permission
+            ): bool => $permission->moduleSlug()
+                === $normalisedModuleSlug
         );
 
-        $permissions = array_values($permissions);
+        $permissions = array_values(
+            $permissions
+        );
 
         usort(
             $permissions,
-            static fn (
+            fn (
                 Permission $first,
                 Permission $second,
-            ): int => strcmp(
-                $first->name(),
-                $second->name()
+            ): int => $this->compare(
+                $first,
+                $second,
             )
         );
 
         return $permissions;
     }
 
-    public function has(string $permission): bool
-    {
-        return isset(
-            $this->permissions[$permission]
+    protected function keyFor(
+        object $item
+    ): string {
+        assert(
+            $item instanceof Permission
         );
+
+        return $item->key();
     }
 
-    public function get(string $permission): ?Permission
-    {
-        return $this->permissions[$permission] ?? null;
-    }
+    protected function compare(
+        object $first,
+        object $second,
+    ): int {
+        assert(
+            $first instanceof Permission
+        );
 
-    public function count(): int
-    {
-        return count($this->permissions);
-    }
+        assert(
+            $second instanceof Permission
+        );
 
-    public function clear(): void
-    {
-        $this->permissions = [];
+        return strcmp(
+            $first->key(),
+            $second->key(),
+        );
     }
 }

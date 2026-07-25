@@ -30,22 +30,41 @@ final class PermissionStage implements BootStageContract
         $module = $context->module();
 
         foreach ($module->permissions() as $permission) {
-            if (
-                ! is_string($permission)
-                || trim($permission) === ''
-            ) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Permissions for module [%s] must be non-empty strings.',
-                        $module->slug()
+            if (is_string($permission)) {
+                if (trim($permission) === '') {
+                    throw new InvalidArgumentException(
+                        sprintf(
+                            'Permissions for module [%s] must be non-empty strings or structured definitions.',
+                            $module->slug()
+                        )
+                    );
+                }
+
+                $this->registry->add(
+                    Permission::fromString(
+                        $module->slug(),
+                        $permission,
                     )
                 );
+
+                continue;
             }
 
-            $this->registry->add(
-                Permission::fromString(
-                    $module->slug(),
-                    $permission,
+            if (is_array($permission)) {
+                $this->registry->add(
+                    Permission::fromArray(
+                        $module->slug(),
+                        $permission,
+                    )
+                );
+
+                continue;
+            }
+
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Permissions for module [%s] must be non-empty strings or structured definitions.',
+                    $module->slug()
                 )
             );
         }

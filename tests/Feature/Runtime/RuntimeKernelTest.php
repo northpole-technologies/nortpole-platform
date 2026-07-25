@@ -15,6 +15,7 @@ use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistrar;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
+use Northpole\Runtime\Roles\RoleDefinitionRegistry;
 use Tests\TestCase;
 
 final class RuntimeKernelTest extends TestCase
@@ -66,6 +67,7 @@ final class RuntimeKernelTest extends TestCase
                 'migrations',
                 'capabilities',
                 'permissions',
+                'role-definitions',
                 'navigation',
                 'event-subscribers',
                 'configuration-schema',
@@ -81,7 +83,7 @@ final class RuntimeKernelTest extends TestCase
         );
 
         $this->assertSame(
-            14,
+            15,
             $registry->count(),
         );
     }
@@ -227,6 +229,22 @@ final class RuntimeKernelTest extends TestCase
         $this->assertSame(
             $registry,
             $registrar->registry(),
+        );
+    }
+
+    public function test_role_definition_registry_is_a_singleton(): void
+    {
+        $first = $this->app->make(
+            RoleDefinitionRegistry::class,
+        );
+
+        $second = $this->app->make(
+            RoleDefinitionRegistry::class,
+        );
+
+        $this->assertSame(
+            $first,
+            $second,
         );
     }
 }
