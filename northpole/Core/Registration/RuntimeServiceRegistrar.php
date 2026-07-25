@@ -15,6 +15,7 @@ use Northpole\Runtime\Discovery\ModuleDiscovery;
 use Northpole\Runtime\Events\ModuleEventBus;
 use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistry;
+use Northpole\Runtime\Health\RuntimeHealthService;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\ConfigurationStage;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
@@ -93,6 +94,10 @@ final class RuntimeServiceRegistrar
         );
 
         $this->registerRuntime(
+            $application
+        );
+
+        $this->registerRuntimeHealth(
             $application
         );
 
@@ -471,6 +476,22 @@ final class RuntimeServiceRegistrar
         );
     }
 
+    private function registerRuntimeHealth(
+        Application $application
+    ): void {
+        $application->singleton(
+            RuntimeHealthService::class,
+            function (
+                Application $application
+            ): RuntimeHealthService {
+                return new RuntimeHealthService(
+                    $application->make(
+                        Runtime::class
+                    ),
+                );
+            },
+        );
+    }
     private function registerBootPipeline(
         Application $application
     ): void {

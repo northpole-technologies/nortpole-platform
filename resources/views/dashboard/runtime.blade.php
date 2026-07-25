@@ -227,6 +227,20 @@
             letter-spacing: -0.06em;
         }
 
+        .health-score {
+            margin: 0 0 8px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .health-score span {
+            color: #7f95ae;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+
         .health-copy {
             max-width: 680px;
             margin: 0;
@@ -386,8 +400,13 @@
             content: "";
         }
 
-        .module-card.disabled::before {
+        .module-card.disabled::before,
+        .module-card.degraded::before {
             background: #f2a84b;
+        }
+
+        .module-card.unhealthy::before {
+            background: #ef6a75;
         }
 
         .module-top {
@@ -420,10 +439,34 @@
             letter-spacing: 0.08em;
         }
 
-        .disabled .badge {
+        .disabled .badge,
+        .degraded .badge {
             border-color: rgba(242, 168, 75, 0.26);
             background: rgba(242, 168, 75, 0.09);
             color: #ffc779;
+        }
+
+        .unhealthy .badge {
+            border-color: rgba(239, 106, 117, 0.3);
+            background: rgba(239, 106, 117, 0.1);
+            color: #ff9aa3;
+        }
+
+        .module-health {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(151, 177, 206, 0.1);
+            color: #849ab2;
+            font-size: 12px;
+        }
+
+        .module-health strong {
+            color: #dbe8f5;
+            font-size: 13px;
         }
 
         .module-description {
@@ -550,9 +593,15 @@
                     <h2>{{ $health }}</h2>
                 </div>
 
+                <p class="health-score">
+                    {{ $runtimeHealthSummary['score'] }}%
+                    <span>runtime score</span>
+                </p>
+
                 <p class="health-copy">
-                    The NorthPole runtime is online and its discovered
-                    modules and registries are available for inspection.
+                    The NorthPole runtime has inspected its discovered
+                    modules, dependency availability, enabled states and
+                    module paths.
                 </p>
 
                 <div class="version-grid">
@@ -575,23 +624,23 @@
 
             <aside class="panel module-summary">
                 <div class="summary-row">
-                    <span>Discovered modules</span>
+                    <span>Runtime score</span>
                     <strong>
-                        {{ $moduleSummary['discovered'] }}
+                        {{ $runtimeHealthSummary['score'] }}%
                     </strong>
                 </div>
 
                 <div class="summary-row">
-                    <span>Enabled modules</span>
+                    <span>Healthy modules</span>
                     <strong>
-                        {{ $moduleSummary['enabled'] }}
+                        {{ $runtimeHealthSummary['healthyModules'] }}
                     </strong>
                 </div>
 
                 <div class="summary-row">
-                    <span>Disabled modules</span>
+                    <span>Runtime issues</span>
                     <strong>
-                        {{ $moduleSummary['disabled'] }}
+                        {{ $runtimeHealthSummary['issues'] }}
                     </strong>
                 </div>
             </aside>
@@ -644,7 +693,7 @@
                             <article
                                 class="module-card
                                     {{ $module['enabled']
-                                        ? ''
+                                        ? $module['healthStatus']
                                         : 'disabled' }}"
                             >
                                 <div class="module-top">
@@ -660,7 +709,9 @@
 
                                     <span class="badge">
                                         {{ $module['enabled']
-                                            ? 'Enabled'
+                                            ? ucfirst(
+                                                $module['healthStatus']
+                                            )
                                             : 'Disabled' }}
                                     </span>
                                 </div>
@@ -690,6 +741,14 @@
                                         {{ $module['permissions'] }}
                                         permissions
                                     </span>
+                                </div>
+
+                                <div class="module-health">
+                                    <span>Health</span>
+
+                                    <strong>
+                                        {{ $module['healthScore'] }}%
+                                    </strong>
                                 </div>
                             </article>
                         </a>
