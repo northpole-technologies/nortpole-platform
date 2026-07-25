@@ -89,6 +89,13 @@ interface ModuleManifestContract
     public function handledCommands(): array;
 
     /**
+     * Returns query names mapped to the handler classes owned by this module.
+     *
+     * @return array<string, string>
+     */
+    public function handledQueries(): array;
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array;

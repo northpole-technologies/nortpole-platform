@@ -37,6 +37,7 @@ use Northpole\Runtime\Lifecycle\MigrationStage;
 use Northpole\Runtime\Lifecycle\NavigationStage;
 use Northpole\Runtime\Lifecycle\PermissionStage;
 use Northpole\Runtime\Lifecycle\ProviderStage;
+use Northpole\Runtime\Lifecycle\QueryHandlerStage;
 use Northpole\Runtime\Lifecycle\RouteStage;
 use Northpole\Runtime\Lifecycle\StageRegistry;
 use Northpole\Runtime\Lifecycle\ViewStage;
@@ -46,6 +47,9 @@ use Northpole\Runtime\Modules\ModuleFinder;
 use Northpole\Runtime\Modules\ModuleRepository;
 use Northpole\Runtime\Navigation\NavigationRegistry;
 use Northpole\Runtime\Permissions\PermissionRegistry;
+use Northpole\Runtime\Queries\ModuleQueryBus;
+use Northpole\Runtime\Queries\ModuleQueryRegistrar;
+use Northpole\Runtime\Queries\ModuleQueryRegistry;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Support\ApplicationAdapter;
 
@@ -182,6 +186,42 @@ final class PlatformServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            ModuleQueryRegistry::class,
+            function (): ModuleQueryRegistry {
+                return new ModuleQueryRegistry();
+            },
+        );
+
+        $this->app->singleton(
+            ModuleQueryRegistrar::class,
+            function (
+                Application $application,
+            ): ModuleQueryRegistrar {
+                return new ModuleQueryRegistrar(
+                    $application->make(
+                        ModuleQueryRegistry::class,
+                    ),
+                );
+            },
+        );
+
+        $this->app->singleton(
+            ModuleQueryBus::class,
+            function (Application $application): ModuleQueryBus {
+                return new ModuleQueryBus(
+                    registry: $application->make(
+                        ModuleQueryRegistry::class,
+                    ),
+                    handlerResolver: static function (
+                        string $handler,
+                    ) use ($application): object {
+                        return $application->make($handler);
+                    },
+                );
+            },
+        );
+
+        $this->app->singleton(
             ModuleDiscovery::class,
             function (Application $application): ModuleDiscovery {
                 return new ModuleDiscovery(
@@ -242,6 +282,11 @@ final class PlatformServiceProvider extends ServiceProvider
                     new CommandHandlerStage(
                         $application->make(
                             ModuleCommandRegistrar::class,
+                        ),
+                    ),
+                    new QueryHandlerStage(
+                        $application->make(
+                            ModuleQueryRegistrar::class,
                         ),
                     ),
                 ]);

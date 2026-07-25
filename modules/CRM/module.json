@@ -45,5 +45,10 @@
         "handles": {
             "crm.customer.create": "Modules\\CRM\\Commands\\CreateCustomerHandler"
         }
+    },
+    "queries": {
+        "handles": {
+            "crm.customer.find": "Modules\\CRM\\Queries\\FindCustomerHandler"
+        }
     }
 }

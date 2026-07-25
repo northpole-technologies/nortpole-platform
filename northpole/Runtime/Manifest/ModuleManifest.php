@@ -30,6 +30,7 @@ final class ModuleManifest implements ModuleManifestContract
         $this->validateDependencies();
         $this->validateEvents();
         $this->validateCommands();
+        $this->validateQueries();
     }
 
     private function validateDependencies(): void
@@ -253,6 +254,59 @@ final class ModuleManifest implements ModuleManifestContract
             }
         }
     }
+
+    private function validateQueries(): void
+    {
+        if (! isset($this->data['queries'])) {
+            return;
+        }
+
+        if (! is_array($this->data['queries'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [queries] must be an object'
+            );
+        }
+
+        $this->validateHandledQueries(
+            $this->data['queries']['handles'] ?? []
+        );
+    }
+
+    private function validateHandledQueries(
+        mixed $handledQueries
+    ): void {
+        if (! is_array($handledQueries)) {
+            throw new InvalidArgumentException(
+                'Module manifest field [queries.handles] must be an object'
+            );
+        }
+
+        foreach (
+            $handledQueries as $queryName => $handlerClass
+        ) {
+            if (
+                ! is_string($queryName)
+                || trim($queryName) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest handled query names must be non-empty strings'
+                );
+            }
+
+            if (
+                ! is_string($handlerClass)
+                || trim($handlerClass) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest query [%s] must have a non-empty handler class',
+                        $queryName
+                    )
+                );
+            }
+        }
+    }
+
     public function name(): string
     {
         return (string) $this->data['name'];
@@ -441,6 +495,27 @@ final class ModuleManifest implements ModuleManifestContract
 
         return $normalisedCommands;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function handledQueries(): array
+    {
+        $handledQueries = $this->data['queries']['handles'] ?? [];
+
+        $normalisedQueries = [];
+
+        foreach (
+            $handledQueries as $queryName => $handlerClass
+        ) {
+            $normalisedQueries[trim($queryName)] = trim(
+                $handlerClass
+            );
+        }
+
+        return $normalisedQueries;
+    }
+
     /**
      * @return array<string, mixed>
      */

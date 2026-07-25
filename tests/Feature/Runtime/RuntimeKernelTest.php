@@ -63,6 +63,7 @@ final class RuntimeKernelTest extends TestCase
                 'navigation',
                 'event-subscribers',
                 'command-handlers',
+                'query-handlers',
             ],
             array_map(
                 static fn ($stage): string => $stage->name(),
@@ -71,7 +72,7 @@ final class RuntimeKernelTest extends TestCase
         );
 
         $this->assertSame(
-            10,
+            11,
             $registry->count(),
         );
     }
@@ -124,3 +125,4 @@ final class RuntimeKernelTest extends TestCase
         );
     }
 }
+
