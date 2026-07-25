@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Runtime\Repair;
 
 use InvalidArgumentException;
+use Northpole\Runtime\Repair\Providers\CommandRepairProvider;
+use Northpole\Runtime\Repair\Providers\QueryRepairProvider;
 use Northpole\Runtime\Repair\RepairRecommendation;
 use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Validation\ValidationIssue;
@@ -147,6 +149,118 @@ final class RuntimeRepairEngineTest extends TestCase
         );
     }
 
+    public function test_it_registers_repair_providers(): void
+    {
+        $engine = new RuntimeRepairEngine;
+
+        $engine->registerProviders([
+            new CommandRepairProvider,
+            new QueryRepairProvider,
+        ]);
+
+        $this->assertSame(
+            2,
+            $engine->providerCount(),
+        );
+
+        $this->assertTrue(
+            $engine->has(
+                'command.handler_class_missing',
+            ),
+        );
+
+        $this->assertTrue(
+            $engine->has(
+                'query.handler_unregistered',
+            ),
+        );
+    }
+
+    public function test_it_uses_registered_repair_providers(): void
+    {
+        $engine = (
+            new RuntimeRepairEngine
+        )->registerProvider(
+            new CommandRepairProvider,
+        );
+
+        $validationResult = new ValidationResult([
+            new ValidationIssue(
+                code: 'command.handler_unregistered',
+                message: 'Command is not registered.',
+                severity: ValidationSeverity::Error,
+                module: 'crm',
+                context: [
+                    'name' => 'crm.customer.create',
+                    'expected_handler' =>
+                        'Modules\CRM\Commands\CreateCustomerHandler',
+                ],
+            ),
+        ]);
+
+        $repairResult = $engine->recommend(
+            $validationResult,
+        );
+
+        $this->assertSame(
+            1,
+            $repairResult->count(),
+        );
+
+        $this->assertSame(
+            'repair.command.register_handler',
+            $repairResult->all()[0]->code(),
+        );
+    }
+
+    public function test_explicit_resolvers_take_priority_over_providers(): void
+    {
+        $engine = (
+            new RuntimeRepairEngine
+        )->registerProvider(
+            new CommandRepairProvider,
+        );
+
+        $engine->register(
+            'command.handler_unregistered',
+            $this->resolver(),
+        );
+
+        $validationResult = new ValidationResult([
+            new ValidationIssue(
+                code: 'command.handler_unregistered',
+                message: 'Command is not registered.',
+                severity: ValidationSeverity::Error,
+            ),
+        ]);
+
+        $recommendation = $engine
+            ->recommend($validationResult)
+            ->all()[0];
+
+        $this->assertSame(
+            'repair.command.handler_unregistered',
+            $recommendation->code(),
+        );
+    }
+
+    public function test_it_rejects_duplicate_repair_providers(): void
+    {
+        $engine = new RuntimeRepairEngine;
+
+        $engine->registerProvider(
+            new CommandRepairProvider,
+        );
+
+        $this->expectException(
+            InvalidArgumentException::class,
+        );
+
+        $engine->registerProvider(
+            new CommandRepairProvider,
+        );
+    }
+
     public function test_it_can_be_cleared(): void
     {
         $engine = new RuntimeRepairEngine;
@@ -156,11 +270,20 @@ final class RuntimeRepairEngineTest extends TestCase
             $this->resolver(),
         );
 
+        $engine->registerProvider(
+            new CommandRepairProvider,
+        );
+
         $engine->clear();
 
         $this->assertSame(
             0,
             $engine->count(),
+        );
+
+        $this->assertSame(
+            0,
+            $engine->providerCount(),
         );
     }
 
