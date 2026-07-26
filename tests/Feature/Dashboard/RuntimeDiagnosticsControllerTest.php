@@ -84,7 +84,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                         'information',
                         $summary,
                     )
-                    && $summary['rules'] === 2,
+                    && $summary['rules'] === 3,
             )
             ->assertViewHas(
                 'validationIssues',
@@ -100,13 +100,11 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             ->assertOk()
             ->assertViewHas(
                 'repairResult',
-                static fn (mixed $result): bool =>
-                    $result instanceof RepairResult,
+                static fn (mixed $result): bool => $result instanceof RepairResult,
             )
             ->assertViewHas(
                 'repairSummary',
-                static fn (mixed $summary): bool =>
-                    is_array($summary)
+                static fn (mixed $summary): bool => is_array($summary)
                     && array_key_exists('status', $summary)
                     && array_key_exists(
                         'recommendations',
@@ -125,8 +123,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
             )
             ->assertViewHas(
                 'repairRecommendations',
-                static fn (mixed $recommendations): bool =>
-                    is_array($recommendations),
+                static fn (mixed $recommendations): bool => is_array($recommendations),
             );
     }
 

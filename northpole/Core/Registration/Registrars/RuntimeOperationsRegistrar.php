@@ -7,6 +7,7 @@ namespace Northpole\Core\Registration\Registrars;
 use Illuminate\Contracts\Foundation\Application;
 use Northpole\Core\Registration\Contracts\ServiceRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
+use Northpole\Runtime\Graph\Contracts\RuntimeGraphBuilderContract;
 use Northpole\Runtime\Health\RuntimeHealthService;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
 use Northpole\Runtime\Repair\Providers\CommandRepairProvider;
@@ -14,6 +15,7 @@ use Northpole\Runtime\Repair\Providers\QueryRepairProvider;
 use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Validation\Rules\CommandHandlerValidationRule;
+use Northpole\Runtime\Validation\Rules\Graph\OrphanNodeValidationRule;
 use Northpole\Runtime\Validation\Rules\QueryHandlerValidationRule;
 use Northpole\Runtime\Validation\RuntimeValidationEngine;
 
@@ -47,6 +49,11 @@ final class RuntimeOperationsRegistrar implements ServiceRegistrar
                             modulesResolver: $modulesResolver,
                             registry: $application->make(
                                 ModuleQueryRegistry::class
+                            ),
+                        ),
+                        new OrphanNodeValidationRule(
+                            graphBuilder: $application->make(
+                                RuntimeGraphBuilderContract::class
                             ),
                         ),
                     ]);
