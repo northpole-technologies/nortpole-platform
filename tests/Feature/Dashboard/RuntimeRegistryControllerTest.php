@@ -107,6 +107,50 @@ final class RuntimeRegistryControllerTest extends TestCase
         }
     }
 
+    public function test_registry_entries_link_to_the_registration_inspector(): void
+    {
+        $this->get(
+            route(
+                'control-centre.runtime.registries.show',
+                ['registry' => 'commands'],
+            ),
+        )
+            ->assertOk()
+            ->assertSee(
+                route(
+                    'control-centre.runtime.inspector.show',
+                    [
+                        'registry' => 'commands',
+                        'module' => 'crm',
+                        'key' => 'crm.customer.create',
+                    ],
+                ),
+                false,
+            );
+    }
+
+    public function test_event_entries_link_to_the_registration_inspector(): void
+    {
+        $this->get(
+            route(
+                'control-centre.runtime.registries.show',
+                ['registry' => 'events'],
+            ),
+        )
+            ->assertOk()
+            ->assertSee(
+                route(
+                    'control-centre.runtime.inspector.show',
+                    [
+                        'registry' => 'events',
+                        'module' => 'crm',
+                        'key' => 'crm.customer.created',
+                    ],
+                ),
+                false,
+            );
+    }
+
     public function test_unknown_registry_returns_not_found(): void
     {
         $this->get(

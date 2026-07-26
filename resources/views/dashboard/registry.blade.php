@@ -265,10 +265,23 @@
         }
 
         .item {
+            display: block;
             padding: 13px 14px;
             border: 1px solid rgba(154, 184, 218, 0.1);
             border-radius: 13px;
             background: rgba(11, 31, 51, 0.58);
+            transition:
+                border-color 160ms ease,
+                background 160ms ease,
+                transform 160ms ease;
+        }
+
+        .item-link:hover,
+        .item-link:focus-visible {
+            border-color: rgba(119, 219, 255, 0.42);
+            background: rgba(17, 43, 68, 0.82);
+            outline: none;
+            transform: translateY(-1px);
         }
 
         .item-row {
@@ -443,9 +456,19 @@
                                     $items['publishes'] ?? []
                                     as $event
                                 )
-                                    <div class="item">
+                                    <a
+                                        class="item item-link"
+                                        href="{{ route(
+                                            'control-centre.runtime.inspector.show',
+                                            [
+                                                'registry' => $registry,
+                                                'module' => $module,
+                                                'key' => $event,
+                                            ],
+                                        ) }}"
+                                    >
                                         <code>{{ $event }}</code>
-                                    </div>
+                                    </a>
                                 @empty
                                     <div class="empty">
                                         No published events.
@@ -460,7 +483,17 @@
                                     $items['subscribes'] ?? []
                                     as $event => $listeners
                                 )
-                                    <div class="item">
+                                    <a
+                                        class="item item-link"
+                                        href="{{ route(
+                                            'control-centre.runtime.inspector.show',
+                                            [
+                                                'registry' => $registry,
+                                                'module' => $module,
+                                                'key' => $event,
+                                            ],
+                                        ) }}"
+                                    >
                                         <div class="item-row">
                                             <div class="item-key">
                                                 {{ $event }}
@@ -479,7 +512,7 @@
                                                 @endforeach
                                             </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 @empty
                                     <div class="empty">
                                         No event subscribers.
@@ -489,7 +522,65 @@
                         @else
                             <div class="items">
                                 @foreach ($items as $key => $value)
-                                    <div class="item">
+                                    @php
+                                        $registrationKey = null;
+
+                                        if (is_string($key)) {
+                                            $registrationKey = $key;
+                                        } elseif (is_string($value)) {
+                                            $registrationKey = $value;
+                                        } elseif (is_array($value)) {
+                                            foreach (
+                                                [
+                                                    'key',
+                                                    'name',
+                                                    'id',
+                                                    'route',
+                                                    'permission',
+                                                    'capability',
+                                                    'notification',
+                                                    'job',
+                                                    'class',
+                                                ] as $candidate
+                                            ) {
+                                                $candidateValue =
+                                                    $value[$candidate]
+                                                        ?? null;
+
+                                                if (
+                                                    is_string(
+                                                        $candidateValue
+                                                    )
+                                                    && trim(
+                                                        $candidateValue
+                                                    ) !== ''
+                                                ) {
+                                                    $registrationKey = trim(
+                                                        $candidateValue
+                                                    );
+
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        $registrationKey ??= sprintf(
+                                            'entry-%d',
+                                            $key + 1,
+                                        );
+                                    @endphp
+
+                                    <a
+                                        class="item item-link"
+                                        href="{{ route(
+                                            'control-centre.runtime.inspector.show',
+                                            [
+                                                'registry' => $registry,
+                                                'module' => $module,
+                                                'key' => $registrationKey,
+                                            ],
+                                        ) }}"
+                                    >
                                         @if (is_string($key))
                                             <div class="item-row">
                                                 <div class="item-key">
@@ -592,7 +683,7 @@
                                         @else
                                             <code>{{ $value }}</code>
                                         @endif
-                                    </div>
+                                    </a>
                                 @endforeach
                             </div>
                         @endif

@@ -270,6 +270,18 @@
             border: 1px solid rgba(154, 184, 218, 0.1);
             border-radius: 13px;
             background: rgba(11, 31, 51, 0.58);
+            transition:
+                border-color 160ms ease,
+                background 160ms ease,
+                transform 160ms ease;
+        }
+
+        .item:hover,
+        .item:focus-visible {
+            border-color: rgba(119, 219, 255, 0.42);
+            background: rgba(17, 43, 68, 0.82);
+            outline: none;
+            transform: translateY(-1px);
         }
 
         .item-key {
@@ -442,7 +454,20 @@
 
                                 <div class="items">
                                     @foreach ($items as $item)
-                                        <div class="item">
+                                        <a
+                                            class="item"
+                                            href="{{ route(
+                                                'control-centre.runtime.inspector.show',
+                                                [
+                                                    'registry' =>
+                                                        $item['registry'],
+                                                    'module' =>
+                                                        $item['module'],
+                                                    'key' =>
+                                                        $item['key'],
+                                                ],
+                                            ) }}"
+                                        >
                                             <div class="item-key">
                                                 {{ $item['key'] }}
                                             </div>
@@ -478,7 +503,7 @@
                                                     </code>
                                                 @endif
                                             </div>
-                                        </div>
+                                        </a>
                                     @endforeach
                                 </div>
                             </section>

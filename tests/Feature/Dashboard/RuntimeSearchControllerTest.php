@@ -60,6 +60,28 @@ final class RuntimeSearchControllerTest extends TestCase
             ->assertSee('CustomerSummaryAgent');
     }
 
+    public function test_search_results_link_to_the_registration_inspector(): void
+    {
+        $this->get(
+            route(
+                'control-centre.runtime.search',
+                ['q' => 'customer.summary'],
+            ),
+        )
+            ->assertOk()
+            ->assertSee(
+                route(
+                    'control-centre.runtime.inspector.show',
+                    [
+                        'registry' => 'agents',
+                        'module' => 'crm',
+                        'key' => 'crm.customer.summary',
+                    ],
+                ),
+                false,
+            );
+    }
+
     public function test_search_can_be_filtered_by_module(): void
     {
         $response = $this->get(
@@ -99,6 +121,31 @@ final class RuntimeSearchControllerTest extends TestCase
             )
             ->assertSee('crm.customer.create')
             ->assertSee('crm.customer.summary');
+    }
+
+    public function test_filtered_search_results_link_to_the_registration_inspector(): void
+    {
+        $this->get(
+            route(
+                'control-centre.runtime.search',
+                [
+                    'q' => 'customer.create',
+                    'module' => 'crm',
+                ],
+            ),
+        )
+            ->assertOk()
+            ->assertSee(
+                route(
+                    'control-centre.runtime.inspector.show',
+                    [
+                        'registry' => 'commands',
+                        'module' => 'crm',
+                        'key' => 'crm.customer.create',
+                    ],
+                ),
+                false,
+            );
     }
 
     public function test_search_returns_an_empty_result_set_for_unknown_terms(): void
