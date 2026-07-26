@@ -63,5 +63,10 @@
             "crm.customer.list": "Modules\\CRM\\Queries\\ListCustomersHandler",
             "crm.customer.find": "Modules\\CRM\\Queries\\FindCustomerHandler"
         }
+    },
+    "agents": {
+        "handles": {
+            "crm.customer.summary": "Modules\\CRM\\Agents\\CustomerSummaryAgent"
+        }
     }
 }
