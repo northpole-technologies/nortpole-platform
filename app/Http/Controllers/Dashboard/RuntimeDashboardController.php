@@ -6,15 +6,16 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
+use Northpole\Runtime\Diagnostics\RuntimeEnvironmentService;
+use Northpole\Runtime\Diagnostics\RuntimeModuleStatisticsService;
 use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
 use Northpole\Runtime\Health\RuntimeHealthSummaryService;
-use Northpole\Runtime\Manifest\ModuleManifest;
-use Northpole\Runtime\Runtime;
 
 final class RuntimeDashboardController extends Controller
 {
     public function __construct(
-        private readonly Runtime $runtime,
+        private readonly RuntimeEnvironmentService $environment,
+        private readonly RuntimeModuleStatisticsService $moduleStatistics,
         private readonly RuntimeHealthSummaryService $healthSummary,
         private readonly RuntimeRegistryStatisticsService $registryStatistics,
     ) {}
@@ -25,33 +26,18 @@ final class RuntimeDashboardController extends Controller
 
         $runtimeHealth = $healthSummary['runtimeHealth'];
         $moduleHealth = $healthSummary['moduleHealthBySlug'];
+        $environment = $this->environment->dashboardData();
 
         $modules = array_map(
             static function (
-                ModuleManifest $module
+                array $module
             ) use (
                 $moduleHealth
             ): array {
-                $health = $moduleHealth[$module->slug()] ?? null;
+                $health = $moduleHealth[$module['slug']] ?? null;
 
                 return [
-                    'name' => $module->name(),
-                    'slug' => $module->slug(),
-                    'version' => $module->version(),
-                    'description' => $module->description(),
-                    'enabled' => $module->enabled(),
-                    'dependencies' => count(
-                        $module->dependencyConstraints(),
-                    ),
-                    'commands' => count(
-                        $module->handledCommands(),
-                    ),
-                    'queries' => count(
-                        $module->handledQueries(),
-                    ),
-                    'permissions' => count(
-                        $module->permissions(),
-                    ),
+                    ...$module,
                     'healthStatus' => $health?->status()
                         ?? 'unhealthy',
                     'healthScore' => $health?->score()
@@ -60,23 +46,7 @@ final class RuntimeDashboardController extends Controller
                         ?? [],
                 ];
             },
-            $this->runtime->modules(),
-        );
-
-        usort(
-            $modules,
-            static fn (
-                array $left,
-                array $right,
-            ): int => $left['name'] <=> $right['name'],
-        );
-
-        $enabledModules = count(
-            array_filter(
-                $modules,
-                static fn (array $module): bool =>
-                    $module['enabled'],
-            ),
+            $this->moduleStatistics->dashboardRows(),
         );
 
         return view(
@@ -90,17 +60,17 @@ final class RuntimeDashboardController extends Controller
                     'score' => $runtimeHealth->score(),
                     'healthyModules' =>
                         $healthSummary['healthyModules'],
-                    'issues' => $healthSummary['issueCount'],
+                    'issues' =>
+                        $healthSummary['issueCount'],
                 ],
-                'environment' => app()->environment(),
-                'laravelVersion' => app()->version(),
-                'phpVersion' => PHP_VERSION,
-                'moduleSummary' => [
-                    'discovered' => count($modules),
-                    'enabled' => $enabledModules,
-                    'disabled' =>
-                        count($modules) - $enabledModules,
-                ],
+                'environment' =>
+                    $environment['environment'],
+                'laravelVersion' =>
+                    $environment['laravelVersion'],
+                'phpVersion' =>
+                    $environment['phpVersion'],
+                'moduleSummary' =>
+                    $this->moduleStatistics->summary(),
                 'metrics' => $this->registryStatistics
                     ->metricCards(),
                 'modules' => $modules,
