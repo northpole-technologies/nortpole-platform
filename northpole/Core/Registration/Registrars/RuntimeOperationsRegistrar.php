@@ -11,6 +11,7 @@ use Northpole\Runtime\Graph\Contracts\RuntimeGraphBuilderContract;
 use Northpole\Runtime\Health\RuntimeHealthService;
 use Northpole\Runtime\Queries\ModuleQueryRegistry;
 use Northpole\Runtime\Repair\Providers\CommandRepairProvider;
+use Northpole\Runtime\Repair\Providers\GraphRepairProvider;
 use Northpole\Runtime\Repair\Providers\QueryRepairProvider;
 use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Runtime;
@@ -73,6 +74,7 @@ final class RuntimeOperationsRegistrar implements ServiceRegistrar
                     ->registerProviders([
                         new CommandRepairProvider,
                         new QueryRepairProvider,
+                        new GraphRepairProvider,
                     ]);
             },
         );

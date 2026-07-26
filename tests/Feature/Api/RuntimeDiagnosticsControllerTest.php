@@ -189,7 +189,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
         );
 
         $this->assertSame(
-            2,
+            3,
             $response->json(
                 'data.repairs.providers',
             ),

@@ -119,7 +119,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                         ],
                         true,
                     )
-                    && $summary['providers'] === 2,
+                    && $summary['providers'] === 3,
             )
             ->assertViewHas(
                 'repairRecommendations',
