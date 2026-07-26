@@ -13,12 +13,13 @@ use Northpole\Runtime\Validation\ValidationResult;
 
 final class RuntimeDiagnosticsService
 {
-    public const SCHEMA_VERSION = '1.0';
+    public const SCHEMA_VERSION = '1.1';
 
     public function __construct(
         private readonly RuntimeHealthService $healthService,
         private readonly RuntimeValidationEngine $validationEngine,
         private readonly RuntimeRepairEngine $repairEngine,
+        private readonly RuntimeRegistryStatisticsService $registryStatistics,
     ) {}
 
     /**
@@ -95,6 +96,10 @@ final class RuntimeDiagnosticsService
                 'recommendations' => $repairResult->count(),
                 'results' => $repairResult->toArray(),
             ],
+            'registries' => [
+                'total' => $this->registryStatistics->total(),
+                'counts' => $this->registryStatistics->counts(),
+            ],
         ];
     }
 
@@ -113,6 +118,7 @@ final class RuntimeDiagnosticsService
             'health' => $diagnostics['health'],
             'validation' => $diagnostics['validation'],
             'repairs' => $diagnostics['repairs'],
+            'registries' => $diagnostics['registries'],
         ];
     }
 

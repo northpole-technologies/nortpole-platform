@@ -66,6 +66,11 @@ final class RuntimeDiagnosticsServiceTest extends TestCase
             'repairs',
             $diagnostics,
         );
+
+        self::assertArrayHasKey(
+            'registries',
+            $diagnostics,
+        );
     }
 
     public function test_it_returns_a_machine_readable_payload(): void
@@ -79,6 +84,7 @@ final class RuntimeDiagnosticsServiceTest extends TestCase
                 'health',
                 'validation',
                 'repairs',
+                'registries',
             ],
             array_keys($payload),
         );
@@ -91,6 +97,13 @@ final class RuntimeDiagnosticsServiceTest extends TestCase
         self::assertSame(
             count($payload['repairs']['results']),
             $payload['repairs']['recommendations'],
+        );
+
+        self::assertSame(
+            array_sum(
+                $payload['registries']['counts'],
+            ),
+            $payload['registries']['total'],
         );
     }
 
@@ -152,6 +165,7 @@ final class RuntimeDiagnosticsServiceTest extends TestCase
                 'health',
                 'validation',
                 'repairs',
+                'registries',
             ],
             array_keys($payload['data']),
         );
