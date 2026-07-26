@@ -31,6 +31,12 @@ final class RuntimeRegistryController extends Controller
                 'Runtime queries grouped by their contributing module.',
             'method' => 'queries',
         ],
+        'agents' => [
+            'title' => 'Agents',
+            'description' =>
+                'Runtime agents grouped by their contributing module.',
+            'method' => 'agents',
+        ],
         'events' => [
             'title' => 'Events',
             'description' =>

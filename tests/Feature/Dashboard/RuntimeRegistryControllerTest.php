@@ -42,6 +42,32 @@ final class RuntimeRegistryControllerTest extends TestCase
             ->assertViewHas('title', 'Queries');
     }
 
+    public function test_agents_registry_can_be_viewed(): void
+    {
+        $response = $this->get(
+            route(
+                'control-centre.runtime.registries.show',
+                ['registry' => 'agents'],
+            ),
+        );
+
+        $response
+            ->assertOk()
+            ->assertViewIs('dashboard.registry')
+            ->assertViewHas('registry', 'agents')
+            ->assertViewHas('title', 'Agents')
+            ->assertViewHas(
+                'groups',
+                static function (array $groups): bool {
+                    return isset(
+                        $groups['crm']['crm.customer.summary'],
+                    );
+                },
+            )
+            ->assertSee('crm.customer.summary')
+            ->assertSee('CustomerSummaryAgent');
+    }
+
     public function test_events_registry_can_be_viewed(): void
     {
         $response = $this->get(

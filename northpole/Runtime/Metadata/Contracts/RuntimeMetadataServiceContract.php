@@ -32,6 +32,11 @@ interface RuntimeMetadataServiceContract
     public function queries(): array;
 
     /**
+     * @return array<string, array<string, string>>
+     */
+    public function agents(): array;
+
+    /**
      * @return array<string, array<string, mixed>>
      */
     public function events(): array;

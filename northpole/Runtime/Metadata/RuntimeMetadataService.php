@@ -42,6 +42,9 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
             'queries' => $this->countMapItems(
                 $this->queries(),
             ),
+            'agents' => $this->countMapItems(
+                $this->agents(),
+            ),
             'published_events' => $this->countEventItems(
                 'publishes',
             ),
@@ -161,6 +164,29 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     /**
      * @return array<string, array<string, mixed>>
      */
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function agents(): array
+    {
+        $agents = [];
+
+        foreach ($this->runtime->modules() as $module) {
+            $items = $module->handledAgents();
+
+            if ($items === []) {
+                continue;
+            }
+
+            ksort($items);
+
+            $agents[$module->slug()] = $items;
+        }
+
+        ksort($agents);
+
+        return $agents;
+    }
     public function events(): array
     {
         $events = [];
@@ -347,6 +373,8 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
                 $module->handledCommands(),
             'queries' =>
                 $module->handledQueries(),
+            'agents' =>
+                $module->handledAgents(),
             'scheduled_jobs' =>
                 $module->scheduledJobs(),
         ];

@@ -44,6 +44,11 @@ final class RuntimeMetadataServiceTest extends TestCase
 
         $this->assertGreaterThanOrEqual(
             1,
+            $summary['agents'],
+        );
+
+        $this->assertGreaterThanOrEqual(
+            1,
             $summary['published_events'],
         );
 
@@ -102,6 +107,16 @@ final class RuntimeMetadataServiceTest extends TestCase
             $crm['queries'],
         );
 
+        $this->assertArrayHasKey(
+            'crm.customer.summary',
+            $crm['agents'],
+        );
+
+        $this->assertSame(
+            'Modules\CRM\Agents\CustomerSummaryAgent',
+            $crm['agents']['crm.customer.summary'],
+        );
+
         $this->assertContains(
             'crm.customer.created',
             $crm['published_events'],
@@ -110,6 +125,25 @@ final class RuntimeMetadataServiceTest extends TestCase
         $this->assertContains(
             'crm.customers.view',
             $crm['permissions'],
+        );
+    }
+
+    public function test_it_returns_agents_grouped_by_module(): void
+    {
+        $metadata = $this->app->make(
+            RuntimeMetadataService::class,
+        );
+
+        $agents = $metadata->agents();
+
+        $this->assertArrayHasKey(
+            'crm',
+            $agents,
+        );
+
+        $this->assertSame(
+            'Modules\CRM\Agents\CustomerSummaryAgent',
+            $agents['crm']['crm.customer.summary'],
         );
     }
 
