@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Northpole\Runtime\Metadata;
 
-use Northpole\Runtime\Graph\RuntimeGraphBuilder;
+use Northpole\Runtime\Graph\Contracts\RuntimeGraphBuilderContract;
 use Northpole\Runtime\Manifest\ModuleManifest;
 use Northpole\Runtime\Metadata\Contracts\RuntimeMetadataServiceContract;
 use Northpole\Runtime\Runtime;
@@ -13,7 +13,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
 {
     public function __construct(
         private readonly Runtime $runtime,
-        private readonly RuntimeGraphBuilder $graphBuilder,
+        private readonly RuntimeGraphBuilderContract $graphBuilder,
     ) {}
 
     /**

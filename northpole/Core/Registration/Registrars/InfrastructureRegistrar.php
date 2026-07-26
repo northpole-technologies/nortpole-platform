@@ -7,6 +7,8 @@ namespace Northpole\Core\Registration\Registrars;
 use Illuminate\Contracts\Foundation\Application;
 use Northpole\Core\Registration\Contracts\ServiceRegistrar;
 use Northpole\Runtime\Discovery\ModuleDiscovery;
+use Northpole\Runtime\Graph\Contracts\RuntimeGraphBuilderContract;
+use Northpole\Runtime\Graph\RuntimeGraphBuilder;
 use Northpole\Runtime\Manifest\ManifestLoader;
 use Northpole\Runtime\Modules\ModuleDependencyResolver;
 use Northpole\Runtime\Modules\ModuleFinder;
@@ -97,6 +99,11 @@ final class InfrastructureRegistrar implements ServiceRegistrar
                     ),
                 );
             },
+        );
+
+        $application->singleton(
+            RuntimeGraphBuilderContract::class,
+            RuntimeGraphBuilder::class,
         );
     }
 }
