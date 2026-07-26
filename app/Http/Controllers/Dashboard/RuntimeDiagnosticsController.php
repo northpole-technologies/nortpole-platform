@@ -6,33 +6,15 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
-use Northpole\Runtime\Capabilities\CapabilityRegistry;
-use Northpole\Runtime\Commands\ModuleCommandRegistry;
-use Northpole\Runtime\Configuration\ModuleConfigurationRegistry;
 use Northpole\Runtime\Diagnostics\RuntimeDiagnosticsService;
-use Northpole\Runtime\Events\ModuleEventRegistry;
+use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
 use Northpole\Runtime\Health\ModuleHealth;
-use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
-use Northpole\Runtime\Lifecycle\StageRegistry;
-use Northpole\Runtime\Navigation\NavigationRegistry;
-use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
-use Northpole\Runtime\Permissions\PermissionRegistry;
-use Northpole\Runtime\Queries\ModuleQueryRegistry;
 
 final class RuntimeDiagnosticsController extends Controller
 {
     public function __construct(
         private readonly RuntimeDiagnosticsService $diagnostics,
-        private readonly StageRegistry $stageRegistry,
-        private readonly CapabilityRegistry $capabilityRegistry,
-        private readonly ModuleCommandRegistry $commandRegistry,
-        private readonly ModuleQueryRegistry $queryRegistry,
-        private readonly ModuleEventRegistry $eventRegistry,
-        private readonly NavigationRegistry $navigationRegistry,
-        private readonly PermissionRegistry $permissionRegistry,
-        private readonly ModuleConfigurationRegistry $configurationRegistry,
-        private readonly ModuleNotificationRegistry $notificationRegistry,
-        private readonly ModuleScheduledJobRegistry $scheduledJobRegistry,
+        private readonly RuntimeRegistryStatisticsService $registryStatistics,
     ) {}
 
     public function __invoke(): View
@@ -64,56 +46,13 @@ final class RuntimeDiagnosticsController extends Controller
         $healthyModules = count(
             array_filter(
                 $runtimeHealth->modules(),
-                static fn (ModuleHealth $health): bool => $health->status() === 'healthy',
+                static fn (ModuleHealth $health): bool =>
+                    $health->status() === 'healthy',
             ),
         );
 
-        $registryCounts = [
-            [
-                'label' => 'Capabilities',
-                'value' => $this->capabilityRegistry->count(),
-                'registry' => 'capabilities',
-            ],
-            [
-                'label' => 'Commands',
-                'value' => $this->commandRegistry->count(),
-                'registry' => 'commands',
-            ],
-            [
-                'label' => 'Queries',
-                'value' => $this->queryRegistry->count(),
-                'registry' => 'queries',
-            ],
-            [
-                'label' => 'Event listeners',
-                'value' => $this->eventRegistry->count(),
-                'registry' => 'events',
-            ],
-            [
-                'label' => 'Navigation items',
-                'value' => $this->navigationRegistry->count(),
-                'registry' => 'navigation',
-            ],
-            [
-                'label' => 'Permissions',
-                'value' => $this->permissionRegistry->count(),
-                'registry' => 'permissions',
-            ],
-            [
-                'label' => 'Configuration',
-                'value' => $this->configurationRegistry->count(),
-            ],
-            [
-                'label' => 'Notifications',
-                'value' => $this->notificationRegistry->count(),
-                'registry' => 'notifications',
-            ],
-            [
-                'label' => 'Scheduled jobs',
-                'value' => $this->scheduledJobRegistry->count(),
-                'registry' => 'scheduled-jobs',
-            ],
-        ];
+        $registryCounts = $this->registryStatistics
+            ->diagnosticCards();
 
         return view(
             'dashboard.diagnostics',
@@ -148,7 +87,8 @@ final class RuntimeDiagnosticsController extends Controller
                     ),
                     'healthyModules' => $healthyModules,
                     'issues' => count($moduleIssues),
-                    'bootStages' => $this->stageRegistry->count(),
+                    'bootStages' => $diagnostics['registries']
+                        ['counts']['boot_stages'],
                 ],
                 'registryCounts' => $registryCounts,
                 'moduleIssues' => $moduleIssues,

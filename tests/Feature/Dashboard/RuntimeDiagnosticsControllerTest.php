@@ -143,7 +143,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                 ): bool {
                     if (
                         ! is_array($registries)
-                        || count($registries) !== 9
+                        || count($registries) !== 10
                     ) {
                         return false;
                     }
