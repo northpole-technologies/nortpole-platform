@@ -19,6 +19,7 @@ use Northpole\Runtime\Events\Subscribers\ModuleInstalledSubscriber;
 use Northpole\Runtime\Jobs\Laravel\LaravelScheduledJobAdapter;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistry;
+use Northpole\Runtime\Notifications\ModuleNotificationBus;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistrar;
 use Northpole\Runtime\Notifications\ModuleNotificationRegistry;
 use Northpole\Runtime\Queries\ModuleQueryBus;
@@ -243,6 +244,26 @@ final class MessagingRegistrar implements ServiceRegistrar
                     $application->make(
                         ModuleNotificationRegistry::class
                     ),
+                );
+            },
+        );
+
+        $application->singleton(
+            ModuleNotificationBus::class,
+            function (
+                Application $application
+            ): ModuleNotificationBus {
+                return new ModuleNotificationBus(
+                    registry: $application->make(
+                        ModuleNotificationRegistry::class
+                    ),
+                    handlerResolver: static function (
+                        string $handler
+                    ) use ($application): object {
+                        return $application->make(
+                            $handler
+                        );
+                    },
                 );
             },
         );
