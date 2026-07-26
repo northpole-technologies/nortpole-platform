@@ -35,6 +35,7 @@ final class ModuleManifest implements ModuleManifestContract
         $this->validateRoles();
         $this->validateCommands();
         $this->validateQueries();
+        $this->validateAgents();
         $this->validateJobs();
     }
 
@@ -865,6 +866,57 @@ final class ModuleManifest implements ModuleManifestContract
         }
     }
 
+    private function validateAgents(): void
+    {
+        if (! isset($this->data['agents'])) {
+            return;
+        }
+
+        if (! is_array($this->data['agents'])) {
+            throw new InvalidArgumentException(
+                'Module manifest field [agents] must be an object'
+            );
+        }
+
+        $this->validateHandledAgents(
+            $this->data['agents']['handles'] ?? []
+        );
+    }
+
+    private function validateHandledAgents(
+        mixed $handledAgents
+    ): void {
+        if (! is_array($handledAgents)) {
+            throw new InvalidArgumentException(
+                'Module manifest field [agents.handles] must be an object'
+            );
+        }
+
+        foreach (
+            $handledAgents as $agentName => $handlerClass
+        ) {
+            if (
+                ! is_string($agentName)
+                || trim($agentName) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    'Module manifest handled agent names must be non-empty strings'
+                );
+            }
+
+            if (
+                ! is_string($handlerClass)
+                || trim($handlerClass) === ''
+            ) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Module manifest agent [%s] must have a non-empty handler class',
+                        $agentName
+                    )
+                );
+            }
+        }
+    }
     private function validateJobs(): void
     {
         if (! isset($this->data['jobs'])) {
@@ -1443,6 +1495,25 @@ final class ModuleManifest implements ModuleManifestContract
         return $normalisedQueries;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function handledAgents(): array
+    {
+        $handledAgents = $this->data['agents']['handles'] ?? [];
+
+        $normalisedAgents = [];
+
+        foreach (
+            $handledAgents as $agentName => $handlerClass
+        ) {
+            $normalisedAgents[trim($agentName)] = trim(
+                $handlerClass
+            );
+        }
+
+        return $normalisedAgents;
+    }
     /**
      * @return array<int, array{
      *     class: string,

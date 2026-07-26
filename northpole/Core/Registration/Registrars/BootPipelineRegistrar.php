@@ -6,11 +6,13 @@ namespace Northpole\Core\Registration\Registrars;
 
 use Illuminate\Contracts\Foundation\Application;
 use Northpole\Core\Registration\Contracts\ServiceRegistrar;
+use Northpole\Runtime\Agents\ModuleAgentRegistrar;
 use Northpole\Runtime\Capabilities\CapabilityRegistry;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Configuration\ModuleConfigurationRegistrar;
 use Northpole\Runtime\Events\ModuleEventRegistrar;
 use Northpole\Runtime\Jobs\ModuleScheduledJobRegistrar;
+use Northpole\Runtime\Lifecycle\AgentHandlerStage;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\CapabilityStage;
 use Northpole\Runtime\Lifecycle\CommandHandlerStage;
@@ -114,6 +116,11 @@ final class BootPipelineRegistrar implements ServiceRegistrar
                         new QueryHandlerStage(
                             $application->make(
                                 ModuleQueryRegistrar::class
+                            ),
+                        ),
+                        new AgentHandlerStage(
+                            $application->make(
+                                ModuleAgentRegistrar::class
                             ),
                         ),
                     ]);

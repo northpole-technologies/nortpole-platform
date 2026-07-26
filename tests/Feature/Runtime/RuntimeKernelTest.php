@@ -75,6 +75,7 @@ final class RuntimeKernelTest extends TestCase
                 'scheduled-jobs',
                 'command-handlers',
                 'query-handlers',
+                'agent-handlers',
             ],
             array_map(
                 static fn ($stage): string => $stage->name(),
@@ -83,7 +84,7 @@ final class RuntimeKernelTest extends TestCase
         );
 
         $this->assertSame(
-            15,
+            16,
             $registry->count(),
         );
     }

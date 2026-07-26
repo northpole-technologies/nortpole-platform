@@ -132,6 +132,13 @@ interface ModuleManifestContract
     public function handledQueries(): array;
 
     /**
+     * Returns agent names mapped to the handler classes owned by this module.
+     *
+     * @return array<string, string>
+     */
+    public function handledAgents(): array;
+
+    /**
      * Returns scheduled jobs declared by this module.
      *
      * @return array<int, array{

@@ -7,6 +7,9 @@ namespace Northpole\Core\Registration\Registrars;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Foundation\Application;
 use Northpole\Core\Registration\Contracts\ServiceRegistrar;
+use Northpole\Runtime\Agents\ModuleAgentBus;
+use Northpole\Runtime\Agents\ModuleAgentRegistrar;
+use Northpole\Runtime\Agents\ModuleAgentRegistry;
 use Northpole\Runtime\Commands\ModuleCommandBus;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
@@ -40,6 +43,10 @@ final class MessagingRegistrar implements ServiceRegistrar
         );
 
         $this->registerQueries(
+            $application
+        );
+
+        $this->registerAgents(
             $application
         );
 
@@ -201,6 +208,49 @@ final class MessagingRegistrar implements ServiceRegistrar
         );
     }
 
+    private function registerAgents(
+        Application $application
+    ): void {
+        $application->singleton(
+            ModuleAgentRegistry::class,
+            function (): ModuleAgentRegistry {
+                return new ModuleAgentRegistry;
+            },
+        );
+
+        $application->singleton(
+            ModuleAgentRegistrar::class,
+            function (
+                Application $application
+            ): ModuleAgentRegistrar {
+                return new ModuleAgentRegistrar(
+                    $application->make(
+                        ModuleAgentRegistry::class
+                    ),
+                );
+            },
+        );
+
+        $application->singleton(
+            ModuleAgentBus::class,
+            function (
+                Application $application
+            ): ModuleAgentBus {
+                return new ModuleAgentBus(
+                    registry: $application->make(
+                        ModuleAgentRegistry::class
+                    ),
+                    handlerResolver: static function (
+                        string $handler
+                    ) use ($application): object {
+                        return $application->make(
+                            $handler
+                        );
+                    },
+                );
+            },
+        );
+    }
     private function registerConfiguration(
         Application $application
     ): void {
