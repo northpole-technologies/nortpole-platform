@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Northpole\Runtime\Metadata;
 
+use Northpole\Runtime\Graph\RuntimeGraphBuilder;
 use Northpole\Runtime\Manifest\ModuleManifest;
 use Northpole\Runtime\Metadata\Contracts\RuntimeMetadataServiceContract;
 use Northpole\Runtime\Runtime;
@@ -12,8 +13,8 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
 {
     public function __construct(
         private readonly Runtime $runtime,
-    ) {
-    }
+        private readonly RuntimeGraphBuilder $graphBuilder,
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -24,8 +25,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
 
         $enabledModules = array_filter(
             $modules,
-            static fn (ModuleManifest $module): bool =>
-                $module->enabled(),
+            static fn (ModuleManifest $module): bool => $module->enabled(),
         );
 
         return [
@@ -33,8 +33,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
             'modules' => [
                 'total' => count($modules),
                 'enabled' => count($enabledModules),
-                'disabled' =>
-                    count($modules) - count($enabledModules),
+                'disabled' => count($modules) - count($enabledModules),
             ],
             'commands' => $this->countMapItems(
                 $this->commands(),
@@ -82,8 +81,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
 
         usort(
             $modules,
-            static fn (array $left, array $right): int =>
-                $left['slug'] <=> $right['slug'],
+            static fn (array $left, array $right): int => $left['slug'] <=> $right['slug'],
         );
 
         return $modules;
@@ -187,6 +185,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
 
         return $agents;
     }
+
     public function events(): array
     {
         $events = [];
@@ -228,8 +227,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     public function permissions(): array
     {
         return $this->moduleLists(
-            static fn (ModuleManifest $module): array =>
-                $module->permissions(),
+            static fn (ModuleManifest $module): array => $module->permissions(),
         );
     }
 
@@ -239,8 +237,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     public function capabilities(): array
     {
         return $this->moduleLists(
-            static fn (ModuleManifest $module): array =>
-                $module->capabilities(),
+            static fn (ModuleManifest $module): array => $module->capabilities(),
         );
     }
 
@@ -250,8 +247,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     public function navigation(): array
     {
         return $this->moduleDefinitions(
-            static fn (ModuleManifest $module): array =>
-                $module->navigation(),
+            static fn (ModuleManifest $module): array => $module->navigation(),
         );
     }
 
@@ -261,8 +257,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     public function notifications(): array
     {
         return $this->moduleDefinitions(
-            static fn (ModuleManifest $module): array =>
-                $module->notifications(),
+            static fn (ModuleManifest $module): array => $module->notifications(),
         );
     }
 
@@ -272,8 +267,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     public function scheduledJobs(): array
     {
         return $this->moduleDefinitions(
-            static fn (ModuleManifest $module): array =>
-                $module->scheduledJobs(),
+            static fn (ModuleManifest $module): array => $module->scheduledJobs(),
         );
     }
 
@@ -282,56 +276,9 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
      */
     public function graph(): array
     {
-        $nodes = [];
-        $edges = [];
-
-        foreach ($this->runtime->modules() as $module) {
-            $nodes[] = [
-                'id' => $module->slug(),
-                'name' => $module->name(),
-                'version' => $module->version(),
-                'enabled' => $module->enabled(),
-            ];
-
-            foreach (
-                $module->dependencyConstraints()
-                as $dependency => $constraint
-            ) {
-                $edges[] = [
-                    'source' => $module->slug(),
-                    'target' => $dependency,
-                    'type' => 'depends_on',
-                    'constraint' => $constraint,
-                ];
-            }
-        }
-
-        usort(
-            $nodes,
-            static fn (array $left, array $right): int =>
-                $left['id'] <=> $right['id'],
-        );
-
-        usort(
-            $edges,
-            static function (
-                array $left,
-                array $right,
-            ): int {
-                return [
-                    $left['source'],
-                    $left['target'],
-                ] <=> [
-                    $right['source'],
-                    $right['target'],
-                ];
-            },
-        );
-
-        return [
-            'nodes' => $nodes,
-            'edges' => $edges,
-        ];
+        return $this->graphBuilder
+            ->build()
+            ->toArray();
     }
 
     /**
@@ -349,39 +296,27 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
             'path' => $module->path(),
             'manifest_path' => $module->manifestPath(),
             'providers' => $module->providers(),
-            'dependencies' =>
-                $module->dependencyConstraints(),
+            'dependencies' => $module->dependencyConstraints(),
             'routes' => $module->routes(),
             'views' => $module->viewsPath(),
             'migrations' => $module->migrationsPath(),
-            'configuration' =>
-                $module->configuration(),
+            'configuration' => $module->configuration(),
             'settings' => $module->settings(),
-            'capabilities' =>
-                $module->capabilities(),
-            'permissions' =>
-                $module->permissions(),
-            'navigation' =>
-                $module->navigation(),
-            'published_events' =>
-                $module->publishedEvents(),
-            'event_subscribers' =>
-                $module->eventSubscribers(),
-            'notifications' =>
-                $module->notifications(),
-            'commands' =>
-                $module->handledCommands(),
-            'queries' =>
-                $module->handledQueries(),
-            'agents' =>
-                $module->handledAgents(),
-            'scheduled_jobs' =>
-                $module->scheduledJobs(),
+            'capabilities' => $module->capabilities(),
+            'permissions' => $module->permissions(),
+            'navigation' => $module->navigation(),
+            'published_events' => $module->publishedEvents(),
+            'event_subscribers' => $module->eventSubscribers(),
+            'notifications' => $module->notifications(),
+            'commands' => $module->handledCommands(),
+            'queries' => $module->handledQueries(),
+            'agents' => $module->handledAgents(),
+            'scheduled_jobs' => $module->scheduledJobs(),
         ];
     }
 
     /**
-     * @param callable(ModuleManifest): array<int, string> $resolver
+     * @param  callable(ModuleManifest): array<int, string>  $resolver
      * @return array<string, array<int, string>>
      */
     private function moduleLists(
@@ -407,7 +342,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     }
 
     /**
-     * @param callable(ModuleManifest): array<int, array<string, mixed>> $resolver
+     * @param  callable(ModuleManifest): array<int, array<string, mixed>>  $resolver
      * @return array<string, array<int, array<string, mixed>>>
      */
     private function moduleDefinitions(
@@ -431,7 +366,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     }
 
     /**
-     * @param array<string, array<mixed>> $groups
+     * @param  array<string, array<mixed>>  $groups
      */
     private function countListItems(
         array $groups,
@@ -445,7 +380,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
     }
 
     /**
-     * @param array<string, array<string, string>> $groups
+     * @param  array<string, array<string, string>>  $groups
      */
     private function countMapItems(
         array $groups,
@@ -473,8 +408,7 @@ final class RuntimeMetadataService implements RuntimeMetadataServiceContract
             }
 
             foreach (
-                $eventMetadata['subscribes']
-                as $listeners
+                $eventMetadata['subscribes'] as $listeners
             ) {
                 $count += count($listeners);
             }

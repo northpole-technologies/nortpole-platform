@@ -199,14 +199,39 @@ final class RuntimeMetadataServiceTest extends TestCase
 
         $crm = collect($graph['nodes'])->firstWhere(
             'id',
-            'crm',
+            'module:crm',
         );
 
         $this->assertNotNull($crm);
 
         $this->assertSame(
+            'module',
+            $crm['type'],
+        );
+
+        $this->assertSame(
             'CRM',
-            $crm['name'],
+            $crm['label'],
+        );
+
+        $this->assertSame(
+            'crm',
+            $crm['module'],
+        );
+
+        $this->assertArrayHasKey(
+            'summary',
+            $graph,
+        );
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $graph['summary']['node_types']['command'],
+        );
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $graph['summary']['edge_types']['handled_by'],
         );
     }
 }

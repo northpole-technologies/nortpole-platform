@@ -122,8 +122,7 @@ final class RuntimeMetadataApiTest extends TestCase
             ->assertJsonPath(
                 'data.enabled',
                 true,
-            )
-            ;
+            );
 
         $this->assertSame(
             'Modules\CRM\Commands\CreateCustomerHandler',
@@ -181,12 +180,27 @@ final class RuntimeMetadataApiTest extends TestCase
                     'nodes' => [
                         '*' => [
                             'id',
-                            'name',
-                            'version',
-                            'enabled',
+                            'type',
+                            'label',
+                            'module',
+                            'metadata',
                         ],
                     ],
-                    'edges',
+                    'edges' => [
+                        '*' => [
+                            'source',
+                            'target',
+                            'type',
+                            'label',
+                            'metadata',
+                        ],
+                    ],
+                    'summary' => [
+                        'nodes',
+                        'edges',
+                        'node_types',
+                        'edge_types',
+                    ],
                 ],
             ]);
 
@@ -194,14 +208,40 @@ final class RuntimeMetadataApiTest extends TestCase
             $response->json('data.nodes'),
         )->firstWhere(
             'id',
-            'crm',
+            'module:crm',
         );
 
         $this->assertNotNull($crm);
 
         $this->assertSame(
+            'module',
+            $crm['type'],
+        );
+
+        $this->assertSame(
             'CRM',
-            $crm['name'],
+            $crm['label'],
+        );
+
+        $command = collect(
+            $response->json('data.nodes'),
+        )->firstWhere(
+            'id',
+            'command:crm:crm.customer.create',
+        );
+
+        $this->assertNotNull($command);
+
+        $this->assertSame(
+            'commands',
+            $command['metadata']['registry'],
+        );
+
+        $this->assertGreaterThanOrEqual(
+            1,
+            $response->json(
+                'data.summary.edge_types.handled_by',
+            ),
         );
     }
 }
