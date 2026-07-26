@@ -7,8 +7,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
-use Northpole\Runtime\Health\ModuleHealth;
-use Northpole\Runtime\Health\RuntimeHealthService;
+use Northpole\Runtime\Health\RuntimeHealthSummaryService;
 use Northpole\Runtime\Manifest\ModuleManifest;
 use Northpole\Runtime\Runtime;
 
@@ -16,19 +15,16 @@ final class RuntimeDashboardController extends Controller
 {
     public function __construct(
         private readonly Runtime $runtime,
-        private readonly RuntimeHealthService $runtimeHealthService,
+        private readonly RuntimeHealthSummaryService $healthSummary,
         private readonly RuntimeRegistryStatisticsService $registryStatistics,
     ) {}
 
     public function __invoke(): View
     {
-        $runtimeHealth = $this->runtimeHealthService->report();
+        $healthSummary = $this->healthSummary->inspect();
 
-        $moduleHealth = [];
-
-        foreach ($runtimeHealth->modules() as $health) {
-            $moduleHealth[$health->slug()] = $health;
-        }
+        $runtimeHealth = $healthSummary['runtimeHealth'];
+        $moduleHealth = $healthSummary['moduleHealthBySlug'];
 
         $modules = array_map(
             static function (
@@ -83,31 +79,6 @@ final class RuntimeDashboardController extends Controller
             ),
         );
 
-        $healthyModules = count(
-            array_filter(
-                $runtimeHealth->modules(),
-                static fn (ModuleHealth $health): bool =>
-                    $health->status() === 'healthy',
-            ),
-        );
-
-        $issueCount = array_reduce(
-            $runtimeHealth->modules(),
-            static function (
-                int $count,
-                ModuleHealth $health,
-            ): int {
-                return $count + count(
-                    array_filter(
-                        $health->checks(),
-                        static fn (array $check): bool =>
-                            ! $check['healthy'],
-                    ),
-                );
-            },
-            0,
-        );
-
         return view(
             'dashboard.runtime',
             [
@@ -117,8 +88,9 @@ final class RuntimeDashboardController extends Controller
                 'runtimeHealth' => $runtimeHealth,
                 'runtimeHealthSummary' => [
                     'score' => $runtimeHealth->score(),
-                    'healthyModules' => $healthyModules,
-                    'issues' => $issueCount,
+                    'healthyModules' =>
+                        $healthSummary['healthyModules'],
+                    'issues' => $healthSummary['issueCount'],
                 ],
                 'environment' => app()->environment(),
                 'laravelVersion' => app()->version(),
@@ -126,7 +98,8 @@ final class RuntimeDashboardController extends Controller
                 'moduleSummary' => [
                     'discovered' => count($modules),
                     'enabled' => $enabledModules,
-                    'disabled' => count($modules) - $enabledModules,
+                    'disabled' =>
+                        count($modules) - $enabledModules,
                 ],
                 'metrics' => $this->registryStatistics
                     ->metricCards(),
