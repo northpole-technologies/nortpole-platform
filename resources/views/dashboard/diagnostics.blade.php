@@ -691,7 +691,7 @@
                     class="brand-mark"
                     aria-hidden="true"
                 >
-                    ❄
+                    NP
                 </div>
 
                 <div>

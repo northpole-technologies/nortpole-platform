@@ -574,7 +574,7 @@
                     class="brand-mark"
                     aria-hidden="true"
                 >
-                    â„
+                    NP
                 </div>
 
                 <div>
@@ -752,7 +752,7 @@
 
                                         <p class="module-slug">
                                             {{ $module['slug'] }}
-                                            Â·
+                                            &middot;
                                             v{{ $module['version'] }}
                                         </p>
                                     </div>
