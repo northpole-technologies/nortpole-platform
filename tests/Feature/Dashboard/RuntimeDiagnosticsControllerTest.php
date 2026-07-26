@@ -84,7 +84,7 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                         'information',
                         $summary,
                     )
-                    && $summary['rules'] === 3,
+                    && $summary['rules'] === 4,
             )
             ->assertViewHas(
                 'validationIssues',

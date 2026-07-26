@@ -15,6 +15,7 @@ use Northpole\Runtime\Repair\Providers\QueryRepairProvider;
 use Northpole\Runtime\Repair\RuntimeRepairEngine;
 use Northpole\Runtime\Runtime;
 use Northpole\Runtime\Validation\Rules\CommandHandlerValidationRule;
+use Northpole\Runtime\Validation\Rules\Graph\DependencyCycleValidationRule;
 use Northpole\Runtime\Validation\Rules\Graph\OrphanNodeValidationRule;
 use Northpole\Runtime\Validation\Rules\QueryHandlerValidationRule;
 use Northpole\Runtime\Validation\RuntimeValidationEngine;
@@ -49,6 +50,11 @@ final class RuntimeOperationsRegistrar implements ServiceRegistrar
                             modulesResolver: $modulesResolver,
                             registry: $application->make(
                                 ModuleQueryRegistry::class
+                            ),
+                        ),
+                        new DependencyCycleValidationRule(
+                            graphBuilder: $application->make(
+                                RuntimeGraphBuilderContract::class
                             ),
                         ),
                         new OrphanNodeValidationRule(
