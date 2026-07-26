@@ -4,30 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Runtime;
 
-use Northpole\Runtime\Discovery\ModuleDiscovery;
-use Northpole\Runtime\Manifest\ManifestLoader;
-use Northpole\Runtime\Modules\ModuleDependencyResolver;
-use Northpole\Runtime\Modules\ModuleFinder;
-use Northpole\Runtime\Modules\ModuleRepository;
-use Northpole\Runtime\Runtime;
+
+
+
+
+
+
+use Tests\Support\CreatesRuntime;
 use Tests\TestCase;
 
 final class RuntimeTest extends TestCase
 {
+    use CreatesRuntime;
     public function test_runtime_discovers_and_exposes_modules(): void
     {
-        $repository = new ModuleRepository;
-
-        $runtime = new Runtime(
-            new ModuleDiscovery(
-                new ModuleFinder,
-                new ManifestLoader,
-                $repository,
-            ),
-            $repository,
-            new ModuleDependencyResolver,
-            base_path('modules'),
-        );
+        $runtime = $this->createRuntime();
 
         $runtime->discover();
 

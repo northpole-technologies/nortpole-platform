@@ -8,18 +8,20 @@ use InvalidArgumentException;
 use Northpole\Runtime\Commands\ModuleCommandRegistrar;
 use Northpole\Runtime\Commands\ModuleCommandRegistry;
 use Northpole\Runtime\Contracts\ModuleManifestContract;
-use Northpole\Runtime\Discovery\ModuleDiscovery;
+
 use Northpole\Runtime\Lifecycle\BootContext;
 use Northpole\Runtime\Lifecycle\CommandHandlerStage;
-use Northpole\Runtime\Manifest\ManifestLoader;
-use Northpole\Runtime\Modules\ModuleDependencyResolver;
-use Northpole\Runtime\Modules\ModuleFinder;
-use Northpole\Runtime\Modules\ModuleRepository;
-use Northpole\Runtime\Runtime;
+
+
+
+
+
+use Tests\Support\CreatesRuntime;
 use Tests\TestCase;
 
 final class CommandHandlerStageTest extends TestCase
 {
+    use CreatesRuntime;
     public function test_it_registers_module_command_handlers(): void
     {
         $registry = new ModuleCommandRegistry;
@@ -239,21 +241,6 @@ final class CommandHandlerStageTest extends TestCase
         return $manifest;
     }
 
-    private function createRuntime(): Runtime
-    {
-        $repository = new ModuleRepository;
-
-        return new Runtime(
-            new ModuleDiscovery(
-                new ModuleFinder,
-                new ManifestLoader,
-                $repository,
-            ),
-            $repository,
-            new ModuleDependencyResolver,
-            base_path('modules'),
-        );
-    }
 }
 
 final class CreateCustomerHandler {}

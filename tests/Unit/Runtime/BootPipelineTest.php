@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace Tests\Unit\Runtime;
 
 use Northpole\Runtime\Contracts\BootStageContract;
-use Northpole\Runtime\Discovery\ModuleDiscovery;
+
 use Northpole\Runtime\Lifecycle\BootContext;
 use Northpole\Runtime\Lifecycle\BootPipeline;
 use Northpole\Runtime\Lifecycle\StageRegistry;
-use Northpole\Runtime\Manifest\ManifestLoader;
-use Northpole\Runtime\Modules\ModuleDependencyResolver;
-use Northpole\Runtime\Modules\ModuleFinder;
-use Northpole\Runtime\Modules\ModuleRepository;
-use Northpole\Runtime\Runtime;
+
+
+
+
+
+use Tests\Support\CreatesRuntime;
 use Tests\TestCase;
 
 final class BootPipelineTest extends TestCase
 {
+    use CreatesRuntime;
     public function test_pipeline_executes_stages_by_priority_for_enabled_modules(): void
     {
         $runtime = $this->createRuntime();
@@ -133,21 +135,6 @@ final class BootPipelineTest extends TestCase
         );
     }
 
-    private function createRuntime(): Runtime
-    {
-        $repository = new ModuleRepository;
-
-        return new Runtime(
-            new ModuleDiscovery(
-                new ModuleFinder,
-                new ManifestLoader,
-                $repository,
-            ),
-            $repository,
-            new ModuleDependencyResolver,
-            base_path('modules'),
-        );
-    }
 
     /**
      * @param  array<int, string>  $executionLog
