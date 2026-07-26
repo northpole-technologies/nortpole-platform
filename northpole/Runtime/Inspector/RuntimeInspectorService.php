@@ -1,0 +1,108 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Northpole\Runtime\Inspector;
+
+use Northpole\Runtime\Inspection\Contracts\RuntimeInspectionServiceContract;
+use Northpole\Runtime\Inspection\RuntimeInspectionReference;
+use Northpole\Runtime\Inspection\RuntimeInspectionResult;
+use Northpole\Runtime\Inspector\Contracts\RuntimeInspectorServiceContract;
+use ReflectionClass;
+use ReflectionException;
+
+final class RuntimeInspectorService implements RuntimeInspectorServiceContract
+{
+    public function __construct(
+        private readonly RuntimeInspectionServiceContract $inspection,
+    ) {}
+
+    public function inspect(
+        RuntimeInspectionReference $reference,
+    ): RuntimeInspectorResult {
+        $inspection = $this->inspection->inspect(
+            $reference,
+        );
+
+        return new RuntimeInspectorResult(
+            reference: $inspection?->reference ?? $reference,
+            inspection: $inspection,
+            source: $this->resolveSource(
+                $inspection,
+            ),
+        );
+    }
+
+    /**
+     * @return array{
+     *     class: string|null,
+     *     file: string|null
+     * }
+     */
+    private function resolveSource(
+        ?RuntimeInspectionResult $inspection,
+    ): array {
+        $class = $this->resolveClass(
+            $inspection?->value,
+        );
+
+        if ($class === null) {
+            return [
+                'class' => null,
+                'file' => null,
+            ];
+        }
+
+        return [
+            'class' => $class,
+            'file' => $this->resolveClassFile(
+                $class,
+            ),
+        ];
+    }
+
+    private function resolveClass(
+        mixed $metadata,
+    ): ?string {
+        if (
+            is_string($metadata)
+            && class_exists($metadata)
+        ) {
+            return $metadata;
+        }
+
+        if (! is_array($metadata)) {
+            return null;
+        }
+
+        $class = $metadata['class'] ?? null;
+
+        if (
+            ! is_string($class)
+            || ! class_exists($class)
+        ) {
+            return null;
+        }
+
+        return $class;
+    }
+
+    /**
+     * @param  class-string  $class
+     */
+    private function resolveClassFile(
+        string $class,
+    ): ?string {
+        try {
+            $file = new ReflectionClass(
+                $class,
+            )->getFileName();
+        } catch (ReflectionException) {
+            return null;
+        }
+
+        return is_string($file)
+            ? $file
+            : null;
+    }
+}

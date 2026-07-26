@@ -14,6 +14,8 @@ use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
 use Northpole\Runtime\Health\RuntimeHealthSummaryService;
 use Northpole\Runtime\Inspection\Contracts\RuntimeInspectionServiceContract;
 use Northpole\Runtime\Inspection\RuntimeInspectionService;
+use Northpole\Runtime\Inspector\Contracts\RuntimeInspectorServiceContract;
+use Northpole\Runtime\Inspector\RuntimeInspectorService;
 use Northpole\Runtime\Providers\NorthpoleRuntimeServiceProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -63,6 +65,22 @@ final class NorthpoleRuntimeServiceProviderTest extends TestCase
         );
     }
 
+    public function test_inspector_contract_resolves_to_the_inspector_service(): void
+    {
+        $contract = $this->app->make(
+            RuntimeInspectorServiceContract::class,
+        );
+
+        $service = $this->app->make(
+            RuntimeInspectorService::class,
+        );
+
+        self::assertSame(
+            $service,
+            $contract,
+        );
+    }
+
     /**
      * @return array<string, array{0: class-string}>
      */
@@ -95,6 +113,9 @@ final class NorthpoleRuntimeServiceProviderTest extends TestCase
             ],
             'inspection service' => [
                 RuntimeInspectionService::class,
+            ],
+            'inspector service' => [
+                RuntimeInspectorService::class,
             ],
         ];
     }

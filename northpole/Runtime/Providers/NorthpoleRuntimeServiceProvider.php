@@ -15,6 +15,8 @@ use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
 use Northpole\Runtime\Health\RuntimeHealthSummaryService;
 use Northpole\Runtime\Inspection\Contracts\RuntimeInspectionServiceContract;
 use Northpole\Runtime\Inspection\RuntimeInspectionService;
+use Northpole\Runtime\Inspector\Contracts\RuntimeInspectorServiceContract;
+use Northpole\Runtime\Inspector\RuntimeInspectorService;
 
 final class NorthpoleRuntimeServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,7 @@ final class NorthpoleRuntimeServiceProvider extends ServiceProvider
         RuntimeDiagnosticsViewModel::class => RuntimeDiagnosticsViewModel::class,
         RuntimeDoctorViewModel::class => RuntimeDoctorViewModel::class,
         RuntimeInspectionService::class => RuntimeInspectionService::class,
+        RuntimeInspectorService::class => RuntimeInspectorService::class,
     ];
 
     public function register(): void
@@ -40,6 +43,11 @@ final class NorthpoleRuntimeServiceProvider extends ServiceProvider
         $this->app->alias(
             RuntimeInspectionService::class,
             RuntimeInspectionServiceContract::class,
+        );
+
+        $this->app->alias(
+            RuntimeInspectorService::class,
+            RuntimeInspectorServiceContract::class,
         );
     }
 }
