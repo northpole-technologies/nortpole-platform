@@ -17,6 +17,8 @@ use Northpole\Runtime\Inspection\Contracts\RuntimeInspectionServiceContract;
 use Northpole\Runtime\Inspection\RuntimeInspectionService;
 use Northpole\Runtime\Inspector\Contracts\RuntimeInspectorServiceContract;
 use Northpole\Runtime\Inspector\RuntimeInspectorService;
+use Northpole\Runtime\Relationships\Contracts\RuntimeRelationshipResolverContract;
+use Northpole\Runtime\Relationships\RuntimeRelationshipResolver;
 
 final class NorthpoleRuntimeServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,7 @@ final class NorthpoleRuntimeServiceProvider extends ServiceProvider
         RuntimeDoctorViewModel::class => RuntimeDoctorViewModel::class,
         RuntimeInspectionService::class => RuntimeInspectionService::class,
         RuntimeInspectorService::class => RuntimeInspectorService::class,
+        RuntimeRelationshipResolver::class => RuntimeRelationshipResolver::class,
     ];
 
     public function register(): void
@@ -48,6 +51,11 @@ final class NorthpoleRuntimeServiceProvider extends ServiceProvider
         $this->app->alias(
             RuntimeInspectorService::class,
             RuntimeInspectorServiceContract::class,
+        );
+
+        $this->app->alias(
+            RuntimeRelationshipResolver::class,
+            RuntimeRelationshipResolverContract::class,
         );
     }
 }

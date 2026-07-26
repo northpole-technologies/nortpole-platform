@@ -17,6 +17,8 @@ use Northpole\Runtime\Inspection\RuntimeInspectionService;
 use Northpole\Runtime\Inspector\Contracts\RuntimeInspectorServiceContract;
 use Northpole\Runtime\Inspector\RuntimeInspectorService;
 use Northpole\Runtime\Providers\NorthpoleRuntimeServiceProvider;
+use Northpole\Runtime\Relationships\Contracts\RuntimeRelationshipResolverContract;
+use Northpole\Runtime\Relationships\RuntimeRelationshipResolver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -81,6 +83,22 @@ final class NorthpoleRuntimeServiceProviderTest extends TestCase
         );
     }
 
+    public function test_relationship_resolver_contract_resolves_to_the_relationship_resolver(): void
+    {
+        $contract = $this->app->make(
+            RuntimeRelationshipResolverContract::class,
+        );
+
+        $service = $this->app->make(
+            RuntimeRelationshipResolver::class,
+        );
+
+        self::assertSame(
+            $service,
+            $contract,
+        );
+    }
+
     /**
      * @return array<string, array{0: class-string}>
      */
@@ -116,6 +134,9 @@ final class NorthpoleRuntimeServiceProviderTest extends TestCase
             ],
             'inspector service' => [
                 RuntimeInspectorService::class,
+            ],
+            'relationship resolver' => [
+                RuntimeRelationshipResolver::class,
             ],
         ];
     }

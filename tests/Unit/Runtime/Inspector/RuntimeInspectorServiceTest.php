@@ -50,7 +50,17 @@ final class RuntimeInspectorServiceTest extends TestCase
         );
 
         self::assertSame(
-            [],
+            [
+                [
+                    'type' => 'handled_by',
+                    'label' => 'Handled by',
+                    'value' => 'Modules\CRM\Commands\CreateCustomerHandler',
+                    'target' => null,
+                    'metadata' => [
+                        'registry' => 'commands',
+                    ],
+                ],
+            ],
             $result->relationships,
         );
 
