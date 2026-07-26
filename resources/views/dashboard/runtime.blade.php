@@ -574,7 +574,7 @@
                     class="brand-mark"
                     aria-hidden="true"
                 >
-                    ❄
+                    â„
                 </div>
 
                 <div>
@@ -584,6 +584,15 @@
             </div>
 
             <div class="topbar-actions">
+                <a
+                    class="graph-link"
+                    href="{{ route(
+                        'control-centre.runtime.search',
+                    ) }}"
+                >
+                    Search
+                </a>
+
                 <a
                     class="graph-link"
                     href="{{ route(
@@ -743,7 +752,7 @@
 
                                         <p class="module-slug">
                                             {{ $module['slug'] }}
-                                            ·
+                                            Â·
                                             v{{ $module['version'] }}
                                         </p>
                                     </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\RuntimeGraphController;
 use App\Http\Controllers\Dashboard\RuntimeModuleController;
 use App\Http\Controllers\Dashboard\RuntimeDiagnosticsController;
 use App\Http\Controllers\Dashboard\RuntimeRegistryController;
+use App\Http\Controllers\Dashboard\RuntimeSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect(
@@ -23,6 +24,11 @@ Route::get(
     '/control-centre/runtime/graph',
     RuntimeGraphController::class,
 )->name('control-centre.runtime.graph');
+
+Route::get(
+    '/control-centre/runtime/search',
+    RuntimeSearchController::class,
+)->name('control-centre.runtime.search');
 
 Route::get(
     '/control-centre/runtime/registries/{registry}',
