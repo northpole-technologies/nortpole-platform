@@ -12,13 +12,12 @@ final class RuntimeDiagnosticsController extends Controller
 {
     public function __construct(
         private readonly RuntimeDiagnosticsService $diagnostics,
-    ) {
-    }
+    ) {}
 
     public function show(): JsonResponse
     {
-        return response()->json([
-            'data' => $this->diagnostics->toArray(),
-        ]);
+        return response()->json(
+            $this->diagnostics->toResponseArray(),
+        );
     }
 }

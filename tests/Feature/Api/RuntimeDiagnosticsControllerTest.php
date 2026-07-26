@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use Northpole\Runtime\Diagnostics\RuntimeDiagnosticsService;
 use Tests\TestCase;
 
 final class RuntimeDiagnosticsControllerTest extends TestCase
@@ -13,6 +14,13 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
         $this->getJson('/api/runtime/diagnostics')
             ->assertOk()
             ->assertJsonStructure([
+                'schema_version',
+                'generated_at',
+                'runtime' => [
+                    'environment',
+                    'php_version',
+                    'framework_version',
+                ],
                 'data' => [
                     'health' => [
                         'status',
@@ -36,6 +44,70 @@ final class RuntimeDiagnosticsControllerTest extends TestCase
                     ],
                 ],
             ]);
+    }
+
+    public function test_runtime_diagnostics_returns_a_versioned_contract(): void
+    {
+        $response = $this->getJson(
+            '/api/runtime/diagnostics',
+        );
+
+        $response->assertOk()
+            ->assertJsonPath(
+                'schema_version',
+                RuntimeDiagnosticsService::SCHEMA_VERSION,
+            );
+
+        $generatedAt = $response->json(
+            'generated_at',
+        );
+
+        $this->assertIsString($generatedAt);
+        $this->assertNotFalse(
+            strtotime($generatedAt),
+        );
+
+        $this->assertSame(
+            [
+                'schema_version',
+                'generated_at',
+                'runtime',
+                'data',
+            ],
+            array_keys($response->json()),
+        );
+    }
+
+    public function test_runtime_diagnostics_returns_runtime_metadata(): void
+    {
+        $response = $this->getJson(
+            '/api/runtime/diagnostics',
+        );
+
+        $response->assertOk()
+            ->assertJsonPath(
+                'runtime.environment',
+                app()->environment(),
+            )
+            ->assertJsonPath(
+                'runtime.php_version',
+                PHP_VERSION,
+            )
+            ->assertJsonPath(
+                'runtime.framework_version',
+                app()->version(),
+            );
+
+        $this->assertSame(
+            [
+                'environment',
+                'php_version',
+                'framework_version',
+            ],
+            array_keys(
+                $response->json('runtime'),
+            ),
+        );
     }
 
     public function test_runtime_diagnostics_returns_health_data(): void

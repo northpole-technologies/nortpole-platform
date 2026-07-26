@@ -13,6 +13,8 @@ use Northpole\Runtime\Validation\ValidationResult;
 
 final class RuntimeDiagnosticsService
 {
+    public const SCHEMA_VERSION = '1.0';
+
     public function __construct(
         private readonly RuntimeHealthService $healthService,
         private readonly RuntimeValidationEngine $validationEngine,
@@ -111,6 +113,36 @@ final class RuntimeDiagnosticsService
             'health' => $diagnostics['health'],
             'validation' => $diagnostics['validation'],
             'repairs' => $diagnostics['repairs'],
+        ];
+    }
+
+    /**
+     * @return array{
+     *     schema_version: string,
+     *     generated_at: string,
+     *     runtime: array{
+     *         environment: string,
+     *         php_version: string,
+     *         framework_version: string
+     *     },
+     *     data: array{
+     *         health: array<string, mixed>,
+     *         validation: array<string, mixed>,
+     *         repairs: array<string, mixed>
+     *     }
+     * }
+     */
+    public function toResponseArray(): array
+    {
+        return [
+            'schema_version' => self::SCHEMA_VERSION,
+            'generated_at' => now()->toIso8601String(),
+            'runtime' => [
+                'environment' => app()->environment(),
+                'php_version' => PHP_VERSION,
+                'framework_version' => app()->version(),
+            ],
+            'data' => $this->toArray(),
         ];
     }
 }

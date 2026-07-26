@@ -93,4 +93,67 @@ final class RuntimeDiagnosticsServiceTest extends TestCase
             $payload['repairs']['recommendations'],
         );
     }
+
+    public function test_it_returns_a_versioned_response_payload(): void
+    {
+        $payload = app(
+            RuntimeDiagnosticsService::class,
+        )->toResponseArray();
+
+        self::assertSame(
+            [
+                'schema_version',
+                'generated_at',
+                'runtime',
+                'data',
+            ],
+            array_keys($payload),
+        );
+
+        self::assertSame(
+            RuntimeDiagnosticsService::SCHEMA_VERSION,
+            $payload['schema_version'],
+        );
+
+        self::assertIsString(
+            $payload['generated_at'],
+        );
+
+        self::assertNotFalse(
+            strtotime($payload['generated_at']),
+        );
+
+        self::assertSame(
+            [
+                'environment',
+                'php_version',
+                'framework_version',
+            ],
+            array_keys($payload['runtime']),
+        );
+
+        self::assertSame(
+            app()->environment(),
+            $payload['runtime']['environment'],
+        );
+
+        self::assertSame(
+            PHP_VERSION,
+            $payload['runtime']['php_version'],
+        );
+
+        self::assertSame(
+            app()->version(),
+            $payload['runtime']['framework_version'],
+        );
+
+        self::assertSame(
+            [
+                'health',
+                'validation',
+                'repairs',
+            ],
+            array_keys($payload['data']),
+        );
+    }
 }
