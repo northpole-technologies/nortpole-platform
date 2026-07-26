@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Northpole\Runtime\Diagnostics\RuntimeEnvironmentService;
-use Northpole\Runtime\Diagnostics\RuntimeModuleStatisticsService;
-use Northpole\Runtime\Diagnostics\RuntimeRegistryStatisticsService;
+use Northpole\Runtime\Diagnostics\RuntimeDoctorViewModel;
 
 final class NorthpoleAboutCommand extends Command
 {
@@ -21,17 +19,14 @@ final class NorthpoleAboutCommand extends Command
         'Inspect the health and state of the NorthPole platform runtime';
 
     public function __construct(
-        private readonly RuntimeEnvironmentService $environment,
-        private readonly RuntimeModuleStatisticsService $moduleStatistics,
-        private readonly RuntimeRegistryStatisticsService $registryStatistics,
+        private readonly RuntimeDoctorViewModel $viewModel,
     ) {
         parent::__construct();
     }
 
     public function handle(): int
     {
-        $moduleSummary = $this->moduleStatistics->summary();
-        $moduleRows = $this->moduleStatistics->consoleRows();
+        $data = $this->viewModel->data();
 
         $this->newLine();
 
@@ -41,7 +36,9 @@ final class NorthpoleAboutCommand extends Command
         $this->newLine();
 
         $this->comment('Runtime Health');
-        $this->line('Status: HEALTHY');
+        $this->line(
+            'Status: '.$data['healthStatus'],
+        );
 
         $this->newLine();
 
@@ -49,53 +46,53 @@ final class NorthpoleAboutCommand extends Command
 
         $this->table(
             ['Property', 'Value'],
-            $this->environment->consoleRows(),
+            $data['platformRows'],
         );
 
         $this->comment('Modules');
 
         $this->table(
             ['Metric', 'Count'],
-            [
-                [
-                    'Discovered',
-                    $moduleSummary['discovered'],
-                ],
-                [
-                    'Enabled',
-                    $moduleSummary['enabled'],
-                ],
-                [
-                    'Disabled',
-                    $moduleSummary['disabled'],
-                ],
-            ],
+            $data['moduleSummaryRows'],
         );
 
         $this->comment('Runtime Registries');
 
         $this->table(
             ['Registry', 'Count'],
-            $this->registryStatistics->consoleRows(),
+            $data['registryRows'],
         );
 
         $this->comment('Discovered Modules');
 
-        if ($moduleRows === []) {
+        if ($data['moduleRows'] === []) {
             $this->warn('No modules discovered.');
 
             $this->newLine();
-            $this->warn('Overall status: DEGRADED');
+
+            $this->warn(
+                'Overall status: '.$data['overallStatus'],
+            );
 
             return self::SUCCESS;
         }
 
         $this->table(
             ['Module', 'Slug', 'Version', 'Status'],
-            $moduleRows,
+            $data['moduleRows'],
         );
 
-        $this->info('Overall status: HEALTHY');
+        if ($data['overallStatus'] === 'HEALTHY') {
+            $this->info(
+                'Overall status: '.$data['overallStatus'],
+            );
+
+            return self::SUCCESS;
+        }
+
+        $this->warn(
+            'Overall status: '.$data['overallStatus'],
+        );
 
         return self::SUCCESS;
     }
