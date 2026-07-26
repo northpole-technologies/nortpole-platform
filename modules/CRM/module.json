@@ -60,6 +60,7 @@
     },
     "queries": {
         "handles": {
+            "crm.customer.list": "Modules\\CRM\\Queries\\ListCustomersHandler",
             "crm.customer.find": "Modules\\CRM\\Queries\\FindCustomerHandler"
         }
     }

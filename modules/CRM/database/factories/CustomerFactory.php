@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\CRM\Database\Factories;
 
-use App\Models\Organisation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\CRM\Models\Customer;
 
@@ -18,7 +17,7 @@ final class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'organisation_id' => Organisation::factory(),
+            'organisation_id' => null,
             'type' => 'individual',
             'status' => 'active',
             'name' => fake()->name(),
