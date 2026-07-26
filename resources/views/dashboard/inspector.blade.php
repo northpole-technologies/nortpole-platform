@@ -319,6 +319,64 @@
             overflow-wrap: anywhere;
         }
 
+        .item-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .item-label {
+            color: #7188a2;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .item-type {
+            padding: 4px 7px;
+            border: 1px solid rgba(119, 219, 255, 0.18);
+            border-radius: 999px;
+            color: #7fcce8;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        .item-value {
+            display: block;
+            margin-top: 9px;
+            color: #c9d8e8;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .item-link {
+            transition:
+                border-color 160ms ease,
+                background 160ms ease,
+                transform 160ms ease;
+        }
+
+        .item-link:hover {
+            border-color: rgba(119, 219, 255, 0.34);
+            background: rgba(20, 48, 75, 0.72);
+            transform: translateY(-1px);
+        }
+
+        .item-link .item-value {
+            color: #8fe1ff;
+        }
+
+        .item-meta {
+            margin-top: 10px;
+            color: #667d97;
+            font-size: 10px;
+        }
+
         .warning {
             border-color: rgba(255, 183, 96, 0.25);
             background: rgba(255, 183, 96, 0.07);
@@ -567,16 +625,108 @@
                             $inspection['relationships']
                             as $relationship
                         )
-                            <div class="item">
-                                {{
-                                    is_scalar($relationship)
-                                        ? $relationship
-                                        : json_encode(
-                                            $relationship,
-                                            JSON_UNESCAPED_SLASHES,
-                                        )
-                                }}
-                            </div>
+                            @php
+                                $target =
+                                    is_array($relationship)
+                                    && is_array(
+                                        $relationship['target']
+                                        ?? null,
+                                    )
+                                        ? $relationship['target']
+                                        : null;
+
+                                $relationshipUrl = $target === null
+                                    ? null
+                                    : route(
+                                        'control-centre.runtime.inspector.show',
+                                        [
+                                            'registry' =>
+                                                $target['registry'],
+                                            'module' =>
+                                                $target['module'],
+                                            'key' =>
+                                                $target['key'],
+                                        ],
+                                    );
+                            @endphp
+
+                            @if ($relationshipUrl !== null)
+                                <a
+                                    class="item item-link"
+                                    href="{{ $relationshipUrl }}"
+                                >
+                                    <div class="item-header">
+                                        <span class="item-label">
+                                            {{
+                                                $relationship['label']
+                                                ?? 'Relationship'
+                                            }}
+                                        </span>
+
+                                        <span class="item-type">
+                                            {{
+                                                str(
+                                                    $relationship['type']
+                                                    ?? 'related',
+                                                )
+                                                    ->replace('_', ' ')
+                                            }}
+                                        </span>
+                                    </div>
+
+                                    <code class="item-value">
+                                        {{
+                                            $relationship['value']
+                                            ?? 'Unknown'
+                                        }}
+                                    </code>
+
+                                    <div class="item-meta">
+                                        Open related runtime registration
+                                    </div>
+                                </a>
+                            @else
+                                <div class="item">
+                                    <div class="item-header">
+                                        <span class="item-label">
+                                            {{
+                                                is_array($relationship)
+                                                    ? (
+                                                        $relationship['label']
+                                                        ?? 'Relationship'
+                                                    )
+                                                    : 'Relationship'
+                                            }}
+                                        </span>
+
+                                        @if (is_array($relationship))
+                                            <span class="item-type">
+                                                {{
+                                                    str(
+                                                        $relationship['type']
+                                                        ?? 'related',
+                                                    )
+                                                        ->replace('_', ' ')
+                                                }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <code class="item-value">
+                                        {{
+                                            is_array($relationship)
+                                                ? (
+                                                    $relationship['value']
+                                                    ?? json_encode(
+                                                        $relationship,
+                                                        JSON_UNESCAPED_SLASHES,
+                                                    )
+                                                )
+                                                : $relationship
+                                        }}
+                                    </code>
+                                </div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
@@ -599,16 +749,67 @@
                             $inspection['dependencies']
                             as $dependency
                         )
-                            <div class="item">
-                                {{
-                                    is_scalar($dependency)
-                                        ? $dependency
-                                        : json_encode(
-                                            $dependency,
-                                            JSON_UNESCAPED_SLASHES,
-                                        )
-                                }}
-                            </div>
+                            @php
+                                $dependencyModule =
+                                    is_array($dependency)
+                                    && is_string(
+                                        $dependency['module']
+                                        ?? null,
+                                    )
+                                        ? $dependency['module']
+                                        : null;
+                            @endphp
+
+                            @if ($dependencyModule !== null)
+                                <a
+                                    class="item item-link"
+                                    href="{{ route(
+                                        'control-centre.modules.show',
+                                        [
+                                            'slug' =>
+                                                $dependencyModule,
+                                        ],
+                                    ) }}"
+                                >
+                                    <div class="item-header">
+                                        <span class="item-label">
+                                            Module dependency
+                                        </span>
+
+                                        <span class="item-type">
+                                            {{
+                                                $dependency['type']
+                                                ?? 'module'
+                                            }}
+                                        </span>
+                                    </div>
+
+                                    <code class="item-value">
+                                        {{ $dependencyModule }}
+                                    </code>
+
+                                    <div class="item-meta">
+                                        Version constraint:
+                                        {{
+                                            $dependency['constraint']
+                                            ?? '*'
+                                        }}
+                                    </div>
+                                </a>
+                            @else
+                                <div class="item">
+                                    <code class="item-value">
+                                        {{
+                                            is_scalar($dependency)
+                                                ? $dependency
+                                                : json_encode(
+                                                    $dependency,
+                                                    JSON_UNESCAPED_SLASHES,
+                                                )
+                                        }}
+                                    </code>
+                                </div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
